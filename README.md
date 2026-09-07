@@ -6,6 +6,7 @@ Repository kumpulan tugas magang di Crocodic Semarang. Setiap tugas/fitur dikerj
 |---|---|---|
 | `main` | Halaman utama repository | - |
 | `login-register` | Halaman Login & Register dengan ConstraintLayout + MySQL | Selesai |
+| `Tugas-3-Implementasi-Pagination` | Daftar destinasi wisata Semarang dengan pagination | Selesai |
 
 ---
 
@@ -146,3 +147,169 @@ LoginActivity  --klik "Daftar"-->  RegisterActivity
 - Alamat pada `BASE_URL` memakai IP laptop, bukan `10.0.2.2`, supaya aplikasi bisa dijalankan di emulator maupun HP asli tanpa mengubah kode. **IP ini berubah saat berpindah jaringan WiFi**, jadi perlu disesuaikan kembali lewat `ipconfig`.
 - Apache dan MySQL di XAMPP harus dalam keadaan menyala saat aplikasi dijalankan. Jika tidak, akan muncul Toast "Gagal terhubung ke server".
 - Password pada database berbentuk hash (acak), bukan teks asli. Ini normal dan memang disengaja demi keamanan.
+
+---
+
+# Branch `Tugas-3-Implementasi-Pagination`
+
+## Deskripsi
+
+Melanjutkan aplikasi pada branch `login-register` dengan menambahkan **daftar destinasi wisata Semarang** yang dimuat memakai konsep **pagination**.
+
+Data tidak diambil sekaligus. Setiap satu kali pemuatan aplikasi hanya meminta **10 data**. Ketika pengguna menggulir mendekati bagian bawah daftar, aplikasi otomatis meminta 10 data berikutnya. Dengan begitu aplikasi tetap ringan walaupun jumlah datanya banyak.
+
+Nama wisata dan deskripsinya disimpan di **MySQL**, sedangkan **gambarnya disimpan sebagai file** di folder `login_api/uploads/`. Yang masuk ke database hanyalah **nama filenya** pada kolom `foto`. API kemudian merakit alamat lengkap gambar ke dalam kolom `foto_url`:
+
+```
+Folder    :  login_api/uploads/gambar_lawang_sewu.jpg
+MySQL     :  foto = "gambar_lawang_sewu.jpg"
+API PHP   :  foto_url = "http://<IP_LAPTOP>/login_api/uploads/gambar_lawang_sewu.jpg"
+Android   :  Glide.load(foto_url)
+```
+
+Cara ini membuat gambar, nama, dan deskripsi selalu sinkron karena penghubungnya adalah kolom di database, bukan tebakan dari nama wisata. Database juga tetap ringan sebab tidak menyimpan berkas gambar.
+
+## Fitur
+
+- **Daftar wisata** — menampilkan 30 destinasi wisata di Semarang dan sekitarnya
+- **Pagination** — 10 data per pemuatan, dibagi menjadi 3 halaman
+- **Infinite scroll** — 10 data berikutnya dimuat otomatis saat pengguna menggulir mendekati bawah
+- **Loading indicator** — lingkaran di tengah layar saat pemuatan pertama, dan di bawah daftar saat memuat data berikutnya
+- **Anti duplikat** — id yang sudah tampil disimpan di `Set`, sehingga data yang sama tidak pernah ditambahkan dua kali
+- **Info data habis** — muncul keterangan "Semua data sudah ditampilkan" setelah halaman terakhir dimuat
+- **Penanganan kondisi** — loading, error (bisa diketuk untuk mencoba lagi), dan data kosong
+
+## Teknologi Tambahan
+
+| Bagian | Teknologi |
+|---|---|
+| Daftar data | `RecyclerView` + `LinearLayoutManager` |
+| Tampilan kartu | `MaterialCardView` |
+| Memuat gambar | Glide 4.16.0 |
+| Deteksi scroll | `RecyclerView.OnScrollListener` |
+| Koneksi jaringan | `HttpURLConnection` (GET) |
+
+## Struktur File Tambahan
+
+```
+TravelDestinationApp/
+├── app/src/main/
+│   ├── java/com/example/tugas2_loginregister/
+│   │   ├── Wisata.kt              -> data satu destinasi wisata
+│   │   ├── WisataAdapter.kt       -> mengubah data menjadi kartu di layar
+│   │   ├── MainActivity.kt        -> daftar wisata + logika pagination
+│   │   └── ApiClient.kt           -> ditambah fungsi get()
+│   └── res/layout/
+│       ├── activity_main.xml      -> daftar, loading, dan pesan
+│       └── item_wisata.xml        -> tampilan satu kartu wisata
+└── login_api/
+    ├── wisata.php                 -> API pagination
+    ├── database_wisata.sql        -> struktur + 30 data wisata
+    └── uploads/                   -> 30 file gambar wisata
+```
+
+## Database
+
+Database: `login_register` — tabel: `wisata`
+
+| Kolom | Tipe | Keterangan |
+|---|---|---|
+| `id` | INT(11) | Primary key, auto increment |
+| `nama_wisata` | VARCHAR(100) | Nama destinasi wisata |
+| `deskripsi` | TEXT | Penjelasan singkat destinasi |
+| `foto` | VARCHAR(255) | **Nama file** gambar di folder `uploads`, bukan gambarnya |
+| `created_at` | TIMESTAMP | Otomatis terisi saat data dibuat |
+
+Struktur beserta 30 datanya ada di `login_api/database_wisata.sql`.
+
+## API
+
+| Endpoint | Method | Parameter | Keterangan |
+|---|---|---|---|
+| `wisata.php` | GET | `page` (default `1`) | Mengembalikan 10 data per halaman |
+
+Contoh: `http://<IP_LAPTOP>/login_api/wisata.php?page=2`
+
+```json
+{
+  "success": true,
+  "message": "Data berhasil diambil",
+  "data": [
+    {
+      "id": 1,
+      "nama_wisata": "Ayana Gedong Songo",
+      "deskripsi": "Taman rekreasi di kawasan Gedong Songo ...",
+      "foto": "gambar_ayana_gedong_songo.jpg",
+      "foto_url": "http://192.168.18.154/login_api/uploads/gambar_ayana_gedong_songo.jpg"
+    }
+  ],
+  "meta": {
+    "total_data": 30,
+    "total_page": 3,
+    "current_page": 1,
+    "per_page": 10
+  }
+}
+```
+
+Bagian `meta` inilah yang dipakai aplikasi untuk tahu kapan harus berhenti memuat: kalau `current_page` sudah sama dengan `total_page`, berarti data sudah habis.
+
+## Cara Kerja Pagination
+
+```
+Buka MainActivity
+       |
+   muatData() halaman 1  -->  ProgressBar tengah tampil
+       |
+   10 data masuk daftar   -->  halaman = 2
+       |
+   pengguna menggulir ke bawah
+       |
+   sisa 3 item menuju bawah?  --> ya --> muatData() halaman 2
+       |                                      |
+       |                              ProgressBar bawah tampil
+       |                                      |
+       |                              10 data masuk, halaman = 3
+       |
+   halaman terakhir terambil
+       |
+   "Semua data sudah ditampilkan"  -->  pemuatan dihentikan
+```
+
+Tiga penanda yang menjaga alur ini tetap benar:
+
+| Penanda | Gunanya |
+|---|---|
+| `sedangMemuat` | Mencegah permintaan ganda saat satu permintaan masih berjalan |
+| `semuaSudahDimuat` | Menghentikan permintaan setelah halaman terakhir terambil |
+| `idSudahAda` | Menyaring data yang id-nya sudah pernah tampil, mencegah duplikat |
+
+## Cara Menjalankan
+
+1. **Siapkan folder API**
+   Sama seperti branch sebelumnya, copy folder `login_api` ke `C:\xampp\htdocs\` **beserta folder `uploads` di dalamnya**.
+
+   Alternatif tanpa menyalin file: arahkan Apache langsung ke folder project dengan menambahkan baris berikut di `C:\xampp\apache\conf\httpd.conf`, lalu restart Apache.
+
+   ```apache
+   Alias /login_api "D:/path/menuju/TravelDestinationApp/login_api"
+   <Directory "D:/path/menuju/TravelDestinationApp/login_api">
+       Require all granted
+   </Directory>
+   ```
+
+2. **Import database wisata**
+   Buka `http://localhost/phpmyadmin`, masuk tab **Import**, pilih `login_api/database_wisata.sql`, klik **Go**. File ini membuat tabel `wisata` sekaligus mengisi 30 datanya.
+
+3. **Sesuaikan alamat API**
+   Ubah `BASE_URL` di `ApiClient.kt` sesuai IP laptop (lihat lewat `ipconfig`).
+
+4. **Jalankan aplikasi**
+   Login seperti biasa, daftar wisata akan langsung tampil di beranda.
+
+## Catatan
+
+- Jumlah data per halaman diatur lewat variabel `$per_page` di `wisata.php`. Mengubah angkanya cukup di satu tempat, sisi Android tidak perlu diubah karena ikut membaca `meta`.
+- Alamat gambar dibangun memakai `$_SERVER["HTTP_HOST"]`, jadi ketika IP laptop berubah, alamat gambar ikut menyesuaikan sendiri tanpa perlu mengubah isi database.
+- Nama file gambar disimpan apa adanya di kolom `foto`, lalu dibungkus `rawurlencode()` saat dijadikan URL supaya nama file yang mengandung spasi tetap bisa diakses.
+- Destinasi yang dipakai mencakup wilayah Kota Semarang dan Kabupaten Semarang (Ungaran, Bandungan, Ambarawa, Bawen).
