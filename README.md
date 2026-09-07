@@ -10,146 +10,6 @@ Repository kumpulan tugas magang di Crocodic Semarang. Setiap tugas/fitur dikerj
 
 ---
 
-# Branch `login-register`
-
-## Deskripsi
-
-Aplikasi Android sederhana berisi halaman **Login** dan **Register**. Seluruh tampilan dibangun memakai **ConstraintLayout**, dan data akun disimpan di **database MySQL**.
-
-Karena Android tidak bisa (dan tidak boleh) terhubung langsung ke MySQL, aplikasi berkomunikasi dengan database melalui **REST API PHP** yang dijalankan di XAMPP. Alur datanya:
-
-```
-Aplikasi Android  ->  API PHP (XAMPP)  ->  Database MySQL
-   Kotlin              login_api/           login_register
-```
-
-Password tidak disimpan sebagai teks asli, melainkan di-hash memakai `password_hash()` bawaan PHP, sehingga isi kolom password di database tidak bisa dibaca langsung.
-
-## Fitur
-
-- **Register** — mendaftarkan akun baru (username & password) ke tabel `users`
-- **Login** — mencocokkan username & password dengan data di MySQL
-- **Beranda** — menampilkan sapaan berisi username yang berhasil masuk
-- **Logout** — kembali ke halaman login
-- **Validasi input** — data kosong, panjang username 3-20 karakter, username hanya boleh huruf/angka/underscore, password minimal 6 karakter, username sudah terdaftar, serta username/password salah saat login
-
-## Teknologi
-
-| Bagian | Teknologi |
-|---|---|
-| Bahasa aplikasi | Kotlin |
-| Tampilan | ConstraintLayout, Material Components |
-| Koneksi jaringan | `HttpURLConnection` (POST, form-urlencoded) |
-| Parsing data | `org.json.JSONObject` |
-| Backend | PHP 8 (`mysqli` + prepared statement) |
-| Database | MySQL / MariaDB (XAMPP) |
-| minSdk / targetSdk | 24 / 37 |
-
-## Struktur File
-
-```
-Tugas2_LoginRegister/
-├── app/src/main/
-│   ├── java/com/example/tugas2_loginregister/
-│   │   ├── ApiClient.kt          -> pengirim data ke API PHP
-│   │   ├── LoginActivity.kt      -> halaman login
-│   │   ├── RegisterActivity.kt   -> halaman register
-│   │   └── MainActivity.kt       -> halaman beranda
-│   ├── res/layout/
-│   │   ├── activity_login.xml    -> tampilan login (ConstraintLayout)
-│   │   ├── activity_register.xml -> tampilan register (ConstraintLayout)
-│   │   └── activity_main.xml     -> tampilan beranda (ConstraintLayout)
-│   └── AndroidManifest.xml
-├── login_api/                    -> salin ke C:\xampp\htdocs\
-│   ├── koneksi.php               -> koneksi ke MySQL
-│   ├── register.php              -> menyimpan user baru
-│   ├── login.php                 -> mengecek username & password
-│   └── database.sql              -> struktur database
-└── screenshot/                   -> tangkapan layar aplikasi
-```
-
-## Database
-
-Database: `login_register` — tabel: `users`
-
-| Kolom | Tipe | Keterangan |
-|---|---|---|
-| `id` | INT(11) | Primary key, auto increment |
-| `username` | VARCHAR(50) | Unique, tidak boleh sama |
-| `password` | VARCHAR(255) | Disimpan dalam bentuk hash |
-| `created_at` | TIMESTAMP | Otomatis terisi saat mendaftar |
-
-Struktur lengkapnya ada di `login_api/database.sql`.
-
-## API
-
-Base URL: `http://<IP_LAPTOP>/login_api/`
-
-| Endpoint | Method | Parameter | Response berhasil |
-|---|---|---|---|
-| `register.php` | POST | `username`, `password` | `{"success":true,"message":"Register berhasil"}` |
-| `login.php` | POST | `username`, `password` | `{"success":true,"message":"Login berhasil","user_id":1,"username":"budi"}` |
-
-Response gagal selalu berbentuk `{"success":false,"message":"<alasan>"}`, dan pesan itulah yang ditampilkan aplikasi lewat Toast.
-
-## Alur Aplikasi
-
-```
-LoginActivity  --klik "Daftar"-->  RegisterActivity
-                                        |
-                                   isi data, klik DAFTAR
-                                        |
-                                   tersimpan di MySQL
-                                        |
-                                   kembali ke LoginActivity
-                                        |
-                              isi data, klik LOGIN (dicek ke MySQL)
-                                        |
-                                   MainActivity (beranda)
-                                        |
-                                  klik LOGOUT -> LoginActivity
-```
-
-## Tangkapan Layar
-
-| Halaman Login | Halaman Register | Register Terisi |
-|:---:|:---:|:---:|
-| <img src="screenshot/1-login.png" width="230"> | <img src="screenshot/2-register.png" width="230"> | <img src="screenshot/3-register-terisi.png" width="230"> |
-
-| Daftar Berhasil | Login Terisi | Beranda |
-|:---:|:---:|:---:|
-| <img src="screenshot/4-daftar-berhasil.png" width="230"> | <img src="screenshot/5-login-terisi.png" width="230"> | <img src="screenshot/6-beranda.png" width="230"> |
-
-| Contoh Validasi (username sudah dipakai) |
-|:---:|
-| <img src="screenshot/7-validasi.png" width="230"> |
-
-## Cara Menjalankan
-
-1. **Salin folder API**
-   Copy folder `login_api` ke `C:\xampp\htdocs\` sehingga menjadi `C:\xampp\htdocs\login_api\`
-
-2. **Buat database**
-   Nyalakan **Apache** dan **MySQL** di XAMPP Control Panel, buka `http://localhost/phpmyadmin`, masuk tab **Import**, pilih file `login_api/database.sql`, lalu klik **Go**
-
-3. **Sesuaikan alamat API**
-   Buka CMD, ketik `ipconfig`, catat **IPv4 Address** laptop (contoh `192.168.1.5`). Ubah baris berikut di `ApiClient.kt`:
-
-   ```kotlin
-   const val BASE_URL = "http://192.168.1.5/login_api/"
-   ```
-
-4. **Jalankan aplikasi**
-   Run project di Android Studio (emulator maupun HP asli). Kalau memakai HP asli, pastikan HP dan laptop terhubung ke WiFi yang sama.
-
-## Catatan
-
-- Alamat pada `BASE_URL` memakai IP laptop, bukan `10.0.2.2`, supaya aplikasi bisa dijalankan di emulator maupun HP asli tanpa mengubah kode. **IP ini berubah saat berpindah jaringan WiFi**, jadi perlu disesuaikan kembali lewat `ipconfig`.
-- Apache dan MySQL di XAMPP harus dalam keadaan menyala saat aplikasi dijalankan. Jika tidak, akan muncul Toast "Gagal terhubung ke server".
-- Password pada database berbentuk hash (acak), bukan teks asli. Ini normal dan memang disengaja demi keamanan.
-
----
-
 # Branch `Tugas-3-Implementasi-Pagination`
 
 ## Deskripsi
@@ -190,33 +50,48 @@ Menerapkan konsep pagination untuk mengoptimalkan proses pemuatan data. Dengan p
 
 Tujuannya agar aplikasi tetap ringan, cepat, responsif, dan nyaman digunakan, meskipun jumlah data destinasi wisatanya cukup banyak.
 
-## Teknologi Tambahan
+## Teknologi
 
 | Bagian | Teknologi |
 |---|---|
+| Bahasa aplikasi | Kotlin |
 | Daftar data | `RecyclerView` + `LinearLayoutManager` |
 | Tampilan kartu | `MaterialCardView` |
 | Memuat gambar | Glide 4.16.0 |
 | Deteksi scroll | `RecyclerView.OnScrollListener` |
 | Koneksi jaringan | `HttpURLConnection` (GET) |
+| Parsing data | `org.json.JSONObject` |
+| Backend | PHP 8 (`mysqli` + prepared statement) |
+| Database | MySQL / MariaDB (XAMPP) |
+| minSdk / targetSdk | 24 / 37 |
 
-## Struktur File Tambahan
+## Struktur File
 
 ```
 TravelDestinationApp/
 ├── app/src/main/
 │   ├── java/com/example/tugas2_loginregister/
+│   │   ├── ApiClient.kt           -> penghubung ke API PHP
 │   │   ├── Wisata.kt              -> data satu destinasi wisata
 │   │   ├── WisataAdapter.kt       -> mengubah data menjadi kartu di layar
 │   │   ├── MainActivity.kt        -> daftar wisata + logika pagination
-│   │   └── ApiClient.kt           -> ditambah fungsi get()
-│   └── res/layout/
-│       ├── activity_main.xml      -> daftar, loading, dan pesan
-│       └── item_wisata.xml        -> tampilan satu kartu wisata
-└── login_api/
-    ├── wisata.php                 -> API pagination
-    ├── database_wisata.sql        -> struktur + 30 data wisata
-    └── uploads/                   -> 30 file gambar wisata
+│   │   ├── LoginActivity.kt       -> halaman login
+│   │   └── RegisterActivity.kt    -> halaman register
+│   ├── res/layout/
+│   │   ├── activity_main.xml      -> daftar, loading, dan pesan
+│   │   ├── item_wisata.xml        -> tampilan satu kartu wisata
+│   │   ├── activity_login.xml     -> tampilan login
+│   │   └── activity_register.xml  -> tampilan register
+│   └── AndroidManifest.xml
+├── login_api/                     -> API PHP
+│   ├── koneksi.php                -> koneksi ke MySQL
+│   ├── login.php                  -> mengecek username & password
+│   ├── register.php               -> menyimpan user baru
+│   ├── wisata.php                 -> API pagination daftar wisata
+│   ├── database.sql               -> struktur tabel users
+│   ├── database_wisata.sql        -> struktur + 30 data wisata
+│   └── uploads/                   -> 30 file gambar wisata
+└── screenshot/                    -> tangkapan layar aplikasi
 ```
 
 ## Database
@@ -232,6 +107,8 @@ Database: `login_register` — tabel: `wisata`
 | `created_at` | TIMESTAMP | Otomatis terisi saat data dibuat |
 
 Struktur beserta 30 datanya ada di `login_api/database_wisata.sql`.
+
+Database yang sama juga memuat tabel `users` yang dipakai halaman login dan register, strukturnya ada di `login_api/database.sql`.
 
 ## API
 
@@ -308,7 +185,7 @@ Tiga penanda yang menjaga alur ini tetap benar:
 ## Cara Menjalankan
 
 1. **Siapkan folder API**
-   Sama seperti branch sebelumnya, copy folder `login_api` ke `C:\xampp\htdocs\` **beserta folder `uploads` di dalamnya**.
+   Nyalakan **Apache** dan **MySQL** di XAMPP Control Panel, lalu copy folder `login_api` ke `C:\xampp\htdocs\` **beserta folder `uploads` di dalamnya**, sehingga menjadi `C:\xampp\htdocs\login_api\`.
 
    Alternatif tanpa menyalin file: arahkan Apache langsung ke folder project dengan menambahkan baris berikut di `C:\xampp\apache\conf\httpd.conf`, lalu restart Apache.
 
@@ -319,14 +196,23 @@ Tiga penanda yang menjaga alur ini tetap benar:
    </Directory>
    ```
 
-2. **Import database wisata**
-   Buka `http://localhost/phpmyadmin`, masuk tab **Import**, pilih `login_api/database_wisata.sql`, klik **Go**. File ini membuat tabel `wisata` sekaligus mengisi 30 datanya.
+2. **Import database**
+   Buka `http://localhost/phpmyadmin`, masuk tab **Import**, lalu import dua file secara berurutan:
+
+   | File | Isi |
+   |---|---|
+   | `login_api/database.sql` | Database `login_register` beserta tabel `users` |
+   | `login_api/database_wisata.sql` | Tabel `wisata` beserta 30 datanya |
 
 3. **Sesuaikan alamat API**
-   Ubah `BASE_URL` di `ApiClient.kt` sesuai IP laptop (lihat lewat `ipconfig`).
+   Buka CMD, ketik `ipconfig`, catat **IPv4 Address** laptop. Ubah baris berikut di `ApiClient.kt`:
+
+   ```kotlin
+   const val BASE_URL = "http://192.168.1.5/login_api/"
+   ```
 
 4. **Jalankan aplikasi**
-   Login seperti biasa, daftar wisata akan langsung tampil di beranda.
+   Run project di Android Studio (emulator maupun HP asli). Daftarkan akun lewat halaman Register, lalu login. Daftar wisata langsung tampil setelah berhasil masuk. Kalau memakai HP asli, pastikan HP dan laptop terhubung ke WiFi yang sama.
 
 ## Catatan
 
