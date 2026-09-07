@@ -154,9 +154,11 @@ LoginActivity  --klik "Daftar"-->  RegisterActivity
 
 ## Deskripsi
 
-Melanjutkan aplikasi pada branch `login-register` dengan menambahkan **daftar destinasi wisata Semarang** yang dimuat memakai konsep **pagination**.
+Melanjutkan project **TravelDestinationApp** dengan menambahkan fitur **daftar destinasi wisata di Semarang** menggunakan konsep **pagination**.
 
-Data tidak diambil sekaligus. Setiap satu kali pemuatan aplikasi hanya meminta **10 data**. Ketika pengguna menggulir mendekati bagian bawah daftar, aplikasi otomatis meminta 10 data berikutnya. Dengan begitu aplikasi tetap ringan walaupun jumlah datanya banyak.
+Dalam implementasinya, data destinasi ditampilkan secara bertahap agar aplikasi tetap ringan dan nyaman digunakan. Setiap kali pengguna melakukan scroll hingga mendekati bagian bawah daftar, aplikasi akan otomatis memuat data destinasi berikutnya.
+
+Nama tempat wisata dan deskripsinya disimpan di database MySQL, sedangkan gambarnya disimpan di folder `uploads` lalu dipanggil dan disinkronkan dengan data di MySQL.
 
 Nama wisata dan deskripsinya disimpan di **MySQL**, sedangkan **gambarnya disimpan sebagai file** di folder `login_api/uploads/`. Yang masuk ke database hanyalah **nama filenya** pada kolom `foto`. API kemudian merakit alamat lengkap gambar ke dalam kolom `foto_url`:
 
@@ -169,15 +171,24 @@ Android   :  Glide.load(foto_url)
 
 Cara ini membuat gambar, nama, dan deskripsi selalu sinkron karena penghubungnya adalah kolom di database, bukan tebakan dari nama wisata. Database juga tetap ringan sebab tidak menyimpan berkas gambar.
 
-## Fitur
+## Ketentuan Fitur
 
-- **Daftar wisata** — menampilkan 30 destinasi wisata di Semarang dan sekitarnya
-- **Pagination** — 10 data per pemuatan, dibagi menjadi 3 halaman
-- **Infinite scroll** — 10 data berikutnya dimuat otomatis saat pengguna menggulir mendekati bawah
-- **Loading indicator** — lingkaran di tengah layar saat pemuatan pertama, dan di bawah daftar saat memuat data berikutnya
-- **Anti duplikat** — id yang sudah tampil disimpan di `Set`, sehingga data yang sama tidak pernah ditambahkan dua kali
-- **Info data habis** — muncul keterangan "Semua data sudah ditampilkan" setelah halaman terakhir dimuat
-- **Penanganan kondisi** — loading, error (bisa diketuk untuk mencoba lagi), dan data kosong
+| # | Ketentuan | Pemenuhan |
+|---|---|---|
+| 1 | Menampilkan daftar destinasi wisata yang berada di Semarang | 30 destinasi Kota & Kabupaten Semarang, diambil dari tabel `wisata` |
+| 2 | Menampilkan 10 item data pada setiap pemuatan | `$per_page = 10` pada `wisata.php`, dibagi menjadi 3 halaman |
+| 3 | Scroll mendekati bawah memuat 10 data berikutnya secara otomatis | `OnScrollListener` memanggil `muatData()` saat tersisa 3 item menuju bawah |
+| 4 | Menampilkan loading indicator saat pemuatan berlangsung | `pbAwal` di tengah layar saat pemuatan pertama, `pbMuatLagi` di bawah daftar saat memuat halaman berikutnya |
+| 5 | Mencegah data yang sama ditampilkan berulang atau duplikat | `idSudahAda`, sebuah `Set` berisi id yang sudah tampil, menyaring data sebelum ditambahkan |
+| 6 | Menampilkan informasi ketika seluruh data selesai dimuat | Keterangan "Semua data sudah ditampilkan" muncul saat pengguna sampai di kartu terakhir |
+| 7 | Menangani kondisi loading, error, dan data kosong | Ketiganya ditangani, pesan error dapat diketuk untuk memuat ulang |
+| 8 | Tampilan responsif, user-friendly, dan mudah digunakan | Kartu `MaterialCardView` dengan gambar, nama, dan deskripsi, mengikuti area aman layar |
+
+## Tujuan
+
+Menerapkan konsep pagination untuk mengoptimalkan proses pemuatan data. Dengan pagination, data destinasi tidak dimuat sekaligus, melainkan secara bertahap.
+
+Tujuannya agar aplikasi tetap ringan, cepat, responsif, dan nyaman digunakan, meskipun jumlah data destinasi wisatanya cukup banyak.
 
 ## Teknologi Tambahan
 
@@ -283,6 +294,16 @@ Tiga penanda yang menjaga alur ini tetap benar:
 | `sedangMemuat` | Mencegah permintaan ganda saat satu permintaan masih berjalan |
 | `semuaSudahDimuat` | Menghentikan permintaan setelah halaman terakhir terambil |
 | `idSudahAda` | Menyaring data yang id-nya sudah pernah tampil, mencegah duplikat |
+
+## Tangkapan Layar
+
+| Loading Pemuatan Pertama | Daftar Wisata | Loading Data Berikutnya |
+|:---:|:---:|:---:|
+| <img src="screenshot/8-wisata-loading-awal.png" width="230"> | <img src="screenshot/9-wisata-daftar.png" width="230"> | <img src="screenshot/10-wisata-loading-berikutnya.png" width="230"> |
+
+| Seluruh Data Selesai Dimuat | Kondisi Gagal Memuat |
+|:---:|:---:|
+| <img src="screenshot/11-wisata-data-habis.png" width="230"> | <img src="screenshot/12-wisata-error.png" width="230"> |
 
 ## Cara Menjalankan
 

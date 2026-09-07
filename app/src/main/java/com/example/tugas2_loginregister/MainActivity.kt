@@ -76,9 +76,14 @@ class MainActivity : AppCompatActivity() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 
+                // Data sudah habis, tinggal mengatur kapan keterangannya tampil.
+                if (semuaSudahDimuat) {
+                    perbaruiInfoBawah()
+                    return
+                }
+
                 if (dy <= 0) return              // hanya bereaksi saat menggulir ke bawah
                 if (sedangMemuat) return         // masih ada permintaan yang berjalan
-                if (semuaSudahDimuat) return     // data memang sudah habis
 
                 val layoutManager = recyclerView.layoutManager as LinearLayoutManager
                 val posisiTerakhir = layoutManager.findLastVisibleItemPosition()
@@ -180,11 +185,29 @@ class MainActivity : AppCompatActivity() {
             // Halaman terakhir sudah terambil, pemuatan dihentikan.
             semuaSudahDimuat = true
             tvInfoBawah.text = "Semua data sudah ditampilkan"
-            tvInfoBawah.visibility = View.VISIBLE
+
+            // post() dipakai supaya pengecekan dilakukan setelah daftar
+            // selesai digambar, sehingga posisi item terakhir sudah benar.
+            rvWisata.post { perbaruiInfoBawah() }
         } else {
             // Siapkan nomor halaman untuk permintaan berikutnya.
             halaman++
         }
+    }
+
+    // Keterangan "semua data sudah ditampilkan" hanya dimunculkan ketika
+    // pengguna benar-benar sampai di kartu terakhir, bukan saat masih di tengah daftar.
+    private fun perbaruiInfoBawah() {
+        if (!semuaSudahDimuat) {
+            tvInfoBawah.visibility = View.GONE
+            return
+        }
+
+        val layoutManager = rvWisata.layoutManager as LinearLayoutManager
+        val posisiTerakhir = layoutManager.findLastVisibleItemPosition()
+
+        tvInfoBawah.visibility =
+            if (posisiTerakhir >= daftarWisata.size - 1) View.VISIBLE else View.GONE
     }
 
     private fun tampilkanError() {
