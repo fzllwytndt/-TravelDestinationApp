@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Tampilan satu kartu wisata: gambar di atas, nama, lalu deskripsi. -->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="12dp"
@@ -23,7 +23,8 @@
             android:layout_height="180dp"
             android:background="#E0E0E0"
             android:contentDescription="Foto tempat wisata"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"
+            tools:src="@drawable/contoh_ayana" />
 
         <TextView
             android:id="@+id/tvNama"
@@ -34,7 +35,8 @@
             android:layout_marginEnd="12dp"
             android:textColor="#212121"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:text="Ayana Gedong Songo" />
 
         <TextView
             android:id="@+id/tvDeskripsi"
@@ -46,7 +48,8 @@
             android:layout_marginBottom="12dp"
             android:lineSpacingExtra="2dp"
             android:textColor="#757575"
-            android:textSize="13sp" />
+            android:textSize="13sp"
+            tools:text="Taman rekreasi di kawasan Gedong Songo dengan spot foto bertema taman bunga dan bangunan ala Eropa." />
 
     </LinearLayout>
 

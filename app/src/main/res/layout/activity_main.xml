@@ -1,113 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F5F5"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical">
+    android:fitsSystemWindows="true">
 
-    <!-- Bagian atas: sapaan untuk pengguna yang sedang login dan tombol keluar. -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+    <View
+        android:id="@+id/viewHeader"
+        android:layout_width="0dp"
+        android:layout_height="72dp"
         android:background="#FFFFFF"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingTop="12dp"
-        android:paddingEnd="12dp"
-        android:paddingBottom="12dp">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+    <TextView
+        android:id="@+id/tvWelcome"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="12dp"
+        android:text="Selamat Datang"
+        android:textColor="#212121"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@id/btnLogout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/tvWelcome"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Selamat Datang"
-                android:textColor="#212121"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+    <TextView
+        android:id="@+id/tvSubJudul"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Destinasi Wisata Semarang"
+        android:textColor="#757575"
+        android:textSize="13sp"
+        app:layout_constraintEnd_toEndOf="@id/tvWelcome"
+        app:layout_constraintStart_toStartOf="@id/tvWelcome"
+        app:layout_constraintTop_toBottomOf="@id/tvWelcome" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Destinasi Wisata Semarang"
-                android:textColor="#757575"
-                android:textSize="13sp" />
+    <Button
+        android:id="@+id/btnLogout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:text="LOGOUT"
+        app:layout_constraintBottom_toBottomOf="@id/viewHeader"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/viewHeader" />
 
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/btnLogout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="LOGOUT" />
-
-    </LinearLayout>
-
-    <!-- Daftar wisata. ProgressBar dan pesan diletakkan menumpuk di tengah
-         area ini supaya bisa muncul saat daftar masih kosong. -->
-    <FrameLayout
-        android:layout_width="match_parent"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvWisata"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:clipToPadding="false"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        app:layout_constraintBottom_toTopOf="@id/pbMuatLagi"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/viewHeader"
+        tools:listitem="@layout/item_wisata" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvWisata"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp" />
+    <ProgressBar
+        android:id="@+id/pbAwal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/rvWisata"
+        app:layout_constraintEnd_toEndOf="@id/rvWisata"
+        app:layout_constraintStart_toStartOf="@id/rvWisata"
+        app:layout_constraintTop_toTopOf="@id/rvWisata" />
 
-        <!-- Loading saat pertama kali membuka halaman. -->
-        <ProgressBar
-            android:id="@+id/pbAwal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="gone" />
+    <TextView
+        android:id="@+id/tvPesan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="24dp"
+        android:textColor="#757575"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/rvWisata"
+        app:layout_constraintEnd_toEndOf="@id/rvWisata"
+        app:layout_constraintStart_toStartOf="@id/rvWisata"
+        app:layout_constraintTop_toTopOf="@id/rvWisata" />
 
-        <!-- Dipakai untuk kondisi data kosong dan kondisi gagal memuat. -->
-        <TextView
-            android:id="@+id/tvPesan"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:padding="24dp"
-            android:textColor="#757575"
-            android:textSize="14sp"
-            android:visibility="gone" />
-
-    </FrameLayout>
-
-    <!-- Bagian bawah: loading saat memuat halaman berikutnya, dan keterangan
-         ketika seluruh data sudah selesai dimuat. -->
     <ProgressBar
         android:id="@+id/pbMuatLagi"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        android:visibility="gone" />
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/tvInfoBawah"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/tvInfoBawah"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingTop="12dp"
         android:paddingBottom="12dp"
         android:textColor="#9E9E9E"
         android:textSize="13sp"
-        android:visibility="gone" />
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

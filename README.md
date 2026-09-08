@@ -41,7 +41,7 @@ Cara ini membuat gambar, nama, dan deskripsi selalu sinkron karena penghubungnya
 | 4 | Menampilkan loading indicator saat pemuatan berlangsung | `pbAwal` di tengah layar saat pemuatan pertama, `pbMuatLagi` di bawah daftar saat memuat halaman berikutnya |
 | 5 | Mencegah data yang sama ditampilkan berulang atau duplikat | `idSudahAda`, sebuah `Set` berisi id yang sudah tampil, menyaring data sebelum ditambahkan |
 | 6 | Menampilkan informasi ketika seluruh data selesai dimuat | Keterangan "Semua data sudah ditampilkan" muncul saat pengguna sampai di kartu terakhir |
-| 7 | Menangani kondisi loading, error, dan data kosong | Ketiganya ditangani, pesan error dapat diketuk untuk memuat ulang |
+| 7 | Menangani kondisi loading, error, dan data kosong | Ketiganya ditangani, pesan error dapat diketuk untuk memuat ulang, dan saat server tidak terjangkau muncul dialog untuk memperbaiki alamat server |
 | 8 | Tampilan responsif, user-friendly, dan mudah digunakan | Kartu `MaterialCardView` dengan gambar, nama, dan deskripsi, mengikuti area aman layar |
 
 ## Tujuan
@@ -56,6 +56,7 @@ Tujuannya agar aplikasi tetap ringan, cepat, responsif, dan nyaman digunakan, me
 |---|---|
 | Bahasa aplikasi | Kotlin |
 | Daftar data | `RecyclerView` + `LinearLayoutManager` |
+| Tata letak layar | `ConstraintLayout` |
 | Tampilan kartu | `MaterialCardView` |
 | Memuat gambar | Glide 4.16.0 |
 | Deteksi scroll | `RecyclerView.OnScrollListener` |
@@ -71,14 +72,15 @@ Tujuannya agar aplikasi tetap ringan, cepat, responsif, dan nyaman digunakan, me
 TravelDestinationApp/
 ├── app/src/main/
 │   ├── java/com/example/tugas2_loginregister/
-│   │   ├── ApiClient.kt           -> penghubung ke API PHP
+│   │   ├── ApiClient.kt           -> penghubung ke API PHP + alamat server
+│   │   ├── DialogServer.kt        -> dialog untuk mengganti alamat server
 │   │   ├── Wisata.kt              -> data satu destinasi wisata
 │   │   ├── WisataAdapter.kt       -> mengubah data menjadi kartu di layar
 │   │   ├── MainActivity.kt        -> daftar wisata + logika pagination
 │   │   ├── LoginActivity.kt       -> halaman login
 │   │   └── RegisterActivity.kt    -> halaman register
 │   ├── res/layout/
-│   │   ├── activity_main.xml      -> daftar, loading, dan pesan
+│   │   ├── activity_main.xml      -> daftar, loading, dan pesan (ConstraintLayout)
 │   │   ├── item_wisata.xml        -> tampilan satu kartu wisata
 │   │   ├── activity_login.xml     -> tampilan login
 │   │   └── activity_register.xml  -> tampilan register
@@ -128,7 +130,7 @@ Contoh: `http://<IP_LAPTOP>/login_api/wisata.php?page=2`
       "nama_wisata": "Ayana Gedong Songo",
       "deskripsi": "Taman rekreasi di kawasan Gedong Songo ...",
       "foto": "gambar_ayana_gedong_songo.jpg",
-      "foto_url": "http://192.168.18.154/login_api/uploads/gambar_ayana_gedong_songo.jpg"
+      "foto_url": "http://<IP_LAPTOP>/login_api/uploads/gambar_ayana_gedong_songo.jpg"
     }
   ],
   "meta": {
@@ -204,12 +206,14 @@ Tiga penanda yang menjaga alur ini tetap benar:
    | `login_api/database.sql` | Database `login_register` beserta tabel `users` |
    | `login_api/database_wisata.sql` | Tabel `wisata` beserta 30 datanya |
 
-3. **Sesuaikan alamat API**
-   Buka CMD, ketik `ipconfig`, catat **IPv4 Address** laptop. Ubah baris berikut di `ApiClient.kt`:
+3. **Sesuaikan alamat server**
+   Buka CMD, ketik `ipconfig`, catat **IPv4 Address** laptop, lalu isikan pada `HOST_DEFAULT` di `ApiClient.kt`:
 
    ```kotlin
-   const val BASE_URL = "http://192.168.1.5/login_api/"
+   const val HOST_DEFAULT = "192.168.1.5"
    ```
+
+   Alamat ini hanya nilai awal. Ketika aplikasi gagal menghubungi server, muncul dialog **Alamat server** berisi kolom isian: masukkan IP yang baru, tekan **Simpan**, dan permintaan yang gagal langsung diulang. Alamat tersebut tersimpan di `SharedPreferences`, sehingga saat berpindah jaringan WiFi tidak perlu mengubah kode dan memasang ulang aplikasi. Untuk emulator, alamat `10.0.2.2` selalu menunjuk ke laptop yang menjalankannya.
 
 4. **Jalankan aplikasi**
    Run project di Android Studio (emulator maupun HP asli). Daftarkan akun lewat halaman Register, lalu login. Daftar wisata langsung tampil setelah berhasil masuk. Kalau memakai HP asli, pastikan HP dan laptop terhubung ke WiFi yang sama.
@@ -220,3 +224,5 @@ Tiga penanda yang menjaga alur ini tetap benar:
 - Alamat gambar dibangun memakai `$_SERVER["HTTP_HOST"]`, jadi ketika IP laptop berubah, alamat gambar ikut menyesuaikan sendiri tanpa perlu mengubah isi database.
 - Nama file gambar disimpan apa adanya di kolom `foto`, lalu dibungkus `rawurlencode()` saat dijadikan URL supaya nama file yang mengandung spasi tetap bisa diakses.
 - Destinasi yang dipakai mencakup wilayah Kota Semarang dan Kabupaten Semarang (Ungaran, Bandungan, Ambarawa, Bawen).
+- Alamat server disimpan di `SharedPreferences` melalui `ApiClient.simpanHost()`, dan dipakai oleh halaman login, register, maupun daftar wisata. Selama alamat tersebut belum pernah diisi, aplikasi memakai nilai `HOST_DEFAULT`.
+- Glide menyimpan gambar di cache berdasarkan URL-nya. Jika file di folder `uploads` diganti tanpa mengubah nama, hapus penyimpanan aplikasi di perangkat agar gambar baru diunduh ulang.

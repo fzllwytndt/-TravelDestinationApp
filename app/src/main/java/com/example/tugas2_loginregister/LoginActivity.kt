@@ -8,20 +8,20 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import org.json.JSONObject
-import java.net.URLEncoder
 
 class LoginActivity : AppCompatActivity() {
+
+    private lateinit var etUsername: EditText
+    private lateinit var etPassword: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        val etUsername = findViewById<EditText>(R.id.etUsername)
-        val etPassword = findViewById<EditText>(R.id.etPassword)
-        val btnLogin = findViewById<Button>(R.id.btnLogin)
-        val tvKeRegister = findViewById<TextView>(R.id.tvKeRegister)
+        etUsername = findViewById(R.id.etUsername)
+        etPassword = findViewById(R.id.etPassword)
 
-        btnLogin.setOnClickListener {
+        findViewById<Button>(R.id.btnLogin).setOnClickListener {
             val username = etUsername.text.toString()
             val password = etPassword.text.toString()
 
@@ -33,7 +33,7 @@ class LoginActivity : AppCompatActivity() {
             login(username, password)
         }
 
-        tvKeRegister.setOnClickListener {
+        findViewById<TextView>(R.id.tvKeRegister).setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
     }
@@ -41,27 +41,30 @@ class LoginActivity : AppCompatActivity() {
     private fun login(username: String, password: String) {
         Thread {
             try {
-                val data = "username=" + URLEncoder.encode(username, "UTF-8") +
-                        "&password=" + URLEncoder.encode(password, "UTF-8")
-
-                val hasil = ApiClient.post("login.php", data)
+                val hasil = ApiClient.post(this, "login.php", ApiClient.dataForm(username, password))
                 val json = JSONObject(hasil)
 
                 runOnUiThread {
-                    Toast.makeText(this, json.getString("message"), Toast.LENGTH_SHORT).show()
-
-                    if (json.getBoolean("success")) {
-                        val intent = Intent(this, MainActivity::class.java)
-                        intent.putExtra("username", json.getString("username"))
-                        startActivity(intent)
-                        finish()
-                    }
+                    tampilkanHasil(json)
                 }
             } catch (e: Exception) {
                 runOnUiThread {
-                    Toast.makeText(this, "Gagal terhubung ke server", Toast.LENGTH_SHORT).show()
+                    DialogServer.tampilkan(this) {
+                        login(username, password)
+                    }
                 }
             }
         }.start()
+    }
+
+    private fun tampilkanHasil(json: JSONObject) {
+        Toast.makeText(this, json.getString("message"), Toast.LENGTH_SHORT).show()
+
+        if (json.getBoolean("success")) {
+            val intent = Intent(this, MainActivity::class.java)
+            intent.putExtra("username", json.getString("username"))
+            startActivity(intent)
+            finish()
+        }
     }
 }
