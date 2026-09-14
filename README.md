@@ -294,13 +294,24 @@ Yang dikirim antar halaman hanya **id**-nya saja, bukan seluruh data wisata. Den
 
 ## Tangkapan Layar
 
-| Hasil Pencarian | Pencarian Tidak Ditemukan |
+### Fitur Search
+
+| Hasil Pencarian (Success) | Pencarian Tidak Ditemukan (Empty) |
 |:---:|:---:|
 | <img src="screenshot/13-search-hasil.png" width="230"> | <img src="screenshot/14-search-kosong.png" width="230"> |
+| Kata kunci `candi` menemukan dua destinasi, satu dari nama wisata dan satu dari deskripsi | Kata kunci yang tidak ada di database menampilkan pesan bahwa wisata tidak ditemukan |
 
-| Detail Wisata | Detail Tiket Gratis | Detail Gagal Dimuat |
-|:---:|:---:|:---:|
-| <img src="screenshot/15-detail-wisata.png" width="230"> | <img src="screenshot/16-detail-gratis.png" width="230"> | <img src="screenshot/17-detail-error.png" width="230"> |
+### Halaman Detail
+
+| Mengambil Data (Loading) | Detail Wisata (Success) |
+|:---:|:---:|
+| <img src="screenshot/18-detail-loading.png" width="230"> | <img src="screenshot/15-detail-wisata.png" width="230"> |
+| Indikator loading tampil selama data detail diambil dari API | Gambar, kategori, nama wisata, lokasi, harga tiket, dan deskripsi |
+
+| Harga Tiket Gratis | Gagal Memuat (Error) |
+|:---:|:---:|
+| <img src="screenshot/16-detail-gratis.png" width="230"> | <img src="screenshot/17-detail-error.png" width="230"> |
+| Harga tiket bernilai `0` ditampilkan sebagai `Gratis` | Pesan gagal memuat yang dapat diketuk untuk mencoba lagi |
 
 ## Cara Menjalankan
 
