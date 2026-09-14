@@ -6,10 +6,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 
-class WisataAdapter(private val daftar: List<Wisata>) :
-    RecyclerView.Adapter<WisataAdapter.ViewHolder>() {
+class WisataAdapter(
+    private val daftar: List<Wisata>,
+    private val saatDiklik: (Wisata) -> Unit
+) : RecyclerView.Adapter<WisataAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val ivFoto: ImageView = view.findViewById(R.id.ivFoto)
@@ -33,8 +34,10 @@ class WisataAdapter(private val daftar: List<Wisata>) :
         holder.tvNama.text = wisata.namaWisata
         holder.tvDeskripsi.text = wisata.deskripsi
 
-        Glide.with(holder.itemView.context)
-            .load(wisata.fotoUrl)
-            .into(holder.ivFoto)
+        Helper.muatGambar(holder.ivFoto, wisata.fotoUrl)
+
+        holder.itemView.setOnClickListener {
+            saatDiklik(wisata)
+        }
     }
 }

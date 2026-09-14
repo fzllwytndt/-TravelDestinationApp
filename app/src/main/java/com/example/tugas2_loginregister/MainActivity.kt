@@ -2,11 +2,12 @@ package com.example.tugas2_loginregister
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
+import android.os.Handler
+import android.os.Looper
 import android.widget.Button
 import android.widget.ProgressBar
+import android.widget.SearchView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,6 +16,7 @@ import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var svCari: SearchView
     private lateinit var rvWisata: RecyclerView
     private lateinit var pbAwal: ProgressBar
     private lateinit var pbMuatLagi: ProgressBar
@@ -31,6 +33,13 @@ class MainActivity : AppCompatActivity() {
     private var sedangMemuat = false
     private var semuaSudahDimuat = false
 
+    private var kataKunci = ""
+
+    private var tokenPermintaan = 0
+
+    private val handlerCari = Handler(Looper.getMainLooper())
+    private var tundaCari: Runnable? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -38,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         siapkanHeader()
         hubungkanView()
         siapkanDaftar()
+        siapkanPencarian()
         pasangScrollListener()
 
         muatData()
@@ -54,6 +64,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun hubungkanView() {
+        svCari = findViewById(R.id.svCari)
         rvWisata = findViewById(R.id.rvWisata)
         pbAwal = findViewById(R.id.pbAwal)
         pbMuatLagi = findViewById(R.id.pbMuatLagi)
@@ -62,15 +73,84 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun siapkanDaftar() {
-        adapter = WisataAdapter(daftarWisata)
+        adapter = WisataAdapter(daftarWisata) { wisata -> bukaDetail(wisata) }
+
         rvWisata.layoutManager = LinearLayoutManager(this)
         rvWisata.adapter = adapter
 
         tvPesan.setOnClickListener {
-            if (!sedangMemuat) {
+            if (!sedangMemuat && !semuaSudahDimuat) {
                 muatData()
             }
         }
+    }
+
+    private fun bukaDetail(wisata: Wisata) {
+        val intent = Intent(this, DetailActivity::class.java)
+        intent.putExtra("id", wisata.id)
+        startActivity(intent)
+    }
+
+    private fun siapkanPencarian() {
+        svCari.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                batalkanTundaCari()
+                svCari.clearFocus()
+                mulaiPencarian(query.orEmpty())
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                jadwalkanPencarian(newText.orEmpty())
+                return true
+            }
+        })
+    }
+
+    private fun jadwalkanPencarian(kunci: String) {
+        batalkanTundaCari()
+
+        val tugas = Runnable { mulaiPencarian(kunci) }
+
+        tundaCari = tugas
+        handlerCari.postDelayed(tugas, JEDA_KETIK)
+    }
+
+    private fun batalkanTundaCari() {
+        tundaCari?.let { handlerCari.removeCallbacks(it) }
+        tundaCari = null
+    }
+
+    private fun mulaiPencarian(kunci: String) {
+        val kunciBaru = kunci.trim()
+
+        if (kunciBaru == kataKunci) return
+
+        kataKunci = kunciBaru
+
+        kosongkanDaftar()
+        muatData()
+    }
+
+    private fun kosongkanDaftar() {
+        tokenPermintaan++
+
+        val jumlahLama = daftarWisata.size
+
+        daftarWisata.clear()
+        idSudahAda.clear()
+
+        if (jumlahLama > 0) {
+            adapter.notifyItemRangeRemoved(0, jumlahLama)
+        }
+
+        halaman = 1
+        sedangMemuat = false
+        semuaSudahDimuat = false
+
+        Helper.sembunyi(tvPesan, tvInfoBawah)
+        sembunyikanLoading()
     }
 
     private fun pasangScrollListener() {
@@ -105,39 +185,37 @@ class MainActivity : AppCompatActivity() {
         sedangMemuat = true
         tampilkanLoading()
 
-        Thread {
-            try {
-                val json = JSONObject(ApiClient.get(this, "wisata.php?page=$halaman"))
+        val token = tokenPermintaan
+        val alamat = "wisata.php?page=$halaman&q=" + Helper.sandikan(kataKunci)
 
-                val dataBaru = bacaDaftarWisata(json.getJSONArray("data"))
-                val totalPage = json.getJSONObject("meta").getInt("total_page")
-
-                runOnUiThread {
-                    tampilkanData(dataBaru, totalPage)
+        Helper.ambilDataApi(
+            activity = this,
+            alamat = alamat,
+            saatBerhasil = { json ->
+                if (token == tokenPermintaan) {
+                    bacaHasilApi(json)
                 }
-
-            } catch (e: Exception) {
-                runOnUiThread {
+            },
+            saatGagal = {
+                if (token == tokenPermintaan) {
                     tampilkanError()
                 }
             }
-        }.start()
+        )
+    }
+
+    private fun bacaHasilApi(json: JSONObject) {
+        val dataBaru = bacaDaftarWisata(json.getJSONArray("data"))
+        val totalPage = json.getJSONObject("meta").getInt("total_page")
+
+        tampilkanData(dataBaru, totalPage)
     }
 
     private fun bacaDaftarWisata(arrayData: JSONArray): List<Wisata> {
         val hasil = mutableListOf<Wisata>()
 
         for (i in 0 until arrayData.length()) {
-            val item = arrayData.getJSONObject(i)
-
-            hasil.add(
-                Wisata(
-                    id = item.getInt("id"),
-                    namaWisata = item.getString("nama_wisata"),
-                    deskripsi = item.getString("deskripsi"),
-                    fotoUrl = item.getString("foto_url")
-                )
-            )
+            hasil.add(Helper.bacaWisata(arrayData.getJSONObject(i)))
         }
 
         return hasil
@@ -145,10 +223,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun tampilkanLoading() {
         if (daftarWisata.isEmpty()) {
-            pbAwal.visibility = View.VISIBLE
-            tvPesan.visibility = View.GONE
+            Helper.tampil(pbAwal)
+            Helper.sembunyi(tvPesan)
         } else {
-            pbMuatLagi.visibility = View.VISIBLE
+            Helper.tampil(pbMuatLagi)
         }
     }
 
@@ -160,12 +238,16 @@ class MainActivity : AppCompatActivity() {
 
         if (daftarWisata.isEmpty()) {
             semuaSudahDimuat = true
-            tvPesan.text = "Belum ada data wisata"
-            tvPesan.visibility = View.VISIBLE
+
+            tvPesan.text =
+                if (kataKunci.isBlank()) "Belum ada data wisata"
+                else "Wisata \"$kataKunci\" tidak ditemukan"
+
+            Helper.tampil(tvPesan)
             return
         }
 
-        tvPesan.visibility = View.GONE
+        Helper.sembunyi(tvPesan)
 
         if (halaman >= totalPage) {
             semuaSudahDimuat = true
@@ -195,15 +277,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun perbaruiInfoBawah() {
         if (!semuaSudahDimuat) {
-            tvInfoBawah.visibility = View.GONE
+            Helper.sembunyi(tvInfoBawah)
             return
         }
 
         val layoutManager = rvWisata.layoutManager as LinearLayoutManager
         val posisiTerakhir = layoutManager.findLastVisibleItemPosition()
 
-        tvInfoBawah.visibility =
-            if (posisiTerakhir >= daftarWisata.size - 1) View.VISIBLE else View.GONE
+        Helper.tampilJika(tvInfoBawah, posisiTerakhir >= daftarWisata.size - 1)
     }
 
     private fun tampilkanError() {
@@ -212,18 +293,28 @@ class MainActivity : AppCompatActivity() {
 
         if (daftarWisata.isEmpty()) {
             tvPesan.text = "Gagal memuat data.\nPeriksa koneksi, lalu ketuk di sini untuk mencoba lagi."
-            tvPesan.visibility = View.VISIBLE
+            Helper.tampil(tvPesan)
 
-            DialogServer.tampilkan(this) {
-                muatData()
+            if (kataKunci.isBlank()) {
+                DialogServer.tampilkan(this) {
+                    muatData()
+                }
             }
         } else {
-            Toast.makeText(this, "Gagal memuat data berikutnya", Toast.LENGTH_SHORT).show()
+            Helper.pesanSingkat(this, "Gagal memuat data berikutnya")
         }
     }
 
     private fun sembunyikanLoading() {
-        pbAwal.visibility = View.GONE
-        pbMuatLagi.visibility = View.GONE
+        Helper.sembunyi(pbAwal, pbMuatLagi)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        batalkanTundaCari()
+    }
+
+    companion object {
+        private const val JEDA_KETIK = 400L
     }
 }

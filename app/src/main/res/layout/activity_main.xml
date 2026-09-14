@@ -53,6 +53,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/viewHeader" />
 
+    <SearchView
+        android:id="@+id/svCari"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="12dp"
+        android:background="#FFFFFF"
+        android:iconifiedByDefault="false"
+        android:queryHint="Cari wisata..."
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/viewHeader" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvWisata"
         android:layout_width="0dp"
@@ -63,7 +77,7 @@
         app:layout_constraintBottom_toTopOf="@id/pbMuatLagi"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/viewHeader"
+        app:layout_constraintTop_toBottomOf="@id/svCari"
         tools:listitem="@layout/item_wisata" />
 
     <ProgressBar
