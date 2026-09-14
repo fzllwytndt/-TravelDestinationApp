@@ -8,6 +8,200 @@ Repository kumpulan tugas magang di Crocodic Semarang. Setiap tugas/fitur dikerj
 | `login-register` | Halaman Login & Register dengan ConstraintLayout + MySQL | Selesai |
 | `Tugas-3-Implementasi-Pagination` | Daftar destinasi wisata Semarang dengan pagination | Selesai |
 | `Tugas-4-Implementasi-Fitur-Search-Detail` | Pencarian destinasi wisata & halaman detail destinasi | Selesai |
+| `Tugas-5-Implementasi-Bottom-Navigation-Fragment-Splash-Screen-Logout` | Bottom Navigation, Fragment, Splash Screen, Session Login & Logout | Selesai |
+
+---
+
+# Branch `Tugas-5-Implementasi-Bottom-Navigation-Fragment-Splash-Screen-Logout`
+
+## Deskripsi
+
+Melanjutkan project **TravelDestinationApp** dengan menambahkan fitur **Bottom Navigation**, **Fragment**, **Splash Screen**, **Session Login**, dan **Logout**.
+
+Pada tugas ini aplikasi dikembangkan agar memiliki navigasi yang lebih terstruktur sehingga pengguna dapat berpindah antar halaman dengan mudah melalui menu navigasi yang berada di bagian bawah aplikasi.
+
+Aplikasi menggunakan beberapa Fragment, yaitu **Home**, **Favorit**, dan **Profil**. Setiap Fragment memiliki fungsi masing-masing dan dapat diakses melalui Bottom Navigation.
+
+Selain itu ditambahkan **Splash Screen** yang digunakan ketika aplikasi pertama kali dibuka. Pada saat Splash Screen berjalan, aplikasi melakukan pengecekan terhadap status login pengguna. Jika pengguna sudah pernah login dan session masih tersimpan, pengguna langsung diarahkan ke halaman utama. Sebaliknya, jika pengguna belum login atau session sudah tidak tersedia, pengguna diarahkan ke halaman Login.
+
+Untuk menyimpan status login pengguna, aplikasi menggunakan **Session Login**. Session ini digunakan agar aplikasi dapat mengingat apakah pengguna sudah login atau belum, sehingga pengguna tidak perlu melakukan login kembali setiap kali membuka aplikasi selama session masih tersedia.
+
+Pada halaman Profil ditambahkan fitur **Logout**. Ketika pengguna menekan tombol Logout, session login dihapus dan pengguna diarahkan kembali ke halaman Login.
+
+Dalam implementasinya, kode dibuat sederhana, rapi, dan terstruktur agar lebih mudah dipahami serta tidak terlalu banyak menggunakan kode yang rumit.
+
+## Ketentuan Fitur
+
+| # | Ketentuan | Pemenuhan |
+|---|---|---|
+| 1 | Menambahkan Bottom Navigation sebagai navigasi utama aplikasi | `BottomNavigationView` pada `activity_main.xml` dengan menu `menu_bottom.xml` |
+| 2 | Bottom Navigation dipakai berpindah antar halaman lewat menu di bagian bawah | Tiga menu: Home, Favorit, dan Profil |
+| 3 | Membuat Fragment Home untuk menampilkan halaman utama aplikasi | `HomeFragment` + `fragment_home.xml`, berisi daftar wisata, pencarian, dan pagination |
+| 4 | Membuat Fragment riwayat untuk halaman kedua | `FavoriteFragment` + `fragment_favorite.xml`, menampilkan teks `Ini Halaman Favorit` |
+| 5 | Membuat Fragment Profil untuk informasi pengguna dan fitur Logout | `ProfileFragment` + `fragment_profile.xml`, berisi tombol Logout |
+| 6 | Memilih menu menampilkan Fragment yang sesuai tanpa membuka Activity baru | `supportFragmentManager.beginTransaction().replace(...)` di dalam `MainActivity` |
+| 7 | Menambahkan Splash Screen saat aplikasi pertama kali dibuka | `SplashActivity` + `activity_splash.xml`, tampil selama 2 detik |
+| 8 | Splash Screen melakukan pengecekan status login | `Sesi.sudahLogin()` dipanggil sebelum berpindah halaman |
+| 9 | Sudah login dan session tersedia diarahkan ke halaman utama | Splash membuka `MainActivity` |
+| 10 | Belum login atau session tidak tersedia diarahkan ke halaman Login | Splash membuka `LoginActivity` |
+| 11 | Menambahkan Session Login untuk menyimpan status login | `Sesi.kt` menyimpan `sudah_login` dan `username` di `SharedPreferences` |
+| 12 | Menambahkan fitur Logout pada halaman Profil | Tombol Logout memanggil `Sesi.keluar()` |
+| 13 | Logout menghapus session dan status login menjadi tidak aktif | `Sesi.hapus()` mengosongkan seluruh isi `SharedPreferences` |
+| 14 | Logout mengarahkan pengguna kembali ke halaman Login | `Intent` ke `LoginActivity` |
+| 15 | Setelah Logout, tombol Back tidak dapat kembali ke halaman utama | `FLAG_ACTIVITY_NEW_TASK` + `FLAG_ACTIVITY_CLEAR_TASK` menghapus tumpukan halaman |
+| 16 | Tampilan halaman dan navigasi responsif, sederhana, dan mudah digunakan | `ConstraintLayout` + `FragmentContainerView`, Bottom Navigation bawaan Material 3 |
+| 17 | Kode rapi dan terstruktur, setiap bagian memiliki fungsi yang jelas | Setiap halaman dipisah ke Fragment sendiri, urusan session dikumpulkan di `Sesi.kt` |
+
+## Alur Aplikasi
+
+```
+Aplikasi Dibuka
+       |
+  Splash Screen
+       |
+  Cek Session Login
+       |
+       +-- sudah login  -->  Home
+       |
+       +-- belum login  -->  Login
+```
+
+Setelah pengguna berhasil login, pengguna dapat memakai Bottom Navigation untuk berpindah halaman:
+
+```
+Home  <->  Favorit  <->  Profil
+```
+
+Jika pengguna berada di Profil dan memilih Logout:
+
+```
+Logout
+   |
+Hapus Session
+   |
+Kembali ke Login
+```
+
+## Penanganan Kondisi
+
+| Kondisi | Yang terjadi |
+|---|---|
+| **Sudah Login** | Session masih tersedia, pengguna tidak perlu login kembali dan langsung masuk ke halaman utama |
+| **Belum Login** | Session tidak ditemukan, pengguna diarahkan ke halaman Login |
+| **Logout** | Session pengguna dihapus dan aplikasi kembali ke halaman Login |
+| **Navigasi Fragment** | Pengguna berpindah antara Home, Favorit, dan Profil memakai Bottom Navigation |
+
+## Tujuan
+
+Menerapkan konsep navigasi dan session login pada aplikasi Android melalui penggunaan Bottom Navigation, Fragment, Splash Screen, dan Logout.
+
+Dengan adanya Bottom Navigation, pengguna dapat berpindah antar halaman dengan lebih mudah. Penggunaan Fragment juga membuat struktur halaman aplikasi menjadi lebih terorganisir karena setiap halaman memiliki Fragment masing-masing.
+
+Splash Screen digunakan untuk melakukan pengecekan status login sebelum menentukan halaman yang akan ditampilkan kepada pengguna. Sedangkan Session Login digunakan agar aplikasi dapat menyimpan status pengguna sehingga pengguna tidak harus melakukan login berulang kali.
+
+Fitur Logout digunakan untuk memberikan kontrol kepada pengguna ketika ingin keluar dari akun. Setelah Logout dilakukan, session dihapus dan pengguna dikembalikan ke halaman Login.
+
+Dengan implementasi fitur tersebut, TravelDestinationApp memiliki navigasi yang lebih baik, alur login yang lebih jelas, serta struktur kode yang sederhana, rapi, terstruktur, dan mudah dipahami.
+
+## File Baru pada Tugas Ini
+
+| File | Kegunaan |
+|---|---|
+| `SplashActivity.kt` | Halaman pembuka sekaligus pengecekan status login |
+| `activity_splash.xml` | Tampilan Splash Screen |
+| `Sesi.kt` | Menyimpan, membaca, dan menghapus session login |
+| `HomeFragment.kt` | Halaman utama berisi daftar wisata, pencarian, dan pagination |
+| `FavoriteFragment.kt` | Halaman kedua |
+| `fragment_favorite.xml` | Tampilan halaman kedua |
+| `ProfileFragment.kt` | Halaman profil berisi tombol Logout |
+| `fragment_profile.xml` | Tampilan halaman profil |
+| `menu_bottom.xml` | Menu Bottom Navigation |
+| `ic_home.xml`, `ic_favorit.xml`, `ic_profil.xml` | Ikon menu Bottom Navigation |
+
+## File yang Berubah
+
+| File | Perubahan |
+|---|---|
+| `activity_main.xml` | Diganti isinya menjadi `FragmentContainerView` + `BottomNavigationView` |
+| `fragment_home.xml` | Nama file sebelumnya `activity_main.xml`, isinya tetap sama |
+| `MainActivity.kt` | Tidak lagi berisi logika daftar wisata, kini hanya mengatur perpindahan Fragment |
+| `LoginActivity.kt` | Menyimpan session lewat `Sesi.simpan()` ketika login berhasil |
+| `AndroidManifest.xml` | `SplashActivity` menjadi halaman yang dibuka pertama kali |
+
+## Isi `Sesi.kt`
+
+| Fungsi | Kegunaan |
+|---|---|
+| `simpan()` | Menyimpan status login dan username setelah login berhasil |
+| `sudahLogin()` | Mengecek apakah session masih tersedia, dipakai oleh Splash Screen |
+| `ambilUsername()` | Mengambil username yang tersimpan, dipakai halaman Home |
+| `hapus()` | Menghapus seluruh isi session |
+| `keluar()` | Menghapus session lalu kembali ke halaman Login tanpa bisa di-Back |
+
+Bagian yang membuat tombol Back tidak dapat kembali ke halaman utama:
+
+```kotlin
+val intent = Intent(activity, LoginActivity::class.java)
+intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+activity.startActivity(intent)
+activity.finish()
+```
+
+`FLAG_ACTIVITY_CLEAR_TASK` menghapus seluruh halaman yang sudah terbuka sebelumnya, sehingga setelah Logout tidak ada lagi halaman utama yang tersisa di belakang halaman Login.
+
+## Perpindahan Fragment
+
+Perpindahan halaman cukup mengganti isi `FragmentContainerView`, tanpa membuka Activity baru:
+
+```kotlin
+bottomNav.setOnItemSelectedListener { menu ->
+    bukaHalaman(
+        when (menu.itemId) {
+            R.id.menuFavorit -> FavoriteFragment()
+            R.id.menuProfil -> ProfileFragment()
+            else -> HomeFragment()
+        }
+    )
+    true
+}
+
+private fun bukaHalaman(fragment: Fragment) {
+    supportFragmentManager.beginTransaction()
+        .replace(R.id.wadahFragment, fragment)
+        .commit()
+}
+```
+
+## Teknologi
+
+| Bagian | Teknologi |
+|---|---|
+| Navigasi bawah | `BottomNavigationView` (Material 3) |
+| Halaman | `Fragment` + `FragmentContainerView` |
+| Perpindahan halaman | `supportFragmentManager` |
+| Splash Screen | `Activity` + `Handler.postDelayed` |
+| Session login | `SharedPreferences` |
+| Ikon menu | Vector drawable |
+
+## Tangkapan Layar
+
+| Splash Screen | Home Fragment |
+|:---:|:---:|
+| <img src="screenshot/19-splash-screen.png" width="230"> | <img src="screenshot/20-home-fragment.png" width="230"> |
+| Tampil saat aplikasi dibuka sambil mengecek status login | Halaman utama berisi daftar wisata, muncul saat session masih tersedia |
+
+| Favorit Fragment | Profil Fragment | Setelah Logout |
+|:---:|:---:|:---:|
+| <img src="screenshot/21-favorit-fragment.png" width="230"> | <img src="screenshot/22-profil-fragment.png" width="230"> | <img src="screenshot/23-logout-ke-login.png" width="230"> |
+| Halaman kedua yang dibuka lewat Bottom Navigation | Halaman profil berisi tombol Logout | Session dihapus dan aplikasi kembali ke halaman Login |
+
+## Catatan
+
+- Session disimpan di `SharedPreferences` dengan nama `sesi_login`, terpisah dari `pengaturan_server` yang dipakai menyimpan alamat server.
+- Username tidak lagi dikirim antar halaman memakai `Intent.putExtra`. Halaman Home mengambilnya langsung dari session lewat `Sesi.ambilUsername()`.
+- Tombol Logout di bagian atas halaman Home tetap ada seperti sebelumnya, dan kini memanggil `Sesi.keluar()` yang sama dengan tombol Logout di halaman Profil.
+- Pada Android 12 ke atas, sistem menampilkan splash bawaan berisi ikon aplikasi sesaat sebelum `SplashActivity` muncul. Hal tersebut merupakan bawaan sistem, bukan bagian dari layout `activity_splash.xml`.
 
 ---
 

@@ -61,9 +61,9 @@ class LoginActivity : AppCompatActivity() {
         Toast.makeText(this, json.getString("message"), Toast.LENGTH_SHORT).show()
 
         if (json.getBoolean("success")) {
-            val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra("username", json.getString("username"))
-            startActivity(intent)
+            Sesi.simpan(this, json.getString("username"))
+
+            startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
     }
