@@ -38,7 +38,7 @@ Dalam implementasinya, kode dibuat sederhana, rapi, dan terstruktur agar lebih m
 | 2 | Bottom Navigation dipakai berpindah antar halaman lewat menu di bagian bawah | Tiga menu: Home, Favorit, dan Profil |
 | 3 | Membuat Fragment Home untuk menampilkan halaman utama aplikasi | `HomeFragment` + `fragment_home.xml`, berisi daftar wisata, pencarian, dan pagination |
 | 4 | Membuat Fragment riwayat untuk halaman kedua | `FavoriteFragment` + `fragment_favorite.xml`, menampilkan teks `Ini Halaman Favorit` |
-| 5 | Membuat Fragment Profil untuk informasi pengguna dan fitur Logout | `ProfileFragment` + `fragment_profile.xml`, berisi tombol Logout |
+| 5 | Membuat Fragment Profil untuk informasi pengguna dan fitur Logout | `ProfileFragment` + `fragment_profile.xml`, berisi ikon profil, nama pengguna, dan tombol Logout |
 | 6 | Memilih menu menampilkan Fragment yang sesuai tanpa membuka Activity baru | `supportFragmentManager.beginTransaction().replace(...)` di dalam `MainActivity` |
 | 7 | Menambahkan Splash Screen saat aplikasi pertama kali dibuka | `SplashActivity` + `activity_splash.xml`, tampil selama 2 detik |
 | 8 | Splash Screen melakukan pengecekan status login | `Sesi.sudahLogin()` dipanggil sebelum berpindah halaman |
@@ -113,7 +113,7 @@ Dengan implementasi fitur tersebut, TravelDestinationApp memiliki navigasi yang 
 | `HomeFragment.kt` | Halaman utama berisi daftar wisata, pencarian, dan pagination |
 | `FavoriteFragment.kt` | Halaman kedua |
 | `fragment_favorite.xml` | Tampilan halaman kedua |
-| `ProfileFragment.kt` | Halaman profil berisi tombol Logout |
+| `ProfileFragment.kt` | Halaman profil berisi ikon profil, nama pengguna, dan tombol Logout |
 | `fragment_profile.xml` | Tampilan halaman profil |
 | `menu_bottom.xml` | Menu Bottom Navigation |
 | `ic_home.xml`, `ic_favorit.xml`, `ic_profil.xml` | Ikon menu Bottom Navigation |
@@ -123,7 +123,7 @@ Dengan implementasi fitur tersebut, TravelDestinationApp memiliki navigasi yang 
 | File | Perubahan |
 |---|---|
 | `activity_main.xml` | Diganti isinya menjadi `FragmentContainerView` + `BottomNavigationView` |
-| `fragment_home.xml` | Nama file sebelumnya `activity_main.xml`, isinya tetap sama |
+| `fragment_home.xml` | Nama file sebelumnya `activity_main.xml`. Tombol Logout di bagian atas dihapus karena Logout kini berada di halaman Profil |
 | `MainActivity.kt` | Tidak lagi berisi logika daftar wisata, kini hanya mengatur perpindahan Fragment |
 | `LoginActivity.kt` | Menyimpan session lewat `Sesi.simpan()` ketika login berhasil |
 | `AndroidManifest.xml` | `SplashActivity` menjadi halaman yang dibuka pertama kali |
@@ -189,18 +189,19 @@ private fun bukaHalaman(fragment: Fragment) {
 | Splash Screen | Home Fragment |
 |:---:|:---:|
 | <img src="screenshot/19-splash-screen.png" width="230"> | <img src="screenshot/20-home-fragment.png" width="230"> |
-| Tampil saat aplikasi dibuka sambil mengecek status login | Halaman utama berisi daftar wisata, muncul saat session masih tersedia |
+| Tampil saat aplikasi dibuka sambil mengecek status login | Halaman utama berisi daftar wisata, sapaan namanya diambil dari session |
 
 | Favorit Fragment | Profil Fragment | Setelah Logout |
 |:---:|:---:|:---:|
 | <img src="screenshot/21-favorit-fragment.png" width="230"> | <img src="screenshot/22-profil-fragment.png" width="230"> | <img src="screenshot/23-logout-ke-login.png" width="230"> |
-| Halaman kedua yang dibuka lewat Bottom Navigation | Halaman profil berisi tombol Logout | Session dihapus dan aplikasi kembali ke halaman Login |
+| Halaman kedua yang dibuka lewat Bottom Navigation | Ikon profil, nama pengguna, dan tombol Logout | Session dihapus dan aplikasi kembali ke halaman Login |
 
 ## Catatan
 
 - Session disimpan di `SharedPreferences` dengan nama `sesi_login`, terpisah dari `pengaturan_server` yang dipakai menyimpan alamat server.
 - Username tidak lagi dikirim antar halaman memakai `Intent.putExtra`. Halaman Home mengambilnya langsung dari session lewat `Sesi.ambilUsername()`.
-- Tombol Logout di bagian atas halaman Home tetap ada seperti sebelumnya, dan kini memanggil `Sesi.keluar()` yang sama dengan tombol Logout di halaman Profil.
+- Tombol Logout di bagian atas halaman Home dihapus supaya tidak ada dua tombol dengan fungsi yang sama. Logout hanya tersedia di halaman Profil sesuai ketentuan tugas.
+- Nama pengguna pada halaman Profil dan sapaan pada halaman Home sama-sama dibaca dari session lewat `Sesi.ambilUsername()`.
 - Pada Android 12 ke atas, sistem menampilkan splash bawaan berisi ikon aplikasi sesaat sebelum `SplashActivity` muncul. Hal tersebut merupakan bawaan sistem, bukan bagian dari layout `activity_splash.xml`.
 
 ---

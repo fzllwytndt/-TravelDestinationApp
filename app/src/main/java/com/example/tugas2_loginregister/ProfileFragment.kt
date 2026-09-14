@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 
 class ProfileFragment : Fragment() {
@@ -19,6 +20,8 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        view.findViewById<TextView>(R.id.tvNama).text = Sesi.ambilUsername(requireContext())
 
         view.findViewById<Button>(R.id.btnLogout).setOnClickListener {
             Sesi.keluar(requireActivity())

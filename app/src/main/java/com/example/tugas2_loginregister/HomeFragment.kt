@@ -7,7 +7,6 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.SearchView
 import android.widget.TextView
@@ -66,10 +65,6 @@ class HomeFragment : Fragment() {
     private fun siapkanHeader(view: View) {
         val username = Sesi.ambilUsername(requireContext())
         view.findViewById<TextView>(R.id.tvWelcome).text = "Selamat Datang, $username"
-
-        view.findViewById<Button>(R.id.btnLogout).setOnClickListener {
-            Sesi.keluar(requireActivity())
-        }
     }
 
     private fun hubungkanView(view: View) {
