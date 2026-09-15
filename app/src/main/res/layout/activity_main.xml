@@ -4,7 +4,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:background="@color/hijau_hutan">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/wadahFragment"
@@ -19,6 +19,10 @@
         android:id="@+id/bottomNav"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:background="@color/putih"
+        app:elevation="0dp"
+        app:itemIconTint="@color/warna_menu_bawah"
+        app:itemTextColor="@color/warna_menu_bawah"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

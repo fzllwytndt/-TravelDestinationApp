@@ -1,4 +1,25 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Base.Theme.Tugas2_LoginRegister" parent="Theme.Material3.DayNight.NoActionBar">
+<resources>
+
+    <!-- Warna dibuat sama dengan mode terang supaya tampilannya tetap konsisten -->
+    <style name="Base.Theme.JelajahJateng" parent="Theme.Material3.Light.NoActionBar">
+
+        <item name="colorPrimary">@color/hijau_hutan</item>
+        <item name="colorOnPrimary">@color/emas</item>
+        <item name="colorSecondary">@color/emas</item>
+        <item name="colorOnSecondary">@color/hijau_malam</item>
+
+        <item name="android:colorBackground">@color/krem</item>
+        <item name="colorSurface">@color/putih</item>
+        <item name="colorOnSurface">@color/teks_utama</item>
+        <item name="colorOutline">@color/garis</item>
+
+        <!-- Latar indikator menu bawah yang sedang aktif -->
+        <item name="colorSecondaryContainer">@color/emas_muda</item>
+        <item name="colorOnSecondaryContainer">@color/hijau_hutan</item>
+
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+
     </style>
+
 </resources>

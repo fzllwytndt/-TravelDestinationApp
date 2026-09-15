@@ -196,16 +196,20 @@ class HomeFragment : Fragment() {
             activity = requireActivity(),
             alamat = alamat,
             saatBerhasil = { json ->
-                if (token == tokenPermintaan) {
+                if (masihAktif(token)) {
                     bacaHasilApi(json)
                 }
             },
             saatGagal = {
-                if (token == tokenPermintaan) {
+                if (masihAktif(token)) {
                     tampilkanError()
                 }
             }
         )
+    }
+
+    private fun masihAktif(token: Int): Boolean {
+        return isAdded && view != null && token == tokenPermintaan
     }
 
     private fun bacaHasilApi(json: JSONObject) {

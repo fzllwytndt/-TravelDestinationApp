@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+
+    <!-- Warna utama, diambil langsung dari logo Jelajah Jateng -->
+    <color name="hijau_malam">#FF050F0E</color>
+    <color name="hijau_hutan">#FF142F1E</color>
+    <color name="hijau_daun">#FF46693F</color>
+    <color name="emas">#FFE4B671</color>
+    <color name="emas_muda">#FFF7EBD6</color>
+
+    <!-- Warna netral untuk latar, kartu, dan teks -->
+    <color name="krem">#FFF6F3EC</color>
+    <color name="putih">#FFFFFFFF</color>
+    <color name="teks_utama">#FF16211B</color>
+    <color name="teks_kedua">#FF6E7A72</color>
+    <color name="garis">#FFE7E2D8</color>
+
 </resources>

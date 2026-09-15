@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="@color/krem">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,14 +19,14 @@
             android:layout_height="96dp"
             android:contentDescription="Ikon profil"
             android:src="@drawable/ic_profil"
-            app:tint="#6750A4" />
+            app:tint="@color/hijau_hutan" />
 
         <TextView
             android:id="@+id/tvNama"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:textColor="#212121"
+            android:textColor="@color/teks_utama"
             android:textSize="18sp"
             android:textStyle="bold"
             tools:text="ujicoba4" />

@@ -2,10 +2,13 @@ package com.example.tugas2_loginregister
 
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import org.json.JSONObject
 
 class DetailActivity : AppCompatActivity() {
@@ -27,6 +30,7 @@ class DetailActivity : AppCompatActivity() {
         setContentView(R.layout.activity_detail)
 
         hubungkanView()
+        siapkanTombolKembali()
 
         idWisata = intent.getIntExtra("id", 0)
 
@@ -45,6 +49,19 @@ class DetailActivity : AppCompatActivity() {
         tvDeskripsi = findViewById(R.id.tvDeskripsi)
         pbLoading = findViewById(R.id.pbLoading)
         tvPesan = findViewById(R.id.tvPesan)
+    }
+
+    /** Tombol kembali diletakkan tepat di bawah status bar. */
+    private fun siapkanTombolKembali() {
+        val barisAtas = findViewById<View>(R.id.barisAtas)
+
+        ViewCompat.setOnApplyWindowInsetsListener(barisAtas) { view, jarakSistem ->
+            val atas = jarakSistem.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            view.setPadding(0, atas, 0, 0)
+            jarakSistem
+        }
+
+        findViewById<ImageButton>(R.id.btnKembali).setOnClickListener { finish() }
     }
 
     private fun muatDetail() {

@@ -4,13 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="12dp"
-    android:layout_marginTop="6dp"
-    android:layout_marginEnd="12dp"
-    android:layout_marginBottom="6dp"
-    app:cardBackgroundColor="#FFFFFF"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="2dp">
+    android:layout_marginStart="20dp"
+    android:layout_marginTop="7dp"
+    android:layout_marginEnd="20dp"
+    android:layout_marginBottom="7dp"
+    app:cardBackgroundColor="@color/putih"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/garis"
+    app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,7 +23,7 @@
             android:id="@+id/ivFoto"
             android:layout_width="match_parent"
             android:layout_height="180dp"
-            android:background="#E0E0E0"
+            android:background="@color/garis"
             android:contentDescription="Foto tempat wisata"
             android:scaleType="centerCrop"
             tools:src="@drawable/contoh_ayana" />
@@ -30,10 +32,10 @@
             android:id="@+id/tvNama"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="12dp"
-            android:textColor="#212121"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="14dp"
+            android:textColor="@color/teks_utama"
             android:textSize="16sp"
             android:textStyle="bold"
             tools:text="Ayana Gedong Songo" />
@@ -42,12 +44,12 @@
             android:id="@+id/tvDeskripsi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="14dp"
             android:layout_marginTop="4dp"
-            android:layout_marginEnd="12dp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginEnd="14dp"
+            android:layout_marginBottom="14dp"
             android:lineSpacingExtra="2dp"
-            android:textColor="#757575"
+            android:textColor="@color/teks_kedua"
             android:textSize="13sp"
             tools:text="Taman rekreasi di kawasan Gedong Songo dengan spot foto bertema taman bunga dan bangunan ala Eropa." />
 

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="@color/krem">
 
     <ScrollView
         android:id="@+id/isiDetail"
@@ -22,7 +22,7 @@
                 android:id="@+id/ivFoto"
                 android:layout_width="match_parent"
                 android:layout_height="230dp"
-                android:background="#E0E0E0"
+                android:background="@color/garis"
                 android:contentDescription="Foto tempat wisata"
                 android:scaleType="centerCrop"
                 tools:src="@drawable/contoh_ayana" />
@@ -33,9 +33,11 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="-44dp"
                 android:layout_marginEnd="16dp"
-                app:cardBackgroundColor="#FFFFFF"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="3dp">
+                app:cardBackgroundColor="@color/putih"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/garis"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -52,7 +54,7 @@
                         android:paddingTop="4dp"
                         android:paddingEnd="10dp"
                         android:paddingBottom="4dp"
-                        android:textColor="#1565C0"
+                        android:textColor="@color/hijau_hutan"
                         android:textSize="11sp"
                         android:textStyle="bold"
                         tools:text="Alam" />
@@ -62,7 +64,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
-                        android:textColor="#212121"
+                        android:textColor="@color/teks_utama"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         tools:text="Candi Gedong Songo" />
@@ -72,7 +74,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:textColor="#9E9E9E"
+                        android:textColor="@color/teks_kedua"
                         android:textSize="13sp"
                         tools:text="Bandungan, Kabupaten Semarang" />
 
@@ -80,7 +82,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:layout_marginTop="14dp"
-                        android:background="#EEEEEE" />
+                        android:background="@color/garis" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -94,7 +96,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Harga Tiket Masuk"
-                            android:textColor="#757575"
+                            android:textColor="@color/teks_kedua"
                             android:textSize="13sp" />
 
                         <TextView
@@ -102,7 +104,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="12dp"
-                            android:textColor="#2E7D32"
+                            android:textColor="@color/hijau_hutan"
                             android:textSize="14sp"
                             android:textStyle="bold"
                             tools:text="Rp 25.000" />
@@ -113,14 +115,21 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <View
+                android:layout_width="32dp"
+                android:layout_height="3dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="24dp"
+                android:background="@color/emas" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginEnd="20dp"
                 android:text="Deskripsi Wisata"
-                android:textColor="#212121"
+                android:textColor="@color/teks_utama"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
@@ -132,13 +141,29 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="20dp"
                 android:lineSpacingExtra="4dp"
-                android:textColor="#757575"
+                android:textColor="@color/teks_kedua"
                 android:textSize="14sp"
                 tools:text="Kompleks sembilan candi Hindu peninggalan Wangsa Syailendra di lereng Gunung Ungaran." />
 
         </LinearLayout>
 
     </ScrollView>
+
+    <FrameLayout
+        android:id="@+id/barisAtas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/btnKembali"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_margin="12dp"
+            android:background="@drawable/bg_tombol_bulat"
+            android:contentDescription="Kembali"
+            android:src="@drawable/ic_kembali" />
+
+    </FrameLayout>
 
     <ProgressBar
         android:id="@+id/pbLoading"
@@ -154,7 +179,7 @@
         android:layout_gravity="center"
         android:gravity="center"
         android:padding="24dp"
-        android:textColor="#757575"
+        android:textColor="@color/teks_kedua"
         android:textSize="14sp"
         android:visibility="gone"
         tools:text="Gagal memuat detail wisata." />
