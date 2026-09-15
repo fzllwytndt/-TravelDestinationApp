@@ -10,6 +10,8 @@ Repository kumpulan tugas magang di Crocodic Semarang. Setiap tugas/fitur dikerj
 | `Tugas-4-Implementasi-Fitur-Search-Detail` | Pencarian destinasi wisata & halaman detail destinasi | Selesai |
 | `Tugas-5-Implementasi-Bottom-Navigation-Fragment-Splash-Screen-Logout` | Bottom Navigation, Fragment, Splash Screen, Session Login & Logout | Selesai |
 
+Seluruh tangkapan layar pada dokumen ini diambil ulang memakai tampilan aplikasi terkini, yaitu setelah aplikasi memakai identitas **Jelajah Jateng**. Jadi fitur dari tugas sebelumnya pun terlihat dengan warna dan tata letak yang berlaku sekarang.
+
 ---
 
 # Branch `Tugas-5-Implementasi-Bottom-Navigation-Fragment-Splash-Screen-Logout`
@@ -29,6 +31,80 @@ Untuk menyimpan status login pengguna, aplikasi menggunakan **Session Login**. S
 Pada halaman Profil ditambahkan fitur **Logout**. Ketika pengguna menekan tombol Logout, session login dihapus dan pengguna diarahkan kembali ke halaman Login.
 
 Dalam implementasinya, kode dibuat sederhana, rapi, dan terstruktur agar lebih mudah dipahami serta tidak terlalu banyak menggunakan kode yang rumit.
+
+## Identitas Visual
+
+Aplikasi diberi identitas **Jelajah Jateng** memakai logo bertema Jawa Tengah, berupa siluet candi dan pegunungan di dalam pin lokasi yang dipadukan dengan ukiran berwarna emas.
+
+Berkas logo aslinya berada di `login_api/uploads/logo_wisata.png` berukuran 1254 x 1254 piksel. Sebelum dipakai, logo dirapikan lebih dulu: margin hitam beserta bayangannya dipotong, gambar disamakan menjadi bujur sangkar, sudutnya dibulatkan dan dibuat transparan, lalu diperkecil menjadi 512 x 512 piksel. Hasilnya disimpan sebagai `res/drawable/logo_jelajah.png` dan dipakai pada Splash Screen, halaman Login, serta halaman Register.
+
+Warna aplikasi diambil langsung dari logo tersebut, bukan dipilih terpisah, supaya seluruh tampilan terasa menyatu:
+
+| Nama warna | Kode | Diambil dari | Dipakai untuk |
+|---|---|---|---|
+| `hijau_malam` | `#050F0E` | latar kotak logo | latar Splash Screen |
+| `hijau_hutan` | `#142F1E` | bagian tergelap pada logo | warna utama: header, tombol, menu aktif |
+| `hijau_daun` | `#46693F` | gunung dan sawah pada logo | hijau pendukung |
+| `emas` | `#E4B671` | tulisan dan ukiran pada logo | warna aksen |
+| `emas_muda` | `#F7EBD6` | turunan warna emas | label kategori dan indikator menu |
+| `krem` | `#F6F3EC` | netral hangat penyeimbang | latar halaman |
+
+Seluruh warna dikumpulkan di `res/values/colors.xml`, lalu dipasangkan ke warna bawaan Material 3 pada `res/values/themes.xml`:
+
+```xml
+<item name="colorPrimary">@color/hijau_hutan</item>
+<item name="colorOnPrimary">@color/emas</item>
+<item name="colorSecondary">@color/emas</item>
+<item name="colorSecondaryContainer">@color/emas_muda</item>
+```
+
+Karena diatur lewat tema, tombol, indikator Bottom Navigation, dan warna ikon ikut menyesuaikan sendiri tanpa perlu diatur satu per satu di setiap layout. Kode warna yang sebelumnya ditulis langsung di file layout diganti menjadi rujukan `@color/...`, sehingga mengubah warna aplikasi cukup dilakukan pada satu berkas saja.
+
+Halaman Home memakai header hijau bersudut bawah membulat dengan kolom pencarian yang sengaja diletakkan menumpuk pada tepi bawah header. Halaman Detail mendapat tombol kembali berbentuk bulat di atas foto serta garis aksen emas sebagai penanda judul deskripsi.
+
+## Perbaikan Force Close
+
+Pada pengujian ditemukan aplikasi berhenti sendiri beberapa detik setelah Splash Screen apabila server sedang tidak dapat dihubungi:
+
+```
+java.lang.IllegalStateException: Fragment HomeFragment not attached to an activity.
+    at androidx.fragment.app.Fragment.requireActivity(Fragment.java:995)
+    at HomeFragment.tampilkanError(HomeFragment.kt:303)
+```
+
+Penyebabnya, `MainActivity` membuat `HomeFragment` sebanyak dua kali ketika halaman utama dibuka:
+
+```kotlin
+// Sebelum
+if (savedInstanceState == null) {
+    bukaHalaman(HomeFragment())                 // Fragment pertama dibuat
+    bottomNav.selectedItemId = R.id.menuHome    // memicu listener, Fragment kedua dibuat
+}
+```
+
+Fragment pertama langsung digantikan Fragment kedua, padahal permintaan datanya sudah berjalan. Ketika permintaan itu gagal, `tampilkanError()` memanggil `requireActivity()` pada Fragment yang sudah terlepas dari Activity, lalu aplikasi berhenti.
+
+Perbaikannya dilakukan di dua tempat. Pertama, listener menu dipasang setelah halaman awal dibuka sehingga Fragment hanya dibuat satu kali:
+
+```kotlin
+// Sesudah
+if (savedInstanceState == null) {
+    bottomNav.selectedItemId = R.id.menuHome
+    bukaHalaman(HomeFragment())
+}
+
+bottomNav.setOnItemSelectedListener { menu -> ... }
+```
+
+Kedua, hasil permintaan jaringan hanya diproses selama Fragment masih menempel pada Activity:
+
+```kotlin
+private fun masihAktif(token: Int): Boolean {
+    return isAdded && view != null && token == tokenPermintaan
+}
+```
+
+Pengecekan tersebut sekaligus melindungi kondisi lain, misalnya pengguna berpindah ke menu Favorit atau Profil sewaktu data masih dimuat.
 
 ## Ketentuan Fitur
 
@@ -117,6 +193,12 @@ Dengan implementasi fitur tersebut, TravelDestinationApp memiliki navigasi yang 
 | `fragment_profile.xml` | Tampilan halaman profil |
 | `menu_bottom.xml` | Menu Bottom Navigation |
 | `ic_home.xml`, `ic_favorit.xml`, `ic_profil.xml` | Ikon menu Bottom Navigation |
+| `logo_jelajah.png` | Logo aplikasi hasil rapian, dipakai di Splash, Login, dan Register |
+| `bg_header.xml` | Latar header halaman Home dengan sudut bawah membulat |
+| `bg_pencarian.xml` | Latar kolom pencarian berbentuk kartu putih |
+| `bg_tombol_bulat.xml` | Latar bulat tombol kembali pada halaman Detail |
+| `ic_kembali.xml` | Ikon panah untuk tombol kembali |
+| `warna_menu_bawah.xml` | Warna ikon dan teks Bottom Navigation saat aktif maupun tidak |
 
 ## File yang Berubah
 
@@ -126,7 +208,15 @@ Dengan implementasi fitur tersebut, TravelDestinationApp memiliki navigasi yang 
 | `fragment_home.xml` | Nama file sebelumnya `activity_main.xml`. Tombol Logout di bagian atas dihapus karena Logout kini berada di halaman Profil |
 | `MainActivity.kt` | Tidak lagi berisi logika daftar wisata, kini hanya mengatur perpindahan Fragment |
 | `LoginActivity.kt` | Menyimpan session lewat `Sesi.simpan()` ketika login berhasil |
-| `AndroidManifest.xml` | `SplashActivity` menjadi halaman yang dibuka pertama kali |
+| `AndroidManifest.xml` | `SplashActivity` menjadi halaman yang dibuka pertama kali, memakai tema khusus agar ikon status bar terbaca di atas latar gelap |
+| `colors.xml` | Diisi palet warna yang diambil dari logo |
+| `themes.xml` | Palet dipasangkan ke warna Material 3, ditambah tema khusus Splash Screen |
+| `strings.xml` | Nama aplikasi menjadi `Jelajah Jateng` |
+| `activity_splash.xml` | Latar hijau gelap dengan logo di tengah, tulisan nama aplikasi dihapus karena sudah ada pada logo |
+| `activity_detail.xml` | Warna disesuaikan, ditambah tombol kembali dan garis aksen emas |
+| `DetailActivity.kt` | Menangani tombol kembali dan jarak tepi status bar |
+| `activity_login.xml`, `activity_register.xml` | Logo dipasang di bagian atas halaman |
+| `item_wisata.xml`, `fragment_profile.xml`, `fragment_favorite.xml`, `bg_kategori.xml` | Kode warna diganti menjadi rujukan `@color/...` |
 
 ## Isi `Sesi.kt`
 
@@ -183,6 +273,9 @@ private fun bukaHalaman(fragment: Fragment) {
 | Splash Screen | `Activity` + `Handler.postDelayed` |
 | Session login | `SharedPreferences` |
 | Ikon menu | Vector drawable |
+| Warna dan tema | Material 3 color roles + `colors.xml` |
+| Logo aplikasi | PNG dengan latar transparan |
+| Jarak tepi layar | `WindowInsetsCompat` |
 
 ## Tangkapan Layar
 
@@ -194,7 +287,12 @@ private fun bukaHalaman(fragment: Fragment) {
 | Favorit Fragment | Profil Fragment | Setelah Logout |
 |:---:|:---:|:---:|
 | <img src="screenshot/21-favorit-fragment.png" width="230"> | <img src="screenshot/22-profil-fragment.png" width="230"> | <img src="screenshot/23-logout-ke-login.png" width="230"> |
-| Halaman kedua yang dibuka lewat Bottom Navigation | Ikon profil, nama pengguna, dan tombol Logout | Session dihapus dan aplikasi kembali ke halaman Login |
+| Halaman kedua yang dibuka lewat Bottom Navigation | Ikon profil, nama pengguna, dan tombol Logout berwarna hijau dengan tulisan emas | Session dihapus dan aplikasi kembali ke halaman Login |
+
+| Halaman Login | Halaman Register |
+|:---:|:---:|
+| <img src="screenshot/1-login.png" width="230"> | <img src="screenshot/2-register.png" width="230"> |
+| Logo dipasang di bagian atas sebagai penanda identitas aplikasi | Warna tombol dan tautan mengikuti tema yang sama dengan halaman Login |
 
 ## Catatan
 
@@ -202,7 +300,9 @@ private fun bukaHalaman(fragment: Fragment) {
 - Username tidak lagi dikirim antar halaman memakai `Intent.putExtra`. Halaman Home mengambilnya langsung dari session lewat `Sesi.ambilUsername()`.
 - Tombol Logout di bagian atas halaman Home dihapus supaya tidak ada dua tombol dengan fungsi yang sama. Logout hanya tersedia di halaman Profil sesuai ketentuan tugas.
 - Nama pengguna pada halaman Profil dan sapaan pada halaman Home sama-sama dibaca dari session lewat `Sesi.ambilUsername()`.
-- Pada Android 12 ke atas, sistem menampilkan splash bawaan berisi ikon aplikasi sesaat sebelum `SplashActivity` muncul. Hal tersebut merupakan bawaan sistem, bukan bagian dari layout `activity_splash.xml`.
+- Pada Android 12 ke atas, sistem menampilkan splash bawaan berisi ikon aplikasi sesaat sebelum `SplashActivity` muncul. Hal tersebut merupakan bawaan sistem, bukan bagian dari layout `activity_splash.xml`. Ikon peluncur aplikasi sendiri masih memakai ikon bawaan Android Studio, sehingga splash bawaan sistem belum memakai logo Jelajah Jateng.
+- Mulai Android 15, warna status bar tidak lagi dapat diatur lewat `android:statusBarColor`. Karena itu jarak untuk status bar diatur dari kode memakai `WindowInsetsCompat`, sehingga bagian atas layar ikut berwarna hijau menyatu dengan header, sedangkan Bottom Navigation tetap putih sampai ke tepi bawah layar.
+- Warna pada mode gelap sengaja dibuat sama dengan mode terang. Tujuannya agar tampilan tetap konsisten, sebab warna pada layout ditulis sebagai warna tetap yang diambil dari logo.
 
 ---
 
@@ -629,9 +729,10 @@ Tiga penanda yang menjaga alur ini tetap benar:
 |:---:|:---:|:---:|
 | <img src="screenshot/8-wisata-loading-awal.png" width="230"> | <img src="screenshot/9-wisata-daftar.png" width="230"> | <img src="screenshot/10-wisata-loading-berikutnya.png" width="230"> |
 
-| Seluruh Data Selesai Dimuat | Kondisi Gagal Memuat |
-|:---:|:---:|
-| <img src="screenshot/11-wisata-data-habis.png" width="230"> | <img src="screenshot/12-wisata-error.png" width="230"> |
+| Seluruh Data Selesai Dimuat | Kondisi Gagal Memuat | Dialog Alamat Server |
+|:---:|:---:|:---:|
+| <img src="screenshot/11-wisata-data-habis.png" width="230"> | <img src="screenshot/12-wisata-error.png" width="230"> | <img src="screenshot/24-dialog-alamat-server.png" width="230"> |
+| Keterangan muncul setelah kartu terakhir | Pesan gagal yang dapat diketuk untuk memuat ulang | Muncul saat server tidak terjangkau, alamat baru dapat langsung diisi di sini |
 
 ## Catatan
 
