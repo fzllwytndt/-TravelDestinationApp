@@ -15,4 +15,7 @@
     <color name="teks_kedua">#FF6E7A72</color>
     <color name="garis">#FFE7E2D8</color>
 
+    <!-- Warna ikon love ketika wisata sudah masuk daftar favorit -->
+    <color name="merah_favorit">#FFE53935</color>
+
 </resources>

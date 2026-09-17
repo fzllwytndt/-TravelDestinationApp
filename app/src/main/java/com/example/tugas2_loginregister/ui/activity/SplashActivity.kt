@@ -1,10 +1,12 @@
-package com.example.tugas2_loginregister
+package com.example.tugas2_loginregister.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
+import com.example.tugas2_loginregister.R
+import com.example.tugas2_loginregister.utils.SessionManager
 
 class SplashActivity : AppCompatActivity() {
 
@@ -19,7 +21,7 @@ class SplashActivity : AppCompatActivity() {
 
     private fun bukaHalamanBerikutnya() {
         val tujuan =
-            if (Sesi.sudahLogin(this)) MainActivity::class.java
+            if (SessionManager.sudahLogin(this)) MainActivity::class.java
             else LoginActivity::class.java
 
         startActivity(Intent(this, tujuan))

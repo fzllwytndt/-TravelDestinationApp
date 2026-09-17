@@ -9,8 +9,306 @@ Repository kumpulan tugas magang di Crocodic Semarang. Setiap tugas/fitur dikerj
 | `Tugas-3-Implementasi-Pagination` | Daftar destinasi wisata Semarang dengan pagination | Selesai |
 | `Tugas-4-Implementasi-Fitur-Search-Detail` | Pencarian destinasi wisata & halaman detail destinasi | Selesai |
 | `Tugas-5-Implementasi-Bottom-Navigation-Fragment-Splash-Screen-Logout` | Bottom Navigation, Fragment, Splash Screen, Session Login & Logout | Selesai |
+| `Tugas-6-Menambahkan-Fitur-Favorit-Wisata-dengan-Room-Database` | Favorit Wisata dengan Room Database (Entity, DAO, Database, Repository, ViewModel) | Selesai |
 
 Seluruh tangkapan layar pada dokumen ini diambil ulang memakai tampilan aplikasi terkini, yaitu setelah aplikasi memakai identitas **Jelajah Jateng**. Jadi fitur dari tugas sebelumnya pun terlihat dengan warna dan tata letak yang berlaku sekarang.
+
+---
+
+# Branch `Tugas-6-Menambahkan-Fitur-Favorit-Wisata-dengan-Room-Database`
+
+## Deskripsi
+
+Melanjutkan pengembangan **TravelDestinationApp** dengan menambahkan fitur **Favorit Wisata** memakai **Room Database**.
+
+Pada halaman Detail Wisata ditambahkan ikon love. Ketika ikon ditekan (**Like**), data wisata disimpan ke database lokal perangkat. Wisata yang sudah tersimpan langsung muncul pada Fragment Favorit. Ketika ikon ditekan lagi (**Unlike**), data dihapus dari Room Database dan otomatis hilang dari daftar favorit.
+
+Warna ikon mengikuti isi database: **merah** berarti wisata sudah menjadi favorit, **hitam** berarti wisata belum menjadi favorit.
+
+Karena data disimpan memakai Room, daftar favorit tidak hilang walaupun aplikasi ditutup. Ketika aplikasi dibuka kembali, Room mengambil data favorit dari perangkat lalu menampilkannya lagi pada Fragment Favorit.
+
+Fitur ini dibuat memakai susunan **Entity → DAO → Database → Repository → ViewModel → Fragment/Activity** sesuai konsep **MVVM**, sehingga setiap bagian kode memiliki tugas yang jelas.
+
+## Ketentuan Fitur
+
+- Menambahkan fitur Favorit Wisata pada aplikasi TravelDestinationApp.
+- Menambahkan tombol Like/Unlike berupa ikon love pada halaman Detail Wisata.
+- Ketika pengguna menekan Like, data wisata disimpan ke dalam Room Database.
+- Data wisata yang berhasil disimpan ditampilkan pada Fragment Favorit.
+- Ketika pengguna menekan Unlike, data wisata dihapus dari Room Database.
+- Setelah data dihapus, wisata otomatis hilang dari Fragment Favorit.
+- Status tombol mengikuti isi database: sudah favorit berwarna merah, belum favorit berwarna hitam.
+- Room Database dibuat memakai Entity, DAO, Database, Repository, dan ViewModel.
+- Daftar wisata favorit ditampilkan memakai RecyclerView.
+- Data favorit tetap tersimpan walaupun aplikasi ditutup dan dibuka kembali.
+- Menerapkan konsep MVVM agar pembagian tugas setiap bagian kode jelas.
+- Tampilan Fragment Favorit dibuat sederhana dan mudah digunakan.
+- Ketika belum ada wisata favorit, halaman menampilkan keterangan bahwa daftar favorit masih kosong.
+
+## Struktur Room Database
+
+| Bagian | Berkas | Tugasnya |
+|---|---|---|
+| Entity | `data/local/room/FavoriteWisata.kt` | Menentukan bentuk data wisata yang disimpan di database |
+| DAO | `data/local/room/FavoriteWisataDao.kt` | Perintah simpan, hapus, ambil, dan cek data favorit |
+| Database | `data/local/room/WisataDatabase.kt` | Membuat dan mengatur Room Database |
+| Repository | `repository/FavoriteRepository.kt` | Penghubung antara ViewModel dengan DAO |
+| ViewModel | `viewmodel/FavoriteViewModel.kt`, `viewmodel/DetailWisataViewModel.kt` | Menyediakan data favorit untuk tampilan |
+| Fragment / Activity | `ui/fragment/FavoriteFragment.kt`, `ui/activity/DetailWisataActivity.kt` | Menampilkan data kepada pengguna |
+
+### Entity
+
+Satu baris tabel `favorite_wisata` berisi data wisata yang disalin dari API. Isinya disimpan lengkap supaya daftar favorit tetap dapat ditampilkan walaupun aplikasi sedang tidak terhubung ke server.
+
+```kotlin
+@Entity(tableName = "favorite_wisata")
+data class FavoriteWisata(
+    @PrimaryKey val id: Int,
+    val namaWisata: String,
+    val kategori: String,
+    val lokasi: String,
+    val hargaTiket: Int,
+    val deskripsi: String,
+    val fotoUrl: String
+)
+```
+
+`id` dipakai sebagai Primary Key, jadi satu wisata hanya dapat tersimpan satu kali.
+
+### DAO
+
+```kotlin
+@Dao
+interface FavoriteWisataDao {
+
+    @Query("SELECT * FROM favorite_wisata ORDER BY namaWisata ASC")
+    fun ambilSemua(): LiveData<List<FavoriteWisata>>
+
+    @Query("SELECT EXISTS(SELECT 1 FROM favorite_wisata WHERE id = :id)")
+    fun cekFavorit(id: Int): LiveData<Boolean>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun simpan(wisata: FavoriteWisata)
+
+    @Query("DELETE FROM favorite_wisata WHERE id = :id")
+    suspend fun hapus(id: Int)
+}
+```
+
+- `ambilSemua()` dipakai Fragment Favorit. Hasilnya berupa **LiveData**, jadi daftar ikut berubah sendiri setiap ada data yang ditambah atau dihapus.
+- `cekFavorit()` dipakai halaman Detail untuk menentukan warna ikon love.
+- `simpan()` dan `hapus()` ditandai `suspend` supaya dijalankan di luar Main Thread.
+
+### Database
+
+```kotlin
+@Database(entities = [FavoriteWisata::class], version = 1, exportSchema = false)
+abstract class WisataDatabase : RoomDatabase() {
+
+    abstract fun favoriteWisataDao(): FavoriteWisataDao
+
+    companion object {
+        fun ambilData(context: Context): WisataDatabase { ... }
+    }
+}
+```
+
+Database dibuat satu kali saja lalu dipakai bersama oleh seluruh halaman, sehingga tidak ada dua database yang terbuka bersamaan. Berkasnya tersimpan di perangkat dengan nama `wisata.db`.
+
+### Repository
+
+`FavoriteRepository` menjadi satu-satunya bagian yang berhubungan langsung dengan DAO. Di sinilah data `Wisata` dari API disalin menjadi `FavoriteWisata` sebelum disimpan ke Room.
+
+### ViewModel
+
+- `FavoriteViewModel` menyediakan `daftarFavorit` untuk Fragment Favorit.
+- `DetailWisataViewModel` menyediakan isi halaman detail, status favorit, dan perintah `ubahFavorit()` untuk tombol Like/Unlike.
+
+## Alur Fitur Favorit
+
+```
+Pengguna membuka Detail Wisata
+        |
+        v
+Room mengecek status favorit wisata tersebut
+        |
+        v
+Belum favorit  ->  ikon love berwarna hitam
+        |
+        v
+Pengguna menekan ikon love (Like)
+        |
+        v
+Data disimpan ke Room Database
+        |
+        v
+Ikon berubah menjadi merah & wisata muncul di Fragment Favorit
+```
+
+Ketika wisata sudah menjadi favorit:
+
+```
+Pengguna menekan ikon love (Unlike)
+        |
+        v
+Data dihapus dari Room Database
+        |
+        v
+Ikon kembali berwarna hitam & wisata hilang dari Fragment Favorit
+```
+
+Ketika aplikasi ditutup lalu dibuka kembali:
+
+```
+Aplikasi dibuka kembali  ->  Room membaca tabel favorite_wisata  ->  daftar favorit tetap tampil
+```
+
+Daftar favorit dan ikon love tidak perlu dimuat ulang secara manual karena keduanya memakai **LiveData**, jadi tampilan otomatis menyesuaikan isi database.
+
+## Penataan Ulang Struktur Folder (MVVM)
+
+Sebelumnya seluruh berkas Kotlin berada pada satu folder. Pada tugas ini berkas dikelompokkan sesuai tugasnya masing-masing:
+
+```
+com.example.tugas2_loginregister
+├── data
+│   └── local
+│       └── room
+│           ├── FavoriteWisata.kt        (Entity)
+│           ├── FavoriteWisataDao.kt     (DAO)
+│           └── WisataDatabase.kt        (Database)
+├── model
+│   ├── Wisata.kt
+│   └── WisataResponse.kt
+├── network
+│   ├── ApiClient.kt
+│   ├── ApiService.kt
+│   ├── AuthRequest.kt
+│   └── AuthResponse.kt
+├── repository
+│   ├── AuthRepository.kt
+│   ├── FavoriteRepository.kt
+│   └── WisataRepository.kt
+├── ui
+│   ├── activity
+│   │   ├── DetailWisataActivity.kt
+│   │   ├── LoginActivity.kt
+│   │   ├── MainActivity.kt
+│   │   ├── RegisterActivity.kt
+│   │   └── SplashActivity.kt
+│   ├── adapter
+│   │   ├── FavoriteWisataAdapter.kt
+│   │   └── WisataAdapter.kt
+│   └── fragment
+│       ├── FavoriteFragment.kt
+│       ├── HomeFragment.kt
+│       └── ProfileFragment.kt
+├── utils
+│   ├── DialogServer.kt
+│   ├── Helper.kt
+│   ├── SessionManager.kt
+│   └── UiState.kt
+└── viewmodel
+    ├── AuthViewModel.kt
+    ├── AuthViewModelFactory.kt
+    ├── DetailWisataViewModel.kt
+    ├── FavoriteViewModel.kt
+    └── WisataViewModel.kt
+```
+
+Pengambilan data dari API juga dipindahkan ke **Retrofit** supaya alurnya mengikuti MVVM:
+
+```
+Activity / Fragment  ->  ViewModel  ->  Repository  ->  ApiService (Retrofit) / DAO (Room)
+```
+
+Activity dan Fragment sekarang hanya mengurus tampilan. Proses pengambilan data dijalankan ViewModel memakai Coroutine, lalu hasilnya dikabarkan memakai `UiState` yang berisi tiga keadaan: `Loading`, `Berhasil`, dan `Gagal`.
+
+## File Baru pada Tugas Ini
+
+| Berkas | Kegunaan |
+|---|---|
+| `data/local/room/FavoriteWisata.kt` | Entity tabel favorit |
+| `data/local/room/FavoriteWisataDao.kt` | Perintah database untuk data favorit |
+| `data/local/room/WisataDatabase.kt` | Pengaturan Room Database |
+| `model/WisataResponse.kt` | Bentuk balasan API daftar wisata & detail wisata |
+| `network/ApiService.kt` | Daftar alamat API yang dipanggil Retrofit |
+| `network/AuthRequest.kt` | Data yang dikirim saat Login & Register |
+| `network/AuthResponse.kt` | Balasan API Login & Register |
+| `repository/AuthRepository.kt` | Penghubung ViewModel dengan API Login & Register |
+| `repository/WisataRepository.kt` | Penghubung ViewModel dengan API wisata |
+| `repository/FavoriteRepository.kt` | Penghubung ViewModel dengan DAO |
+| `utils/UiState.kt` | Keadaan tampilan: Loading, Berhasil, Gagal |
+| `viewmodel/AuthViewModel.kt` | Proses Login & Register |
+| `viewmodel/AuthViewModelFactory.kt` | Pembuat `AuthViewModel` beserta Repository-nya |
+| `viewmodel/WisataViewModel.kt` | Daftar wisata, pencarian, dan pagination |
+| `viewmodel/DetailWisataViewModel.kt` | Isi halaman detail dan tombol Like/Unlike |
+| `viewmodel/FavoriteViewModel.kt` | Daftar wisata favorit |
+| `ui/adapter/FavoriteWisataAdapter.kt` | Menampilkan daftar favorit pada RecyclerView |
+| `res/drawable/ic_favorite_black.xml` | Ikon love hitam (belum favorit) |
+| `res/drawable/ic_favorite_red.xml` | Ikon love merah (sudah favorit) |
+| `res/layout/item_loading.xml` | Baris penanda data berikutnya sedang dimuat |
+
+## File yang Berubah
+
+| Berkas | Perubahan |
+|---|---|
+| `res/layout/activity_detail_wisata.xml` | Nama berkas sebelumnya `activity_detail.xml`, ditambah ikon love di pojok kanan bawah |
+| `res/layout/fragment_favorite.xml` | Dari halaman kosong menjadi RecyclerView daftar favorit beserta keterangan ketika masih kosong |
+| `res/layout/fragment_home.xml` | Baris "sedang memuat" dipindahkan ke `item_loading.xml` |
+| `res/menu/bottom_nav_menu.xml` | Nama berkas sebelumnya `menu_bottom.xml` |
+| `res/drawable/ic_history.xml`, `res/drawable/ic_account.xml` | Nama berkas sebelumnya `ic_favorit.xml` dan `ic_profil.xml` |
+| `utils/SessionManager.kt` | Nama berkas sebelumnya `Sesi.kt` |
+| `network/ApiClient.kt` | Dari HttpURLConnection menjadi Retrofit, alamat server tetap dapat diubah pengguna |
+| `utils/Helper.kt` | Bagian pengambilan data API dipindahkan ke Repository |
+| `ui/activity/*`, `ui/fragment/*` | Pengambilan data dipindahkan ke ViewModel |
+| `gradle/libs.versions.toml`, `app/build.gradle.kts` | Menambah Room, Retrofit, Lifecycle, Coroutine, dan plugin KSP |
+
+## Penanganan Kondisi
+
+| Kondisi | Yang ditampilkan aplikasi |
+|---|---|
+| Wisata belum favorit | Ikon love berwarna hitam |
+| Wisata sudah favorit | Ikon love berwarna merah |
+| Favorit berhasil disimpan | Muncul pesan singkat "Ditambahkan ke favorit" dan wisata masuk ke Fragment Favorit |
+| Favorit dihapus | Muncul pesan singkat "Dihapus dari favorit" dan wisata hilang dari Fragment Favorit |
+| Favorit kosong | Fragment Favorit menampilkan keterangan "Belum ada wisata favorit" |
+| Aplikasi ditutup lalu dibuka lagi | Daftar favorit tetap tampil karena tersimpan di Room Database |
+| Detail wisata gagal dimuat | Tampil keterangan gagal, dan halaman dapat dicoba ulang dengan mengetuk keterangan tersebut |
+
+## Teknologi
+
+| Bagian | Yang dipakai |
+|---|---|
+| Bahasa | Kotlin |
+| Database lokal | Room 2.8.5 (Entity, DAO, Database) |
+| Pengolah anotasi | KSP |
+| Arsitektur | MVVM (Repository, ViewModel, LiveData) |
+| Proses latar | Coroutine (`viewModelScope`) |
+| Jaringan | Retrofit + Gson + OkHttp Logging Interceptor |
+| Daftar data | RecyclerView + ListAdapter (DiffUtil) |
+| Gambar | Glide |
+
+## Catatan Penyesuaian Gradle
+
+Plugin `org.jetbrains.kotlin.android` **tidak lagi dituliskan** pada `app/build.gradle.kts` karena AGP 9 sudah membawa dukungan Kotlin secara bawaan. Kalau plugin tersebut ditulis ulang, muncul error `Cannot add extension with name 'kotlin'`.
+
+Room memakai versi **2.8.5**. Versi 2.6.1 belum dapat dipakai bersama KSP versi baru dan membuat proses build berhenti dengan pesan `[ksp] java.lang.IllegalStateException: unexpected jvm signature V`.
+
+## Cara Menjalankan
+
+1. Nyalakan **Apache** dan **MySQL** pada XAMPP.
+2. Pastikan folder `login_api` berada di dalam `htdocs`, lalu import `database.sql` dan `database_wisata.sql`.
+3. Samakan alamat server pada aplikasi dengan IP laptop (`ipconfig`). Alamat dapat diubah lewat dialog **Alamat server** yang muncul ketika aplikasi gagal terhubung.
+4. Jalankan aplikasi, lakukan Login, lalu buka salah satu wisata pada halaman Home.
+5. Tekan ikon love di pojok kanan bawah halaman Detail untuk menyimpan wisata ke favorit.
+6. Buka menu **Favorit** pada Bottom Navigation untuk melihat daftarnya.
+
+## Catatan
+
+- Data favorit disimpan di perangkat, jadi setiap perangkat memiliki daftar favoritnya sendiri dan tidak dikirim ke server.
+- Wisata yang sama tidak dapat tersimpan dua kali karena `id` dipakai sebagai Primary Key.
+- Ikon love dan daftar favorit memakai LiveData, jadi keduanya selalu mengikuti isi database tanpa perlu dimuat ulang.
 
 ---
 

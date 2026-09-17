@@ -185,4 +185,17 @@
         android:visibility="gone"
         tools:text="Gagal memuat detail wisata." />
 
+    <!-- Ikon love: merah berarti sudah favorit, hitam berarti belum favorit -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabFavorit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="20dp"
+        android:contentDescription="@string/tambah_favorit"
+        android:src="@drawable/ic_favorite_black"
+        android:visibility="gone"
+        app:backgroundTint="@color/putih"
+        app:tint="@null" />
+
 </FrameLayout>

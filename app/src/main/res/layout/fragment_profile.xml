@@ -18,7 +18,7 @@
             android:layout_width="96dp"
             android:layout_height="96dp"
             android:contentDescription="Ikon profil"
-            android:src="@drawable/ic_profil"
+            android:src="@drawable/ic_account"
             app:tint="@color/hijau_hutan" />
 
         <TextView

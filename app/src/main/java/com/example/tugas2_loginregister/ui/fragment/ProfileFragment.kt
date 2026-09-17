@@ -1,4 +1,4 @@
-package com.example.tugas2_loginregister
+package com.example.tugas2_loginregister.ui.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.example.tugas2_loginregister.R
+import com.example.tugas2_loginregister.utils.SessionManager
 
 class ProfileFragment : Fragment() {
 
@@ -21,10 +23,10 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.findViewById<TextView>(R.id.tvNama).text = Sesi.ambilUsername(requireContext())
+        view.findViewById<TextView>(R.id.tvNama).text = SessionManager.ambilUsername(requireContext())
 
         view.findViewById<Button>(R.id.btnLogout).setOnClickListener {
-            Sesi.keluar(requireActivity())
+            SessionManager.keluar(requireActivity())
         }
     }
 }

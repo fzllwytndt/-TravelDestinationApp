@@ -1,10 +1,12 @@
-package com.example.tugas2_loginregister
+package com.example.tugas2_loginregister.utils
 
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import com.example.tugas2_loginregister.ui.activity.LoginActivity
 
-object Sesi {
+/** Penyimpan status login supaya pengguna tidak perlu login ulang setiap membuka aplikasi. */
+object SessionManager {
 
     private const val NAMA_PREF = "sesi_login"
     private const val KUNCI_LOGIN = "sudah_login"

@@ -15,7 +15,7 @@
         android:theme="@style/Theme.JelajahJateng">
 
         <activity
-            android:name=".SplashActivity"
+            android:name=".ui.activity.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.JelajahJateng.Splash">
             <intent-filter>
@@ -25,13 +25,13 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".LoginActivity" />
+        <activity android:name=".ui.activity.LoginActivity" />
 
-        <activity android:name=".RegisterActivity" />
+        <activity android:name=".ui.activity.RegisterActivity" />
 
-        <activity android:name=".MainActivity" />
+        <activity android:name=".ui.activity.MainActivity" />
 
-        <activity android:name=".DetailActivity" />
+        <activity android:name=".ui.activity.DetailWisataActivity" />
     </application>
 
 </manifest>

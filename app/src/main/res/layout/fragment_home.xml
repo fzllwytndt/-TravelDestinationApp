@@ -66,7 +66,7 @@
         android:clipToPadding="false"
         android:paddingTop="10dp"
         android:paddingBottom="6dp"
-        app:layout_constraintBottom_toTopOf="@id/pbMuatLagi"
+        app:layout_constraintBottom_toTopOf="@id/wadahMuatLagi"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/svCari"
@@ -97,13 +97,12 @@
         app:layout_constraintStart_toStartOf="@id/rvWisata"
         app:layout_constraintTop_toTopOf="@id/rvWisata" />
 
-    <ProgressBar
-        android:id="@+id/pbMuatLagi"
-        android:layout_width="wrap_content"
+    <!-- Baris "sedang memuat" dipisah ke item_loading.xml supaya mudah dipakai ulang -->
+    <include
+        android:id="@+id/wadahMuatLagi"
+        layout="@layout/item_loading"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:indeterminateTint="@color/hijau_hutan"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/tvInfoBawah"
         app:layout_constraintEnd_toEndOf="parent"
