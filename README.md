@@ -304,6 +304,18 @@ Room memakai versi **2.8.5**. Versi 2.6.1 belum dapat dipakai bersama KSP versi 
 5. Tekan ikon love di pojok kanan bawah halaman Detail untuk menyimpan wisata ke favorit.
 6. Buka menu **Favorit** pada Bottom Navigation untuk melihat daftarnya.
 
+## Tangkapan Layar
+
+| Belum Favorit | Menekan Ikon Love | Sudah Favorit |
+|:---:|:---:|:---:|
+| <img src="screenshot/25-detail-belum-favorit.png" width="230"> | <img src="screenshot/26-favorit-disimpan.png" width="230"> | <img src="screenshot/27-detail-sudah-favorit.png" width="230"> |
+| Ikon love berwarna hitam karena wisata belum tersimpan di Room Database | Data disimpan ke Room Database dan muncul pesan singkat "Ditambahkan ke favorit" | Ikon berubah merah mengikuti isi database tanpa memuat ulang halaman |
+
+| Fragment Favorit Terisi | Fragment Favorit Kosong |
+|:---:|:---:|
+| <img src="screenshot/28-favorit-terisi.png" width="230"> | <img src="screenshot/29-favorit-kosong.png" width="230"> |
+| Daftar wisata favorit diambil dari Room Database memakai RecyclerView | Setelah seluruh wisata di-Unlike, daftar menjadi kosong dan keterangannya langsung muncul |
+
 ## Catatan
 
 - Data favorit disimpan di perangkat, jadi setiap perangkat memiliki daftar favoritnya sendiri dan tidak dikirim ke server.
