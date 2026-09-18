@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Warna dibuat sama dengan mode terang supaya tampilannya tetap konsisten -->
     <style name="Base.Theme.JelajahJateng" parent="Theme.Material3.Light.NoActionBar">
@@ -18,7 +18,7 @@
         <item name="colorOnSecondaryContainer">@color/hijau_hutan</item>
 
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
 
     </style>
 

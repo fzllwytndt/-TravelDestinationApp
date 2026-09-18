@@ -14,23 +14,25 @@
     app:strokeColor="@color/garis"
     app:strokeWidth="1dp">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
         <ImageView
             android:id="@+id/ivFoto"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="180dp"
             android:background="@color/garis"
             android:contentDescription="Foto tempat wisata"
             android:scaleType="centerCrop"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             tools:src="@drawable/contoh_ayana" />
 
         <TextView
             android:id="@+id/tvNama"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="14dp"
             android:layout_marginTop="12dp"
@@ -38,11 +40,14 @@
             android:textColor="@color/teks_utama"
             android:textSize="16sp"
             android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ivFoto"
             tools:text="Ayana Gedong Songo" />
 
         <TextView
             android:id="@+id/tvDeskripsi"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="14dp"
             android:layout_marginTop="4dp"
@@ -51,8 +56,12 @@
             android:lineSpacingExtra="2dp"
             android:textColor="@color/teks_kedua"
             android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvNama"
             tools:text="Taman rekreasi di kawasan Gedong Songo dengan spot foto bertema taman bunga dan bangunan ala Eropa." />
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.google.android.material.card.MaterialCardView>

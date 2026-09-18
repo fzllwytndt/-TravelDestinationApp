@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="Base.Theme.JelajahJateng" parent="Theme.Material3.Light.NoActionBar">
 
@@ -20,7 +20,7 @@
 
         <!-- Halaman berlatar terang, jadi ikon status bar dibuat gelap -->
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
 
     </style>
 
@@ -29,7 +29,7 @@
     <!-- Splash berlatar hijau gelap, jadi ikon status bar dibuat terang -->
     <style name="Theme.JelajahJateng.Splash" parent="Base.Theme.JelajahJateng">
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
 
 </resources>

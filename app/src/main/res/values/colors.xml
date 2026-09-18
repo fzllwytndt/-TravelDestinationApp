@@ -4,7 +4,6 @@
     <!-- Warna utama, diambil langsung dari logo Jelajah Jateng -->
     <color name="hijau_malam">#FF050F0E</color>
     <color name="hijau_hutan">#FF142F1E</color>
-    <color name="hijau_daun">#FF46693F</color>
     <color name="emas">#FFE4B671</color>
     <color name="emas_muda">#FFF7EBD6</color>
 
