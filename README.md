@@ -265,10 +265,10 @@ private fun konfirmasiHapus() {
 | <img src="screenshot/9-wisata-daftar.png" width="230"> | <img src="screenshot/30-tambah-wisata.png" width="230"> | <img src="screenshot/32-edit-wisata.png" width="230"> |
 | Data diambil dari `wisata.php` melalui Repository lalu ditampilkan pada RecyclerView | Form Create, data dikirim ke `wisata_add.php` setelah tombol Simpan ditekan | Form Update terisi data lama, perubahannya dikirim ke `wisata_edit.php` |
 
-| Delete – Tombol pada Halaman Detail | Loading saat Request API | Data Kosong |
+| Delete – Alert Dialog Konfirmasi | Loading saat Request API | Data Kosong |
 |:---:|:---:|:---:|
-| <img src="screenshot/31-detail-wisata-crud.png" width="230"> | <img src="screenshot/8-wisata-loading-awal.png" width="230"> | <img src="screenshot/14-search-kosong.png" width="230"> |
-| Tombol **Hapus Wisata** memunculkan Alert Dialog konfirmasi sebelum data dihapus | `ProgressBar` tampil selama aplikasi menunggu jawaban API | Keterangan muncul ketika API tidak mengembalikan data wisata |
+| <img src="screenshot/36-dialog-konfirmasi-hapus.png" width="230"> | <img src="screenshot/8-wisata-loading-awal.png" width="230"> | <img src="screenshot/14-search-kosong.png" width="230"> |
+| Tombol **Hapus Wisata** memunculkan Alert Dialog lebih dulu: **Ya, Hapus** meneruskan ke API, **Batal** membatalkan | `ProgressBar` tampil selama aplikasi menunggu jawaban API | Keterangan muncul ketika API tidak mengembalikan data wisata |
 
 ## Catatan
 
@@ -467,10 +467,10 @@ API mengembalikan foto_url untuk ditampilkan Glide
 | <img src="screenshot/30-tambah-wisata.png" width="230"> | <img src="screenshot/31-detail-wisata-crud.png" width="230"> | <img src="screenshot/32-edit-wisata.png" width="230"> |
 | Halaman form untuk memasukkan data wisata baru (`activity_add_wisata.xml`) | Halaman detail dilengkapi tombol **EDIT WISATA** dan **Hapus Wisata** (`activity_detail_wisata.xml`) | Form terisi otomatis dengan data lama untuk diperbarui (`activity_edit_wisata.xml`) |
 
-| Memilih Foto dari Galeri | Foto Terpilih pada Form Tambah | Ganti Foto pada Form Edit |
-|:---:|:---:|:---:|
-| <img src="screenshot/33-pilih-foto-galeri.png" width="230"> | <img src="screenshot/34-tambah-wisata-foto-terpilih.png" width="230"> | <img src="screenshot/35-edit-wisata-ganti-foto.png" width="230"> |
-| Menekan area foto membuka pemilih gambar bawaan Android, tanpa meminta izin penyimpanan | Foto langsung tampil sebagai pratinjau dan labelnya berubah menjadi **Ganti Foto Wisata** | Halaman Edit menampilkan foto lama dari server, siap diganti dengan foto baru |
+| Foto Terpilih pada Form Tambah | Ganti Foto pada Form Edit |
+|:---:|:---:|
+| <img src="screenshot/34-tambah-wisata-foto-terpilih.png" width="230"> | <img src="screenshot/35-edit-wisata-ganti-foto.png" width="230"> |
+| Foto dari galeri langsung tampil sebagai pratinjau dan labelnya berubah menjadi **Ganti Foto Wisata** | Halaman Edit menampilkan foto lama dari server, siap diganti dengan foto baru |
 
 ## Catatan
 
