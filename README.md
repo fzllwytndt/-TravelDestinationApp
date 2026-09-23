@@ -28,6 +28,8 @@ Pada tugas ini, pengguna dapat mengelola data wisata secara langsung dari aplika
 - **Update**: Mengubah data wisata yang sudah ada melalui halaman **Edit Data Wisata** (`EditWisataActivity`). Form terisi otomatis dengan data lama, lalu dikirim ke API `wisata_edit.php` untuk diperbarui di database.
 - **Delete**: Menghapus data wisata melalui Backend API `wisata_delete.php` dengan menekan tombol **Hapus Wisata** pada halaman Detail Wisata setelah memberikan konfirmasi dialog. Data yang dihapus otomatis dihilangkan dari database dan tidak lagi ditampilkan di daftar.
 
+Foto wisata dapat diambil langsung dari galeri perangkat. Area foto pada halaman Tambah dan Edit dapat ditekan untuk membuka pemilih gambar bawaan Android, lalu gambarnya diperkecil lebih dulu sebelum dikirim ke server sebagai `multipart/form-data`. Kolom URL gambar tetap disediakan sebagai pilihan lain apabila fotonya sudah tersedia di internet.
+
 Selain mengimplementasikan API CRUD, tugas ini juga mencakup layouting setiap halaman agar tampilan menjadi rapi, responsif, sederhana, dan mudah digunakan dengan warna tema konsisten.
 
 ## Ketentuan Fitur
@@ -36,6 +38,7 @@ Selain mengimplementasikan API CRUD, tugas ini juga mencakup layouting setiap ha
 - Menambahkan Floating Action Button (FAB) pada Home Fragment untuk membuka halaman Tambah Data Wisata.
 - Membuat halaman Tambah Data Wisata (`AddWisataActivity`) yang berisi form untuk memasukkan data wisata baru (`nama_wisata`, `kategori`, `lokasi`, `harga_tiket`, `foto`, `deskripsi`).
 - Mengirimkan data baru ke Backend API (`wisata_add.php`) dan memperbarui daftar wisata pada Home Fragment.
+- Menyediakan pemilihan foto wisata dari galeri perangkat pada halaman Tambah dan Edit, lalu mengunggahnya ke folder `login_api/uploads/`.
 - Membuat halaman Detail Wisata (`DetailWisataActivity`) dengan tombol **EDIT WISATA** dan **Hapus Wisata**.
 - Membuat fitur Edit Data Wisata (`EditWisataActivity`) dengan form pre-filled, lalu mengirimkan data yang diperbarui ke Backend API (`wisata_edit.php`).
 - Membuat fitur Hapus Data Wisata melalui Backend API (`wisata_delete.php`) sehingga data terhapus dari database dan tidak lagi ditampilkan.
@@ -77,27 +80,55 @@ Backend API digunakan sebagai penghubung antara aplikasi Android dan database My
 |---|---|---|---|
 | `wisata.php` | GET | `page`, `q` | Mengambil daftar wisata (Read) dengan pagination dan pencarian |
 | `wisata_detail.php` | GET | `id` | Mengambil detail lengkap satu wisata (Read) |
-| `wisata_add.php` | POST | `nama_wisata`, `kategori`, `lokasi`, `harga_tiket`, `deskripsi`, `foto` | Menambahkan data wisata baru ke database (Create) |
-| `wisata_edit.php` | POST | `id`, `nama_wisata`, `kategori`, `lokasi`, `harga_tiket`, `deskripsi`, `foto` | Mengubah data wisata yang sudah ada (Update) |
+| `wisata_add.php` | POST | `nama_wisata`, `kategori`, `lokasi`, `harga_tiket`, `deskripsi`, `foto`, `foto_file` | Menambahkan data wisata baru ke database (Create) |
+| `wisata_edit.php` | POST | `id`, `nama_wisata`, `kategori`, `lokasi`, `harga_tiket`, `deskripsi`, `foto`, `foto_file` | Mengubah data wisata yang sudah ada (Update) |
 | `wisata_delete.php` | POST | `id` | Menghapus data wisata dari database (Delete) |
+
+Kolom `foto` pada MySQL hanya menyimpan **nama file**, sedangkan gambarnya berupa file di folder `login_api/uploads/`. Karena itu `wisata_add.php` dan `wisata_edit.php` menerima dua bentuk masukan: `foto` berupa teks (URL atau nama file) dan `foto_file` berupa file sungguhan yang dikirim sebagai `multipart/form-data`. Apabila `foto_file` terisi, file disimpan ke folder `uploads/` dan namanya yang dicatat ke database.
+
+## Alur Unggah Foto Wisata
+
+```
+        Menekan Area Foto
+                |
+      Pemilih Gambar Android
+                |
+        Foto Dipilih -> Pratinjau
+                |
+      Diperkecil jadi JPEG (maks 1280px)
+                |
+      Dikirim sebagai multipart "foto_file"
+                |
+        +-------+-------+
+        |               |
+  Folder uploads/   Kolom foto
+   (file gambar)    (nama file)
+        |               |
+        +-------+-------+
+                |
+          Kolom foto_url
+   (alamat lengkap untuk Glide)
+```
 
 ## File Baru pada Tugas Ini
 
 | Berkas | Kegunaan |
 |---|---|
-| `login_api/wisata_add.php` | Endpoint API PHP untuk menambah data wisata ke database |
-| `login_api/wisata_edit.php` | Endpoint API PHP untuk memperbarui data wisata di database |
-| `login_api/wisata_delete.php` | Endpoint API PHP untuk menghapus data wisata dari database |
-| `ui/activity/AddWisataActivity.kt` | Activity form tambah data wisata baru |
-| `ui/activity/EditWisataActivity.kt` | Activity form edit/ubah data wisata |
+| `login_api/wisata_add.php` | Endpoint API PHP untuk menambah data wisata ke database sekaligus menerima unggahan file foto |
+| `login_api/wisata_edit.php` | Endpoint API PHP untuk memperbarui data wisata di database sekaligus mengganti file fotonya |
+| `login_api/wisata_delete.php` | Endpoint API PHP untuk menghapus data wisata dari database beserta file fotonya |
+| `ui/activity/AddWisataActivity.kt` | Activity form tambah data wisata baru beserta pemilihan foto dari galeri |
+| `ui/activity/EditWisataActivity.kt` | Activity form edit/ubah data wisata beserta penggantian fotonya |
 | `viewmodel/AddWisataViewModel.kt` | ViewModel untuk menangani proses tambah wisata |
-| `viewmodel/EditWisataViewModel.kt` | ViewModel untuk menangani proses edit wisata |
+| `viewmodel/EditWisataViewModel.kt` | ViewModel untuk menangani proses edit wisata dan menyegarkan data favorit di Room |
+| `utils/FotoHelper.kt` | Memperkecil foto pilihan pengguna lalu membungkusnya menjadi bagian `multipart` |
 | `res/layout/activity_add_wisata.xml` | Layout form tambah data wisata |
 | `res/layout/activity_edit_wisata.xml` | Layout form edit data wisata |
 | `res/drawable/ic_add.xml` | Ikon tambah (`+`) untuk FAB pada Home Fragment |
 | `res/drawable/ic_edit.xml` | Ikon edit |
 | `res/drawable/ic_delete.xml` | Ikon hapus |
 | `res/drawable/bg_pilih_foto.xml` | Latar bingkai area foto wisata |
+| `res/drawable/bg_label_foto.xml` | Latar tanda `+` supaya tetap terbaca saat menumpuk di atas foto |
 
 ## File yang Berubah
 
@@ -106,8 +137,13 @@ Backend API digunakan sebagai penghubung antara aplikasi Android dan database My
 | `login_api/wisata.php` | Diubah menjadi `ORDER BY id DESC` agar wisata baru langsung tampil di urutan teratas |
 | `model/Wisata.kt` | Menambahkan interface `Serializable` dan field `foto` |
 | `model/WisataResponse.kt` | Menambahkan data class `WisataActionResponse` untuk response aksi CRUD |
-| `network/ApiService.kt` | Menambahkan endpoint `tambahWisata`, `editWisata`, dan `hapusWisata` |
-| `repository/WisataRepository.kt` | Menambahkan method panggil API untuk aksi Tambah, Edit, dan Hapus |
+| `network/ApiService.kt` | Menambahkan endpoint `tambahWisata`, `editWisata`, `hapusWisata`, serta versi `@Multipart` untuk mengunggah file foto |
+| `network/ApiClient.kt` | Menambahkan `writeTimeout` 30 detik agar pengiriman file foto tidak terputus |
+| `repository/WisataRepository.kt` | Menambahkan method panggil API untuk aksi Tambah, Edit, dan Hapus, termasuk jalur unggah foto |
+| `repository/FavoriteRepository.kt` | Menambahkan `perbarui()` dan menyatukan pemetaan `Wisata` menjadi `FavoriteWisata` |
+| `data/local/room/FavoriteWisataDao.kt` | Menambahkan `@Update perbarui()` agar data favorit ikut tersegarkan saat wisatanya diubah |
+| `utils/Helper.kt` | Menambahkan `muatGambar()` versi `Uri` untuk pratinjau foto sebelum diunggah |
+| `login_api/koneksi.php` | Menambahkan fungsi `hapus_foto()` supaya file foto yang tidak terpakai tidak menumpuk |
 | `viewmodel/WisataViewModel.kt` | Menambahkan method `refreshData()` untuk memuat ulang daftar dari awal |
 | `viewmodel/DetailWisataViewModel.kt` | Menambahkan method `hapusWisata(id)` dan mereset favorit Room DB jika terhapus |
 | `ui/fragment/HomeFragment.kt` | Menambahkan listener FAB Tambah dan `ActivityResultLauncher` untuk refresh otomatis |
@@ -115,7 +151,7 @@ Backend API digunakan sebagai penghubung antara aplikasi Android dan database My
 | `ui/activity/DetailWisataActivity.kt` | Menambahkan listener tombol Edit dan Hapus beserta dialog konfirmasi |
 | `res/layout/activity_detail_wisata.xml` | Menambahkan baris tombol aksi **EDIT WISATA** dan **Hapus Wisata** di bagian bawah |
 | `AndroidManifest.xml` | Mendaftarkan `AddWisataActivity` dan `EditWisataActivity` |
-| `res/values/colors.xml` | Menambahkan warna tombol CRUD (`ungu_tombol`, `biru_tombol`, `merah_hapus`) |
+| `res/values/colors.xml` | Menambahkan warna tombol CRUD (`ungu_tombol`, `biru_tombol`, `merah_hapus`) dan `putih_kabut` |
 | `res/values/strings.xml` | Menambahkan string pendukung halaman Tambah, Edit, dan Hapus Wisata |
 
 ## Tangkapan Layar (Tugas 7)
@@ -124,6 +160,18 @@ Backend API digunakan sebagai penghubung antara aplikasi Android dan database My
 |:---:|:---:|:---:|
 | <img src="screenshot/30-tambah-wisata.png" width="230"> | <img src="screenshot/31-detail-wisata-crud.png" width="230"> | <img src="screenshot/32-edit-wisata.png" width="230"> |
 | Halaman form untuk memasukkan data wisata baru (`activity_add_wisata.xml`) | Halaman detail dilengkapi tombol **EDIT WISATA** dan **Hapus Wisata** (`activity_detail_wisata.xml`) | Form terisi otomatis dengan data lama untuk diperbarui (`activity_edit_wisata.xml`) |
+
+| Memilih Foto dari Galeri | Foto Terpilih pada Form Tambah | Ganti Foto pada Form Edit |
+|:---:|:---:|:---:|
+| <img src="screenshot/33-pilih-foto-galeri.png" width="230"> | <img src="screenshot/34-tambah-wisata-foto-terpilih.png" width="230"> | <img src="screenshot/35-edit-wisata-ganti-foto.png" width="230"> |
+| Menekan area foto membuka pemilih gambar bawaan Android, tanpa meminta izin penyimpanan | Foto langsung tampil sebagai pratinjau dan labelnya berubah menjadi **Ganti Foto Wisata** | Halaman Edit menampilkan foto lama dari server, siap diganti dengan foto baru |
+
+## Catatan (Tugas 7)
+
+- Pemilih gambar memakai `ActivityResultContracts.PickVisualMedia`, jadi aplikasi **tidak memerlukan izin akses penyimpanan** sama sekali.
+- Foto diperkecil menjadi JPEG dengan sisi terpanjang 1280 piksel sebelum dikirim. Tanpa langkah ini, foto ponsel yang berukuran 3-8 MB akan ditolak XAMPP yang secara bawaan hanya menerima unggahan 2 MB.
+- Saat wisata dihapus atau fotonya diganti, file lama di folder `uploads/` ikut dibuang. File bawaan `logo_wisata.png` dan foto yang berupa URL luar sengaja dilewati.
+- Foto yang sedang dipilih ikut disimpan pada `onSaveInstanceState`, jadi tidak hilang ketika layar diputar.
 
 ---
 
