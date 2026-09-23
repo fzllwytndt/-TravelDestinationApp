@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.tugas2_loginregister.model.Wisata
 import com.example.tugas2_loginregister.repository.FavoriteRepository
 import com.example.tugas2_loginregister.repository.WisataRepository
+import com.example.tugas2_loginregister.utils.PesanGagal
 import com.example.tugas2_loginregister.utils.UiState
 import kotlinx.coroutines.launch
 
@@ -58,7 +59,7 @@ class DetailWisataViewModel(aplikasi: Application) : AndroidViewModel(aplikasi) 
                     _kondisiHapus.value = UiState.Gagal(balasan.message.ifBlank { "Gagal menghapus data wisata" })
                 }
             } catch (e: Exception) {
-                _kondisiHapus.value = UiState.Gagal("Terjadi kesalahan saat menghapus data: ${e.message}", e)
+                _kondisiHapus.value = UiState.Gagal(PesanGagal.dari("menghapus data wisata", e), e)
             }
         }
     }

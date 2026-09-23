@@ -150,11 +150,6 @@ class EditWisataActivity : AppCompatActivity() {
         val foto = etFoto.text.toString()
         val deskripsi = etDeskripsi.text.toString()
 
-        if (nama.isBlank() || kategori.isBlank() || lokasi.isBlank() || deskripsi.isBlank()) {
-            Toast.makeText(this, "Form Kosong: Harap isi semua field wajib", Toast.LENGTH_SHORT).show()
-            return
-        }
-
         viewModel.editWisata(
             id = idWisata,
             namaWisata = nama,

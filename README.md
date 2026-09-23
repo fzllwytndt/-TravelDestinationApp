@@ -11,8 +11,271 @@ Repository kumpulan tugas magang di Crocodic Semarang. Setiap tugas/fitur dikerj
 | `Tugas-5-Implementasi-Bottom-Navigation-Fragment-Splash-Screen-Logout` | Bottom Navigation, Fragment, Splash Screen, Session Login & Logout | Selesai |
 | `Tugas-6-Menambahkan-Fitur-Favorit-Wisata-dengan-Room-Database` | Favorit Wisata dengan Room Database (Entity, DAO, Database, Repository, ViewModel) | Selesai |
 | `Tugas-7-Implementasi-Backend-API-CRUD-Layouting` | Implementasi Backend API CRUD & Layouting (Create, Read, Update, Delete) | Selesai |
+| `Tugas-8-Implementasi-API-CRUD-Wisata-pada-Aplikasi-Android` | Implementasi API CRUD Wisata dengan MVVM + Repository, Alert Dialog konfirmasi hapus, serta penanganan Loading, Success, Error, dan Data Kosong | Selesai |
 
 Seluruh tangkapan layar pada dokumen ini diambil ulang memakai tampilan aplikasi terkini, yaitu setelah aplikasi memakai identitas **Jelajah Jateng**. Jadi fitur dari tugas sebelumnya pun terlihat dengan warna dan tata letak yang berlaku sekarang.
+
+---
+
+# Branch `Tugas 8 – Implementasi API CRUD Wisata pada Aplikasi Android`
+
+## Deskripsi
+
+Melanjutkan pengembangan **TravelDestinationApp** dengan merapikan dan melengkapi fitur **CRUD (Create, Read, Update, Delete)** data wisata agar seluruh prosesnya berjalan melalui **API** dan tersusun memakai arsitektur **MVVM + Repository**.
+
+Jika pada Tugas 7 fokusnya adalah membangun Backend API PHP beserta layouting halamannya, maka pada Tugas 8 fokusnya berpindah ke **sisi aplikasi Android**: memastikan setiap proses CRUD melewati alur yang benar (Activity/Fragment → ViewModel → Repository → API), serta memastikan pengguna selalu mendapat kabar yang jelas ketika proses sedang berjalan, berhasil, gagal, maupun ketika datanya memang kosong.
+
+- **Create**: Menambahkan data wisata baru lewat form pada halaman **Tambah Data Wisata** (`AddWisataActivity`). Setelah tombol **Simpan** ditekan, data dikirim ke API melalui `AddWisataViewModel` → `WisataRepository`.
+- **Read**: Mengambil daftar wisata dari API lalu menampilkannya pada **RecyclerView** di Home Fragment, serta menampilkan satu data lengkap pada halaman **Detail Wisata**.
+- **Update**: Mengubah data wisata yang sudah ada lewat halaman **Edit Data Wisata** (`EditWisataActivity`). Form terisi otomatis dengan data lama, lalu perubahannya dikirim kembali ke API.
+- **Delete**: Menghapus data wisata melalui API. Sebelum data benar-benar dihapus, aplikasi **wajib menampilkan Alert Dialog** sebagai konfirmasi supaya data tidak terhapus karena salah tekan.
+
+Seluruh kode ditulis dengan cara yang paling sederhana supaya konsep API, MVVM, Repository, Alert Dialog, Loading, Success, dan Error mudah dipelajari kembali.
+
+## Ketentuan Fitur
+
+- Mengimplementasikan fitur CRUD data wisata menggunakan API (Create, Read, Update, Delete).
+- Membuat fitur **Create** untuk menambahkan data wisata baru melalui form, lalu mengirimkannya ke API saat tombol Simpan ditekan.
+- Membuat fitur **Read** untuk mengambil data wisata dari API dan menampilkannya pada aplikasi.
+- Membuat fitur **Update** untuk mengubah data wisata yang sudah tersedia, lalu mengirimkan data yang telah diubah kembali melalui API.
+- Membuat fitur **Delete** untuk menghapus data wisata melalui API.
+- Fitur Delete **wajib memakai Alert Dialog** sebagai konfirmasi: memilih **Ya, Hapus** melanjutkan penghapusan, memilih **Batal** membatalkan dan data tetap tersimpan.
+- Menggunakan arsitektur **MVVM + Repository**, dengan ViewModel mengatur data untuk tampilan dan Repository sebagai penghubung antara ViewModel dengan API.
+- Menampilkan **loading indicator** ketika proses request API sedang berlangsung.
+- Menangani kondisi ketika proses CRUD **berhasil**.
+- Menangani kondisi ketika proses CRUD **gagal**, misalnya karena kesalahan koneksi atau request API.
+- Menangani kondisi ketika **data wisata kosong**.
+- Membuat tampilan yang rapi, sederhana, responsif, dan mudah digunakan.
+- Menerapkan kode yang rapi dan terstruktur agar setiap bagian program memiliki fungsi yang jelas.
+
+## Arsitektur MVVM + Repository
+
+Activity dan Fragment tidak pernah memanggil API secara langsung. Permintaan selalu dititipkan ke ViewModel, lalu diteruskan Repository:
+
+```
+Activity / Fragment
+        |
+        v
+    ViewModel
+        |
+        v
+   Repository
+        |
+        v
+       API
+        |
+        v
+Backend / Database
+```
+
+Data yang sudah didapat dikembalikan lewat jalur yang sama, hanya arahnya dibalik:
+
+```
+Backend / Database
+        |
+        v
+       API
+        |
+        v
+   Repository
+        |
+        v
+    ViewModel
+        |
+        v
+Activity / Fragment
+```
+
+Pembagian tugas tiap lapisan:
+
+| Lapisan | Berkas | Tugasnya |
+|---|---|---|
+| View | `HomeFragment`, `DetailWisataActivity`, `AddWisataActivity`, `EditWisataActivity` | Menampilkan data, menerima tekanan tombol, dan mengamati `UiState` dari ViewModel |
+| ViewModel | `WisataViewModel`, `DetailWisataViewModel`, `AddWisataViewModel`, `EditWisataViewModel` | Memeriksa isian form, memanggil Repository, dan mengabarkan keadaan Loading / Berhasil / Gagal |
+| Repository | `WisataRepository` | Satu-satunya pintu menuju API: Read daftar, Read detail, Create, Update, dan Delete |
+| Network | `ApiService`, `ApiClient` | Menentukan alamat endpoint serta membungkus kegagalan jaringan menjadi `GagalKoneksi` / `GagalServer` |
+| Model | `Wisata`, `WisataResponse`, `WisataDetailResponse`, `WisataActionResponse` | Bentuk data yang dikirim dan diterima dari API |
+
+Keadaan tampilan diwakili satu kelas saja, yaitu `UiState`, sehingga setiap halaman cukup menunggu satu kabar:
+
+```kotlin
+sealed class UiState<out T> {
+    object Loading : UiState<Nothing>()
+    data class Berhasil<out T>(val data: T) : UiState<T>()
+    data class Gagal(val pesan: String, val penyebab: Exception? = null) : UiState<Nothing>()
+}
+```
+
+## Alur Setiap Proses CRUD
+
+**1. Create – Tambah Data**
+
+```
+Form Tambah Data  ->  Klik Simpan  ->  AddWisataViewModel  ->  WisataRepository
+        ->  wisata_add.php  ->  Data Berhasil Disimpan  ->  Daftar Wisata Diperbarui
+```
+
+**2. Read – Tampilkan Data**
+
+```
+Home Fragment  ->  WisataViewModel  ->  WisataRepository  ->  wisata.php
+        ->  Data Wisata  ->  RecyclerView
+```
+
+**3. Update – Edit Data**
+
+```
+Detail Wisata  ->  Klik Edit  ->  Form Edit  ->  Ubah Data  ->  Klik Simpan
+        ->  EditWisataViewModel  ->  WisataRepository  ->  wisata_edit.php  ->  Data Berhasil Diperbarui
+```
+
+**4. Delete – Hapus Data**
+
+```
+                    Detail Wisata
+                          |
+                     Klik Hapus
+                          |
+                    Alert Dialog
+       "Apakah Anda yakin ingin menghapus data wisata ini?"
+                          |
+            +-------------+-------------+
+            |                           |
+          Batal                     Ya, Hapus
+            |                           |
+   Tidak menghapus            DetailWisataViewModel
+                                        |
+                                 WisataRepository
+                                        |
+                                 wisata_delete.php
+                                        |
+                                   Data Dihapus
+                                        |
+                              Daftar Wisata Diperbarui
+```
+
+Potongan kode Alert Dialog pada `DetailWisataActivity`:
+
+```kotlin
+private fun konfirmasiHapus() {
+    AlertDialog.Builder(this)
+        .setTitle(getString(R.string.hapus_wisata))
+        .setMessage(getString(R.string.konfirmasi_hapus))
+        .setPositiveButton(getString(R.string.ya_hapus)) { _, _ ->
+            viewModel.hapusWisata(idWisata)
+        }
+        .setNegativeButton(getString(R.string.batal), null)
+        .show()
+}
+```
+
+## API yang Dipakai
+
+| Endpoint | Method | Parameter | Proses CRUD |
+|---|---|---|---|
+| `wisata.php` | GET | `page`, `q` | **Read** daftar wisata (pagination + pencarian) |
+| `wisata_detail.php` | GET | `id` | **Read** detail satu wisata |
+| `wisata_add.php` | POST | `nama_wisata`, `kategori`, `lokasi`, `harga_tiket`, `deskripsi`, `foto`, `foto_file` | **Create** |
+| `wisata_edit.php` | POST | `id`, `nama_wisata`, `kategori`, `lokasi`, `harga_tiket`, `deskripsi`, `foto`, `foto_file` | **Update** |
+| `wisata_delete.php` | POST | `id` | **Delete** |
+
+## File Baru pada Tugas Ini
+
+| Berkas | Kegunaan |
+|---|---|
+| `utils/PesanGagal.kt` | Menerjemahkan kegagalan request API menjadi kalimat yang mudah dipahami, dipakai bersama oleh ViewModel Tambah, Edit, dan Hapus |
+
+## File yang Berubah
+
+| Berkas | Perubahan |
+|---|---|
+| `viewmodel/AddWisataViewModel.kt` | Pesan gagal Create tidak lagi menampilkan isi `Exception` mentah, melainkan memakai `PesanGagal` |
+| `viewmodel/EditWisataViewModel.kt` | Pesan gagal Update memakai `PesanGagal` |
+| `viewmodel/DetailWisataViewModel.kt` | Pesan gagal Delete memakai `PesanGagal` |
+| `ui/activity/AddWisataActivity.kt` | Pemeriksaan form kosong dihapus dari Activity karena sudah menjadi tugas ViewModel, sehingga tidak ada validasi ganda |
+| `ui/activity/EditWisataActivity.kt` | Pemeriksaan form kosong dihapus dari Activity dengan alasan yang sama |
+| `ui/activity/DetailWisataActivity.kt` | Judul Alert Dialog hapus diambil dari `strings.xml`, tidak lagi ditulis langsung di kode |
+
+## Penanganan Kondisi
+
+**Loading** — ditampilkan selama aplikasi menunggu jawaban API:
+
+| Proses | Yang ditampilkan aplikasi |
+|---|---|
+| Mengambil daftar wisata | `ProgressBar` di tengah daftar saat halaman pertama, dan baris "memuat" di bawah daftar saat memuat halaman berikutnya |
+| Menambahkan data wisata | `ProgressBar` tampil dan tombol **Simpan** dinonaktifkan sementara |
+| Mengubah data wisata | `ProgressBar` tampil dan tombol **Simpan** dinonaktifkan sementara |
+| Menghapus data wisata | `ProgressBar` tampil serta tombol **EDIT WISATA** dan **Hapus Wisata** dinonaktifkan sementara |
+
+**Success** — ditampilkan ketika request API berhasil:
+
+| Proses | Yang ditampilkan aplikasi |
+|---|---|
+| Data berhasil diambil | Daftar wisata tampil pada RecyclerView |
+| Data berhasil ditambahkan | Pesan singkat dari server, halaman form ditutup, daftar pada Home dimuat ulang otomatis |
+| Data berhasil diperbarui | Pesan singkat dari server, halaman Edit ditutup, halaman Detail dan daftar ikut disegarkan |
+| Data berhasil dihapus | Pesan singkat dari server, halaman Detail ditutup, data hilang dari daftar Home |
+
+**Error** — ditampilkan ketika request API gagal:
+
+| Kondisi | Yang ditampilkan aplikasi |
+|---|---|
+| Server tidak dapat dihubungi | "Gagal *(proses)*. Server tidak dapat dihubungi. Periksa koneksi internet Anda." |
+| Balasan server tidak dapat dibaca | "Gagal *(proses)*. Server sedang bermasalah. Silakan coba beberapa saat lagi." |
+| Gagal memuat daftar wisata | Keterangan gagal beserta ajakan "ketuk di sini untuk mencoba lagi", ditambah dialog **Alamat server** apabila server memang tidak terjangkau |
+| Form masih ada yang kosong | "Form tidak boleh ada yang kosong. Harap isi seluruh informasi wisata." dan data tidak jadi dikirim |
+| Server menolak permintaan | Pesan `message` dari server ditampilkan apa adanya, tombol aktif kembali |
+
+**Data Kosong** — ditampilkan ketika API tidak mengembalikan data:
+
+| Kondisi | Yang ditampilkan aplikasi |
+|---|---|
+| Belum ada satu pun data wisata | "Belum ada data wisata" |
+| Pencarian tidak menemukan hasil | "Wisata *(kata kunci)* tidak ditemukan" |
+
+## Teknologi
+
+| Bagian | Yang dipakai |
+|---|---|
+| Bahasa | Kotlin |
+| Arsitektur | MVVM + Repository (ViewModel, LiveData, `UiState`) |
+| Jaringan | Retrofit + Gson + OkHttp Logging Interceptor |
+| Backend | PHP + MySQL (XAMPP) |
+| Proses latar | Coroutine (`viewModelScope`, `Dispatchers.IO`) |
+| Konfirmasi hapus | `androidx.appcompat.app.AlertDialog` |
+| Daftar data | RecyclerView + ListAdapter |
+| Gambar | Glide |
+| Tata letak | ConstraintLayout + Material Components |
+
+## Cara Menjalankan
+
+1. Nyalakan **Apache** dan **MySQL** pada XAMPP.
+2. Pastikan folder `login_api` berada di dalam `htdocs`, lalu import `database.sql` dan `database_wisata.sql`.
+3. Samakan alamat server pada aplikasi dengan IP laptop (`ipconfig`). Alamat dapat diubah lewat dialog **Alamat server**.
+4. Jalankan aplikasi lalu lakukan Login.
+5. **Read**: daftar wisata langsung dimuat dari API pada halaman Home.
+6. **Create**: tekan **Floating Action Button**, isi form, lalu tekan **Simpan Wisata**.
+7. **Update**: buka salah satu wisata, tekan **EDIT WISATA**, ubah datanya, lalu tekan **Simpan Perubahan**.
+8. **Delete**: pada halaman Detail tekan **Hapus Wisata**, lalu pilih **Ya, Hapus** pada dialog konfirmasi.
+
+## Tangkapan Layar
+
+| Read – Daftar Wisata dari API | Create – Form Tambah Data | Update – Form Edit Data |
+|:---:|:---:|:---:|
+| <img src="screenshot/9-wisata-daftar.png" width="230"> | <img src="screenshot/30-tambah-wisata.png" width="230"> | <img src="screenshot/32-edit-wisata.png" width="230"> |
+| Data diambil dari `wisata.php` melalui Repository lalu ditampilkan pada RecyclerView | Form Create, data dikirim ke `wisata_add.php` setelah tombol Simpan ditekan | Form Update terisi data lama, perubahannya dikirim ke `wisata_edit.php` |
+
+| Delete – Tombol pada Halaman Detail | Loading saat Request API | Data Kosong |
+|:---:|:---:|:---:|
+| <img src="screenshot/31-detail-wisata-crud.png" width="230"> | <img src="screenshot/8-wisata-loading-awal.png" width="230"> | <img src="screenshot/14-search-kosong.png" width="230"> |
+| Tombol **Hapus Wisata** memunculkan Alert Dialog konfirmasi sebelum data dihapus | `ProgressBar` tampil selama aplikasi menunggu jawaban API | Keterangan muncul ketika API tidak mengembalikan data wisata |
+
+## Catatan
+
+- Pemeriksaan form kosong kini hanya berada di ViewModel. Sebelumnya pemeriksaan yang sama juga ditulis di Activity, sehingga ada dua tempat yang mengerjakan hal serupa.
+- Pesan gagal CRUD dikumpulkan di `PesanGagal` supaya Tambah, Edit, dan Hapus memakai gaya kalimat yang sama, dan pengguna tidak lagi melihat pesan teknis seperti `java.net.ConnectException`.
+- Alert Dialog hapus memakai tombol **Ya, Hapus** dan **Batal**. Memilih **Batal** tidak mengirim apa pun ke API, jadi data tetap utuh.
+- Setelah Create, Update, atau Delete berhasil, Home Fragment memuat ulang daftar dari halaman pertama lewat `refreshData()` sehingga daftar selalu sama dengan isi database.
 
 ---
 

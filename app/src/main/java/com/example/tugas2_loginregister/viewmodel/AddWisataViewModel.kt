@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.tugas2_loginregister.repository.WisataRepository
+import com.example.tugas2_loginregister.utils.PesanGagal
 import com.example.tugas2_loginregister.utils.UiState
 import kotlinx.coroutines.launch
 
@@ -58,7 +59,7 @@ class AddWisataViewModel(aplikasi: Application) : AndroidViewModel(aplikasi) {
                     _kondisiSimpan.value = UiState.Gagal(balasan.message.ifBlank { "Gagal menambahkan data wisata" })
                 }
             } catch (e: Exception) {
-                _kondisiSimpan.value = UiState.Gagal("Terjadi kesalahan saat menyimpan: ${e.message}", e)
+                _kondisiSimpan.value = UiState.Gagal(PesanGagal.dari("menambahkan data wisata", e), e)
             }
         }
     }

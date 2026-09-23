@@ -191,7 +191,7 @@ class DetailWisataActivity : AppCompatActivity() {
 
     private fun konfirmasiHapus() {
         AlertDialog.Builder(this)
-            .setTitle("Hapus Wisata")
+            .setTitle(getString(R.string.hapus_wisata))
             .setMessage(getString(R.string.konfirmasi_hapus))
             .setPositiveButton(getString(R.string.ya_hapus)) { _, _ ->
                 viewModel.hapusWisata(idWisata)

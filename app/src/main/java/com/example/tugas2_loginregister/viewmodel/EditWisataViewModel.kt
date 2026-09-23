@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.tugas2_loginregister.repository.FavoriteRepository
 import com.example.tugas2_loginregister.repository.WisataRepository
+import com.example.tugas2_loginregister.utils.PesanGagal
 import com.example.tugas2_loginregister.utils.UiState
 import kotlinx.coroutines.launch
 
@@ -69,7 +70,7 @@ class EditWisataViewModel(aplikasi: Application) : AndroidViewModel(aplikasi) {
                     _kondisiEdit.value = UiState.Gagal(balasan.message.ifBlank { "Gagal memperbarui data wisata" })
                 }
             } catch (e: Exception) {
-                _kondisiEdit.value = UiState.Gagal("Terjadi kesalahan saat memperbarui: ${e.message}", e)
+                _kondisiEdit.value = UiState.Gagal(PesanGagal.dari("memperbarui data wisata", e), e)
             }
         }
     }

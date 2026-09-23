@@ -122,11 +122,6 @@ class AddWisataActivity : AppCompatActivity() {
         val foto = etFoto.text.toString()
         val deskripsi = etDeskripsi.text.toString()
 
-        if (nama.isBlank() || kategori.isBlank() || lokasi.isBlank() || deskripsi.isBlank()) {
-            Toast.makeText(this, "Form Kosong: Harap isi semua field data wisata", Toast.LENGTH_SHORT).show()
-            return
-        }
-
         viewModel.tambahWisata(
             namaWisata = nama,
             kategori = kategori,
