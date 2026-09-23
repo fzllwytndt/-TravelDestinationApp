@@ -238,11 +238,11 @@
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:text="@string/edit_wisata"
-            android:textColor="@color/ungu_tombol"
+            android:textColor="@color/hijau_hutan"
             android:textSize="14sp"
             android:textStyle="bold"
             app:cornerRadius="12dp"
-            app:strokeColor="@color/ungu_tombol"
+            app:strokeColor="@color/hijau_hutan"
             app:strokeWidth="1.5dp" />
 
         <com.google.android.material.button.MaterialButton
