@@ -185,6 +185,7 @@ private fun konfirmasiHapus() {
 |---|---|
 | `utils/PesanGagal.kt` | Menerjemahkan kegagalan request API menjadi kalimat yang mudah dipahami, dipakai bersama oleh ViewModel Tambah, Edit, dan Hapus |
 | `postman/TravelDestinationApp.postman_collection.json` | Koleksi Postman berisi seluruh endpoint API untuk menguji CRUD tanpa membuka aplikasi Android |
+| `login_api/index.php` | Halaman depan folder API, mengarahkan `login_api/` ke `wisata.php` sekaligus menutup daftar isi folder yang sebelumnya terbuka |
 
 ## File yang Berubah
 
@@ -278,6 +279,8 @@ Berkas `postman/TravelDestinationApp.postman_collection.json` berisi seluruh end
 Kolom `foto` dan bagian `foto_file` bersifat pilihan. Bila keduanya kosong, server memakai gambar bawaan `logo_wisata.png`.
 
 Perlu diingat, endpoint `wisata_delete.php` langsung menghapus data begitu dipanggil. Alert Dialog konfirmasi hanya ada di aplikasi Android, bukan di API.
+
+Alamat `http://localhost/login_api` saja bukan endpoint, melainkan nama folder. Sekarang alamat itu diarahkan ke `wisata.php` oleh `index.php`, jadi tetap membalas JSON daftar wisata.
 
 ## Cara Menjalankan
 
