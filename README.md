@@ -195,6 +195,7 @@ private fun konfirmasiHapus() {
 | `ui/activity/AddWisataActivity.kt` | Pemeriksaan form kosong dihapus dari Activity karena sudah menjadi tugas ViewModel, sehingga tidak ada validasi ganda |
 | `ui/activity/EditWisataActivity.kt` | Pemeriksaan form kosong dihapus dari Activity dengan alasan yang sama |
 | `ui/activity/DetailWisataActivity.kt` | Judul Alert Dialog hapus diambil dari `strings.xml`, tidak lagi ditulis langsung di kode |
+| `utils/FotoHelper.kt` | Memperbaiki pembacaan foto galeri yang selalu gagal sehingga unggah foto pada Create dan Update kini berjalan |
 
 ## Penanganan Kondisi
 
@@ -276,6 +277,7 @@ private fun konfirmasiHapus() {
 - Pesan gagal CRUD dikumpulkan di `PesanGagal` supaya Tambah, Edit, dan Hapus memakai gaya kalimat yang sama, dan pengguna tidak lagi melihat pesan teknis seperti `java.net.ConnectException`.
 - Alert Dialog hapus memakai tombol **Ya, Hapus** dan **Batal**. Memilih **Batal** tidak mengirim apa pun ke API, jadi data tetap utuh.
 - Setelah Create, Update, atau Delete berhasil, Home Fragment memuat ulang daftar dari halaman pertama lewat `refreshData()` sehingga daftar selalu sama dengan isi database.
+- Unggah foto sebelumnya selalu gagal dengan pesan "Foto yang dipilih tidak dapat dibaca". Penyebabnya pada `FotoHelper`: ketika `inJustDecodeBounds` bernilai `true`, `BitmapFactory.decodeStream()` memang selalu mengembalikan `null` dan hanya mengisi `outWidth` serta `outHeight`, tetapi nilai `null` itu ikut diperiksa sehingga proses berhenti sebelum gambar sempat dibaca. Sekarang keberhasilannya diperiksa dari ukuran gambar, bukan dari nilai kembalian `decodeStream()`.
 
 ---
 

@@ -52,8 +52,15 @@ object FotoHelper {
     private fun bacaGambarKecil(context: Context, uri: Uri): Bitmap? {
         val resolver = context.contentResolver
 
+        // Dengan inJustDecodeBounds, decodeStream memang selalu mengembalikan null dan hanya
+        // mengisi outWidth serta outHeight. Jadi keberhasilannya diperiksa dari ukuran itu,
+        // bukan dari nilai kembalian decodeStream.
         val opsiUkur = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, opsiUkur) } ?: return null
+        resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, opsiUkur) }
+
+        if (opsiUkur.outWidth <= 0 || opsiUkur.outHeight <= 0) {
+            return null
+        }
 
         val opsiBaca = BitmapFactory.Options().apply {
             inSampleSize = hitungSkala(opsiUkur.outWidth, opsiUkur.outHeight)
