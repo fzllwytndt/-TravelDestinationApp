@@ -10,8 +10,120 @@ Repository kumpulan tugas magang di Crocodic Semarang. Setiap tugas/fitur dikerj
 | `Tugas-4-Implementasi-Fitur-Search-Detail` | Pencarian destinasi wisata & halaman detail destinasi | Selesai |
 | `Tugas-5-Implementasi-Bottom-Navigation-Fragment-Splash-Screen-Logout` | Bottom Navigation, Fragment, Splash Screen, Session Login & Logout | Selesai |
 | `Tugas-6-Menambahkan-Fitur-Favorit-Wisata-dengan-Room-Database` | Favorit Wisata dengan Room Database (Entity, DAO, Database, Repository, ViewModel) | Selesai |
+| `Tugas-7-Implementasi-Backend-API-CRUD-Layouting` | Implementasi Backend API CRUD & Layouting (Create, Read, Update, Delete) | Selesai |
 
 Seluruh tangkapan layar pada dokumen ini diambil ulang memakai tampilan aplikasi terkini, yaitu setelah aplikasi memakai identitas **Jelajah Jateng**. Jadi fitur dari tugas sebelumnya pun terlihat dengan warna dan tata letak yang berlaku sekarang.
+
+---
+
+# Branch `Tugas 7 – Implementasi Backend API CRUD & Layouting`
+
+## Deskripsi
+
+Melanjutkan pengembangan **TravelDestinationApp** dengan mengimplementasikan fitur **CRUD (Create, Read, Update, Delete)** data wisata menggunakan **Backend API** serta melakukan **layouting** pada halaman-halaman yang digunakan untuk fitur CRUD.
+
+Pada tugas ini, pengguna dapat mengelola data wisata secara langsung dari aplikasi Android melalui Backend API PHP dan database MySQL:
+- **Create**: Menambahkan data wisata baru melalui halaman **Tambah Data Wisata** (`AddWisataActivity`) dengan menekan **Floating Action Button (FAB)** pada Home Fragment. Data dikirim ke API `wisata_add.php` dan disimpan ke database.
+- **Read**: Mengambil dan menampilkan daftar data wisata dari API `wisata.php` pada Home Fragment dan detail wisata lengkap pada halaman **Detail Wisata** (`DetailWisataActivity`).
+- **Update**: Mengubah data wisata yang sudah ada melalui halaman **Edit Data Wisata** (`EditWisataActivity`). Form terisi otomatis dengan data lama, lalu dikirim ke API `wisata_edit.php` untuk diperbarui di database.
+- **Delete**: Menghapus data wisata melalui Backend API `wisata_delete.php` dengan menekan tombol **Hapus Wisata** pada halaman Detail Wisata setelah memberikan konfirmasi dialog. Data yang dihapus otomatis dihilangkan dari database dan tidak lagi ditampilkan di daftar.
+
+Selain mengimplementasikan API CRUD, tugas ini juga mencakup layouting setiap halaman agar tampilan menjadi rapi, responsif, sederhana, dan mudah digunakan dengan warna tema konsisten.
+
+## Ketentuan Fitur
+
+- Mengembangkan Home Fragment untuk menampilkan daftar data wisata dari Backend API.
+- Menambahkan Floating Action Button (FAB) pada Home Fragment untuk membuka halaman Tambah Data Wisata.
+- Membuat halaman Tambah Data Wisata (`AddWisataActivity`) yang berisi form untuk memasukkan data wisata baru (`nama_wisata`, `kategori`, `lokasi`, `harga_tiket`, `foto`, `deskripsi`).
+- Mengirimkan data baru ke Backend API (`wisata_add.php`) dan memperbarui daftar wisata pada Home Fragment.
+- Membuat halaman Detail Wisata (`DetailWisataActivity`) dengan tombol **EDIT WISATA** dan **Hapus Wisata**.
+- Membuat fitur Edit Data Wisata (`EditWisataActivity`) dengan form pre-filled, lalu mengirimkan data yang diperbarui ke Backend API (`wisata_edit.php`).
+- Membuat fitur Hapus Data Wisata melalui Backend API (`wisata_delete.php`) sehingga data terhapus dari database dan tidak lagi ditampilkan.
+- Menampilkan indikator loading saat aplikasi melakukan request ke Backend API.
+- Menangani kondisi error apabila proses pengambilan, penambahan, perubahan, atau penghapusan data mengalami masalah.
+- Menangani kondisi ketika data wisata kosong.
+- Menangani kondisi **Form Kosong** (memberikan peringatan apabila terdapat field data wajib yang belum diisi).
+- Membuat layout setiap halaman dengan tampilan rapi, responsif, sederhana, dan mudah digunakan.
+
+## Alur Keseluruhan Fitur CRUD
+
+```
+                        Home Fragment
+                             |
+                  Menampilkan Daftar Wisata
+                             |
+                  +----------+----------+
+                  |                     |
+             Klik FAB               Pilih Wisata
+                  |                     |
+         Form Tambah Wisata       Detail Wisata
+                  |                     |
+               Create               Edit / Hapus
+                  |                     |
+            Backend API            Backend API
+                  |                     |
+             Database MySQL         Database MySQL
+                  |                     |
+         +--------+---------------------+
+         |
+Daftar Wisata Diperbarui
+```
+
+## Backend API CRUD (PHP)
+
+Backend API digunakan sebagai penghubung antara aplikasi Android dan database MySQL:
+
+| Endpoint | Method | Parameter | Fungsi |
+|---|---|---|---|
+| `wisata.php` | GET | `page`, `q` | Mengambil daftar wisata (Read) dengan pagination dan pencarian |
+| `wisata_detail.php` | GET | `id` | Mengambil detail lengkap satu wisata (Read) |
+| `wisata_add.php` | POST | `nama_wisata`, `kategori`, `lokasi`, `harga_tiket`, `deskripsi`, `foto` | Menambahkan data wisata baru ke database (Create) |
+| `wisata_edit.php` | POST | `id`, `nama_wisata`, `kategori`, `lokasi`, `harga_tiket`, `deskripsi`, `foto` | Mengubah data wisata yang sudah ada (Update) |
+| `wisata_delete.php` | POST | `id` | Menghapus data wisata dari database (Delete) |
+
+## File Baru pada Tugas Ini
+
+| Berkas | Kegunaan |
+|---|---|
+| `login_api/wisata_add.php` | Endpoint API PHP untuk menambah data wisata ke database |
+| `login_api/wisata_edit.php` | Endpoint API PHP untuk memperbarui data wisata di database |
+| `login_api/wisata_delete.php` | Endpoint API PHP untuk menghapus data wisata dari database |
+| `ui/activity/AddWisataActivity.kt` | Activity form tambah data wisata baru |
+| `ui/activity/EditWisataActivity.kt` | Activity form edit/ubah data wisata |
+| `viewmodel/AddWisataViewModel.kt` | ViewModel untuk menangani proses tambah wisata |
+| `viewmodel/EditWisataViewModel.kt` | ViewModel untuk menangani proses edit wisata |
+| `res/layout/activity_add_wisata.xml` | Layout form tambah data wisata |
+| `res/layout/activity_edit_wisata.xml` | Layout form edit data wisata |
+| `res/drawable/ic_add.xml` | Ikon tambah (`+`) untuk FAB pada Home Fragment |
+| `res/drawable/ic_edit.xml` | Ikon edit |
+| `res/drawable/ic_delete.xml` | Ikon hapus |
+| `res/drawable/bg_pilih_foto.xml` | Latar bingkai area foto wisata |
+
+## File yang Berubah
+
+| Berkas | Perubahan |
+|---|---|
+| `login_api/wisata.php` | Diubah menjadi `ORDER BY id DESC` agar wisata baru langsung tampil di urutan teratas |
+| `model/Wisata.kt` | Menambahkan interface `Serializable` dan field `foto` |
+| `model/WisataResponse.kt` | Menambahkan data class `WisataActionResponse` untuk response aksi CRUD |
+| `network/ApiService.kt` | Menambahkan endpoint `tambahWisata`, `editWisata`, dan `hapusWisata` |
+| `repository/WisataRepository.kt` | Menambahkan method panggil API untuk aksi Tambah, Edit, dan Hapus |
+| `viewmodel/WisataViewModel.kt` | Menambahkan method `refreshData()` untuk memuat ulang daftar dari awal |
+| `viewmodel/DetailWisataViewModel.kt` | Menambahkan method `hapusWisata(id)` dan mereset favorit Room DB jika terhapus |
+| `ui/fragment/HomeFragment.kt` | Menambahkan listener FAB Tambah dan `ActivityResultLauncher` untuk refresh otomatis |
+| `res/layout/fragment_home.xml` | Menambahkan `FloatingActionButton` (`fabTambah`) di pojok kanan bawah |
+| `ui/activity/DetailWisataActivity.kt` | Menambahkan listener tombol Edit dan Hapus beserta dialog konfirmasi |
+| `res/layout/activity_detail_wisata.xml` | Menambahkan baris tombol aksi **EDIT WISATA** dan **Hapus Wisata** di bagian bawah |
+| `AndroidManifest.xml` | Mendaftarkan `AddWisataActivity` dan `EditWisataActivity` |
+| `res/values/colors.xml` | Menambahkan warna tombol CRUD (`ungu_tombol`, `biru_tombol`, `merah_hapus`) |
+| `res/values/strings.xml` | Menambahkan string pendukung halaman Tambah, Edit, dan Hapus Wisata |
+
+## Tangkapan Layar (Tugas 7)
+
+| Form Tambah Wisata | Detail Wisata dengan Edit & Hapus | Form Edit Wisata |
+|:---:|:---:|:---:|
+| <img src="screenshot/30-tambah-wisata.png" width="230"> | <img src="screenshot/31-detail-wisata-crud.png" width="230"> | <img src="screenshot/32-edit-wisata.png" width="230"> |
+| Halaman form untuk memasukkan data wisata baru (`activity_add_wisata.xml`) | Halaman detail dilengkapi tombol **EDIT WISATA** dan **Hapus Wisata** (`activity_detail_wisata.xml`) | Form terisi otomatis dengan data lama untuk diperbarui (`activity_edit_wisata.xml`) |
 
 ---
 
