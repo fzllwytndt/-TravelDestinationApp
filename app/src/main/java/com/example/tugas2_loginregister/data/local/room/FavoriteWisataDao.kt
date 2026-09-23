@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 
 /** Perintah-perintah yang boleh dijalankan pada tabel favorit. */
 @Dao
@@ -21,6 +22,10 @@ interface FavoriteWisataDao {
     /** Wisata yang sama cukup tersimpan satu kali, jadi data lama ditimpa. */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun simpan(wisata: FavoriteWisata)
+
+    /** Menyegarkan data favorit setelah wisatanya diubah. Diabaikan bila belum difavoritkan. */
+    @Update
+    suspend fun perbarui(wisata: FavoriteWisata)
 
     @Query("DELETE FROM favorite_wisata WHERE id = :id")
     suspend fun hapus(id: Int)

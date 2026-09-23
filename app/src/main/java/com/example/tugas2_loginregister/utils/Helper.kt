@@ -1,6 +1,7 @@
 package com.example.tugas2_loginregister.utils
 
 import android.content.Context
+import android.net.Uri
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
@@ -28,6 +29,13 @@ object Helper {
     fun muatGambar(gambar: ImageView, url: String) {
         Glide.with(gambar.context)
             .load(url)
+            .into(gambar)
+    }
+
+    /** Dipakai untuk pratinjau foto yang baru dipilih dari galeri, sebelum diunggah. */
+    fun muatGambar(gambar: ImageView, uri: Uri) {
+        Glide.with(gambar.context)
+            .load(uri)
             .into(gambar)
     }
 

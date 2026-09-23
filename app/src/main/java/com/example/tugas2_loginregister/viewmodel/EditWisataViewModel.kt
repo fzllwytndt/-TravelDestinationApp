@@ -1,10 +1,12 @@
 package com.example.tugas2_loginregister.viewmodel
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.tugas2_loginregister.repository.FavoriteRepository
 import com.example.tugas2_loginregister.repository.WisataRepository
 import com.example.tugas2_loginregister.utils.UiState
 import kotlinx.coroutines.launch
@@ -12,6 +14,7 @@ import kotlinx.coroutines.launch
 class EditWisataViewModel(aplikasi: Application) : AndroidViewModel(aplikasi) {
 
     private val repository = WisataRepository(aplikasi)
+    private val favoriteRepository = FavoriteRepository(aplikasi)
 
     private val _kondisiEdit = MutableLiveData<UiState<String>?>()
     val kondisiEdit: LiveData<UiState<String>?> = _kondisiEdit
@@ -23,7 +26,8 @@ class EditWisataViewModel(aplikasi: Application) : AndroidViewModel(aplikasi) {
         lokasi: String,
         hargaTiketText: String,
         deskripsi: String,
-        foto: String
+        foto: String,
+        fotoLokal: Uri?
     ) {
         val nama = namaWisata.trim()
         val kat = kategori.trim()
@@ -53,10 +57,13 @@ class EditWisataViewModel(aplikasi: Application) : AndroidViewModel(aplikasi) {
                     lokasi = lok,
                     hargaTiket = hargaInt,
                     deskripsi = desk,
-                    foto = fot
+                    foto = fot,
+                    fotoLokal = fotoLokal
                 )
 
                 if (balasan.success) {
+                    // Data favorit di Room ikut disegarkan agar tidak menampilkan data lama
+                    balasan.data?.let { favoriteRepository.perbarui(it) }
                     _kondisiEdit.value = UiState.Berhasil(balasan.message.ifBlank { "Data wisata berhasil diperbarui" })
                 } else {
                     _kondisiEdit.value = UiState.Gagal(balasan.message.ifBlank { "Gagal memperbarui data wisata" })

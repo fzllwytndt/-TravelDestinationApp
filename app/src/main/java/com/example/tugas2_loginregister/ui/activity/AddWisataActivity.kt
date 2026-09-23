@@ -1,12 +1,16 @@
 package com.example.tugas2_loginregister.ui.activity
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -16,14 +20,16 @@ import com.example.tugas2_loginregister.utils.Helper
 import com.example.tugas2_loginregister.utils.UiState
 import com.example.tugas2_loginregister.viewmodel.AddWisataViewModel
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.card.MaterialCardView
 
 class AddWisataActivity : AppCompatActivity() {
 
     private val viewModel: AddWisataViewModel by viewModels()
 
     private lateinit var btnKembali: ImageButton
+    private lateinit var cardFoto: MaterialCardView
     private lateinit var ivPreviewFoto: ImageView
-    private lateinit var wadahPlaceholderFoto: View
+    private lateinit var tvLabelFoto: TextView
     private lateinit var etNamaWisata: EditText
     private lateinit var etKategori: EditText
     private lateinit var etLokasi: EditText
@@ -33,13 +39,25 @@ class AddWisataActivity : AppCompatActivity() {
     private lateinit var btnSimpan: MaterialButton
     private lateinit var pbLoading: ProgressBar
 
+    /** Foto dari galeri yang siap diunggah. Null berarti pengguna belum memilih foto. */
+    private var fotoTerpilih: Uri? = null
+
+    private val pemilihFoto = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
+            fotoTerpilih = uri
+            tampilkanPratinjau(uri)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_wisata)
 
         hubungkanView()
         siapkanTombolKembali()
+        pulihkanFotoTerpilih(savedInstanceState)
 
+        cardFoto.setOnClickListener { bukaGaleri() }
         btnSimpan.setOnClickListener { simpanData() }
 
         amatiViewModel()
@@ -47,8 +65,9 @@ class AddWisataActivity : AppCompatActivity() {
 
     private fun hubungkanView() {
         btnKembali = findViewById(R.id.btnKembali)
+        cardFoto = findViewById(R.id.cardFoto)
         ivPreviewFoto = findViewById(R.id.ivPreviewFoto)
-        wadahPlaceholderFoto = findViewById(R.id.wadahPlaceholderFoto)
+        tvLabelFoto = findViewById(R.id.tvLabelFoto)
         etNamaWisata = findViewById(R.id.etNamaWisata)
         etKategori = findViewById(R.id.etKategori)
         etLokasi = findViewById(R.id.etLokasi)
@@ -70,6 +89,31 @@ class AddWisataActivity : AppCompatActivity() {
         btnKembali.setOnClickListener { finish() }
     }
 
+    /** Foto pilihan disimpan sendiri supaya tidak hilang saat layar diputar. */
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(KUNCI_FOTO_TERPILIH, fotoTerpilih?.toString())
+    }
+
+    private fun pulihkanFotoTerpilih(savedInstanceState: Bundle?) {
+        val tersimpan = savedInstanceState?.getString(KUNCI_FOTO_TERPILIH) ?: return
+
+        fotoTerpilih = Uri.parse(tersimpan)
+        tampilkanPratinjau(Uri.parse(tersimpan))
+    }
+
+    private fun bukaGaleri() {
+        pemilihFoto.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+        )
+    }
+
+    private fun tampilkanPratinjau(uri: Uri) {
+        Helper.muatGambar(ivPreviewFoto, uri)
+        Helper.tampil(ivPreviewFoto)
+        tvLabelFoto.setText(R.string.ganti_foto_wisata)
+    }
+
     private fun simpanData() {
         val nama = etNamaWisata.text.toString()
         val kategori = etKategori.text.toString()
@@ -89,7 +133,8 @@ class AddWisataActivity : AppCompatActivity() {
             lokasi = lokasi,
             hargaTiketText = harga,
             deskripsi = deskripsi,
-            foto = foto
+            foto = foto,
+            fotoLokal = fotoTerpilih
         )
     }
 
@@ -122,5 +167,9 @@ class AddWisataActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        private const val KUNCI_FOTO_TERPILIH = "kunci_foto_terpilih"
     }
 }

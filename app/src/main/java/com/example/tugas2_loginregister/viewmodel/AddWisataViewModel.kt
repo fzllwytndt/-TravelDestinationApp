@@ -1,6 +1,7 @@
 package com.example.tugas2_loginregister.viewmodel
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -22,7 +23,8 @@ class AddWisataViewModel(aplikasi: Application) : AndroidViewModel(aplikasi) {
         lokasi: String,
         hargaTiketText: String,
         deskripsi: String,
-        foto: String
+        foto: String,
+        fotoLokal: Uri?
     ) {
         val nama = namaWisata.trim()
         val kat = kategori.trim()
@@ -46,7 +48,8 @@ class AddWisataViewModel(aplikasi: Application) : AndroidViewModel(aplikasi) {
                     lokasi = lok,
                     hargaTiket = hargaInt,
                     deskripsi = desk,
-                    foto = fot
+                    foto = fot,
+                    fotoLokal = fotoLokal
                 )
 
                 if (balasan.success) {

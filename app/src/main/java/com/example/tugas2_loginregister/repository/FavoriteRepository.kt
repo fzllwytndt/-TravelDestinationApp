@@ -24,20 +24,25 @@ class FavoriteRepository(context: Context) {
 
     /** Data wisata dari API disalin menjadi data favorit sebelum disimpan ke Room. */
     suspend fun simpan(wisata: Wisata) {
-        dao.simpan(
-            FavoriteWisata(
-                id = wisata.id,
-                namaWisata = wisata.namaWisata,
-                kategori = wisata.kategori,
-                lokasi = wisata.lokasi,
-                hargaTiket = wisata.hargaTiket,
-                deskripsi = wisata.deskripsi,
-                fotoUrl = wisata.fotoUrl
-            )
-        )
+        dao.simpan(jadikanFavorit(wisata))
+    }
+
+    /** Dipanggil setelah wisata diubah supaya daftar favorit tidak menampilkan data lama. */
+    suspend fun perbarui(wisata: Wisata) {
+        dao.perbarui(jadikanFavorit(wisata))
     }
 
     suspend fun hapus(id: Int) {
         dao.hapus(id)
     }
+
+    private fun jadikanFavorit(wisata: Wisata) = FavoriteWisata(
+        id = wisata.id,
+        namaWisata = wisata.namaWisata,
+        kategori = wisata.kategori,
+        lokasi = wisata.lokasi,
+        hargaTiket = wisata.hargaTiket,
+        deskripsi = wisata.deskripsi,
+        fotoUrl = wisata.fotoUrl
+    )
 }

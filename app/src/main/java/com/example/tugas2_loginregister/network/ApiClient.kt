@@ -33,6 +33,7 @@ object ApiClient {
     private const val NAMA_PREF = "pengaturan_server"
     private const val KUNCI_HOST = "alamat_server"
     private const val WAKTU_TUNGGU = 5L
+    private const val WAKTU_TUNGGU_UNGGAH = 30L
 
     private var retrofit: Retrofit? = null
     private var hostTerpakai = ""
@@ -96,6 +97,8 @@ object ApiClient {
             .addInterceptor(pencatat)
             .connectTimeout(WAKTU_TUNGGU, TimeUnit.SECONDS)
             .readTimeout(WAKTU_TUNGGU, TimeUnit.SECONDS)
+            // Mengirim file foto butuh waktu lebih lama daripada sekadar mengirim teks.
+            .writeTimeout(WAKTU_TUNGGU_UNGGAH, TimeUnit.SECONDS)
             .build()
     }
 

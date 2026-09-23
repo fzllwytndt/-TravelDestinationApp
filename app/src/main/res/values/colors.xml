@@ -24,4 +24,7 @@
     <color name="biru_tombol">#FF1565C0</color>
     <color name="abu_pilih_foto">#FFE0E0E0</color>
 
+    <!-- Putih tembus pandang untuk latar tanda + di atas foto wisata -->
+    <color name="putih_kabut">#E6FFFFFF</color>
+
 </resources>

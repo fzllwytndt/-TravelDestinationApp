@@ -13,6 +13,7 @@
     <string name="edit_wisata">EDIT WISATA</string>
     <string name="hapus_wisata">Hapus Wisata</string>
     <string name="pilih_foto_wisata">Pilih Foto Wisata</string>
+    <string name="ganti_foto_wisata">Ganti Foto Wisata</string>
     <string name="konfirmasi_hapus">Apakah Anda yakin ingin menghapus data wisata ini?</string>
     <string name="ya_hapus">Ya, Hapus</string>
     <string name="batal">Batal</string>

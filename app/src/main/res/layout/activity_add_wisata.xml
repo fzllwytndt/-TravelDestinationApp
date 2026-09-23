@@ -91,22 +91,29 @@
                 android:layout_width="match_parent"
                 android:layout_height="180dp"
                 android:layout_marginBottom="16dp"
+                android:clickable="true"
+                android:contentDescription="@string/pilih_foto_wisata"
+                android:focusable="true"
                 app:cardBackgroundColor="@color/putih"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
                 app:strokeColor="@color/garis"
                 app:strokeWidth="1dp">
 
-                <RelativeLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
                     <ImageView
                         android:id="@+id/ivPreviewFoto"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
                         android:scaleType="centerCrop"
                         android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
                         tools:src="@drawable/contoh_ayana"
                         tools:visibility="visible" />
 
@@ -114,9 +121,17 @@
                         android:id="@+id/wadahPlaceholderFoto"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
+                        android:background="@drawable/bg_label_foto"
                         android:gravity="center"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:paddingStart="20dp"
+                        android:paddingTop="12dp"
+                        android:paddingEnd="20dp"
+                        android:paddingBottom="12dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
 
                         <ImageView
                             android:layout_width="44dp"
@@ -126,6 +141,7 @@
                             app:tint="@color/hijau_hutan" />
 
                         <TextView
+                            android:id="@+id/tvLabelFoto"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
@@ -136,7 +152,7 @@
 
                     </LinearLayout>
 
-                </RelativeLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
@@ -207,7 +223,7 @@
                 android:layout_height="52dp"
                 android:layout_marginBottom="12dp"
                 android:background="@drawable/bg_pencarian"
-                android:hint="URL Gambar / Nama File Foto (Opsional)"
+                android:hint="URL Gambar (opsional, jika tidak mengunggah foto)"
                 android:inputType="textUri"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
