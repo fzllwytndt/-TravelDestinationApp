@@ -1,5 +1,6 @@
 package com.example.tugas2_loginregister.ui.fragment
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -10,12 +11,14 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.SearchView
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tugas2_loginregister.R
 import com.example.tugas2_loginregister.model.Wisata
+import com.example.tugas2_loginregister.ui.activity.AddWisataActivity
 import com.example.tugas2_loginregister.ui.activity.DetailWisataActivity
 import com.example.tugas2_loginregister.ui.adapter.WisataAdapter
 import com.example.tugas2_loginregister.utils.DialogServer
@@ -23,6 +26,7 @@ import com.example.tugas2_loginregister.utils.Helper
 import com.example.tugas2_loginregister.utils.SessionManager
 import com.example.tugas2_loginregister.utils.UiState
 import com.example.tugas2_loginregister.viewmodel.WisataViewModel
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class HomeFragment : Fragment() {
 
@@ -34,11 +38,20 @@ class HomeFragment : Fragment() {
     private lateinit var wadahMuatLagi: View
     private lateinit var tvPesan: TextView
     private lateinit var tvInfoBawah: TextView
+    private lateinit var fabTambah: FloatingActionButton
 
     private lateinit var adapter: WisataAdapter
 
     private val handlerCari = Handler(Looper.getMainLooper())
     private var tundaCari: Runnable? = null
+
+    private val launcherAksi = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { hasil ->
+        if (hasil.resultCode == Activity.RESULT_OK) {
+            viewModel.refreshData()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,6 +70,11 @@ class HomeFragment : Fragment() {
         siapkanPencarian()
         pasangScrollListener()
         amatiData()
+
+        fabTambah.setOnClickListener {
+            val intent = Intent(requireContext(), AddWisataActivity::class.java)
+            launcherAksi.launch(intent)
+        }
     }
 
     private fun siapkanHeader(view: View) {
@@ -71,6 +89,7 @@ class HomeFragment : Fragment() {
         wadahMuatLagi = view.findViewById(R.id.wadahMuatLagi)
         tvPesan = view.findViewById(R.id.tvPesan)
         tvInfoBawah = view.findViewById(R.id.tvInfoBawah)
+        fabTambah = view.findViewById(R.id.fabTambah)
     }
 
     private fun siapkanDaftar() {
@@ -85,7 +104,7 @@ class HomeFragment : Fragment() {
     private fun bukaDetail(wisata: Wisata) {
         val intent = Intent(requireContext(), DetailWisataActivity::class.java)
         intent.putExtra(DetailWisataActivity.KUNCI_ID, wisata.id)
-        startActivity(intent)
+        launcherAksi.launch(intent)
     }
 
     private fun siapkanPencarian() {

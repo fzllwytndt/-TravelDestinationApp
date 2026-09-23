@@ -3,4 +3,17 @@
 
     <string name="tambah_favorit">Tambahkan ke favorit</string>
     <string name="hapus_favorit">Hapus dari favorit</string>
+
+    <!-- CRUD Strings -->
+    <string name="tambah_wisata_baru">Tambah Wisata Baru</string>
+    <string name="judul_tambah_wisata">Tambah Data Wisata</string>
+    <string name="judul_edit_wisata">Edit Data Wisata</string>
+    <string name="simpan_wisata">Simpan Wisata</string>
+    <string name="simpan_perubahan">Simpan Perubahan</string>
+    <string name="edit_wisata">EDIT WISATA</string>
+    <string name="hapus_wisata">Hapus Wisata</string>
+    <string name="pilih_foto_wisata">Pilih Foto Wisata</string>
+    <string name="konfirmasi_hapus">Apakah Anda yakin ingin menghapus data wisata ini?</string>
+    <string name="ya_hapus">Ya, Hapus</string>
+    <string name="batal">Batal</string>
 </resources>

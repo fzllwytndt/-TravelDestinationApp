@@ -11,7 +11,7 @@ import com.example.tugas2_loginregister.repository.WisataRepository
 import com.example.tugas2_loginregister.utils.UiState
 import kotlinx.coroutines.launch
 
-/** Mengurus isi halaman Detail Wisata sekaligus tombol Like/Unlike. */
+/** Mengurus isi halaman Detail Wisata, tombol Like/Unlike, dan hapus wisata. */
 class DetailWisataViewModel(aplikasi: Application) : AndroidViewModel(aplikasi) {
 
     private val wisataRepository = WisataRepository(aplikasi)
@@ -19,6 +19,9 @@ class DetailWisataViewModel(aplikasi: Application) : AndroidViewModel(aplikasi) 
 
     private val _kondisi = MutableLiveData<UiState<Wisata>>()
     val kondisi: LiveData<UiState<Wisata>> = _kondisi
+
+    private val _kondisiHapus = MutableLiveData<UiState<String>?>()
+    val kondisiHapus: LiveData<UiState<String>?> = _kondisiHapus
 
     fun muatDetail(id: Int) {
         _kondisi.value = UiState.Loading
@@ -38,6 +41,30 @@ class DetailWisataViewModel(aplikasi: Application) : AndroidViewModel(aplikasi) 
                 )
             }
         }
+    }
+
+    /** Hapus data wisata dari backend API dan Room Database jika ada. */
+    fun hapusWisata(id: Int) {
+        _kondisiHapus.value = UiState.Loading
+
+        viewModelScope.launch {
+            try {
+                val balasan = wisataRepository.hapusWisata(id)
+                if (balasan.success) {
+                    // Hapus dari Room Database favorit jika sebelumnya di-favorite
+                    favoriteRepository.hapus(id)
+                    _kondisiHapus.value = UiState.Berhasil(balasan.message.ifBlank { "Data wisata berhasil dihapus" })
+                } else {
+                    _kondisiHapus.value = UiState.Gagal(balasan.message.ifBlank { "Gagal menghapus data wisata" })
+                }
+            } catch (e: Exception) {
+                _kondisiHapus.value = UiState.Gagal("Terjadi kesalahan saat menghapus data: ${e.message}", e)
+            }
+        }
+    }
+
+    fun resetKondisiHapus() {
+        _kondisiHapus.value = null
     }
 
     /** Dipakai halaman Detail untuk menentukan warna ikon love. */

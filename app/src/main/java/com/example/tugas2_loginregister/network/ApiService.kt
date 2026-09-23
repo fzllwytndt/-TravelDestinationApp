@@ -1,5 +1,6 @@
 package com.example.tugas2_loginregister.network
 
+import com.example.tugas2_loginregister.model.WisataActionResponse
 import com.example.tugas2_loginregister.model.WisataDetailResponse
 import com.example.tugas2_loginregister.model.WisataResponse
 import retrofit2.http.Field
@@ -35,4 +36,33 @@ interface ApiService {
     suspend fun ambilDetailWisata(
         @Query("id") id: Int
     ): WisataDetailResponse
+
+    @FormUrlEncoded
+    @POST("wisata_add.php")
+    suspend fun tambahWisata(
+        @Field("nama_wisata") namaWisata: String,
+        @Field("kategori") kategori: String,
+        @Field("lokasi") lokasi: String,
+        @Field("harga_tiket") hargaTiket: Int,
+        @Field("deskripsi") deskripsi: String,
+        @Field("foto") foto: String
+    ): WisataActionResponse
+
+    @FormUrlEncoded
+    @POST("wisata_edit.php")
+    suspend fun editWisata(
+        @Field("id") id: Int,
+        @Field("nama_wisata") namaWisata: String,
+        @Field("kategori") kategori: String,
+        @Field("lokasi") lokasi: String,
+        @Field("harga_tiket") hargaTiket: Int,
+        @Field("deskripsi") deskripsi: String,
+        @Field("foto") foto: String
+    ): WisataActionResponse
+
+    @FormUrlEncoded
+    @POST("wisata_delete.php")
+    suspend fun hapusWisata(
+        @Field("id") id: Int
+    ): WisataActionResponse
 }

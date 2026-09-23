@@ -40,6 +40,12 @@ class WisataViewModel(aplikasi: Application) : AndroidViewModel(aplikasi) {
         }
     }
 
+    /** Memuat ulang seluruh daftar dari awal (page 1). Dipakai setelah aksi Tambah, Edit, atau Hapus. */
+    fun refreshData() {
+        kosongkanDaftar()
+        muatData()
+    }
+
     fun cari(kunci: String) {
         val kunciBaru = kunci.trim()
 

@@ -32,6 +32,10 @@
         <activity android:name=".ui.activity.MainActivity" />
 
         <activity android:name=".ui.activity.DetailWisataActivity" />
+
+        <activity android:name=".ui.activity.AddWisataActivity" />
+
+        <activity android:name=".ui.activity.EditWisataActivity" />
     </application>
 
 </manifest>

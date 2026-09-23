@@ -38,7 +38,7 @@ $base_url = "http://" . $_SERVER["HTTP_HOST"] . "/login_api/uploads/";
 $stmt = mysqli_prepare(
     $conn,
     "SELECT id, nama_wisata, kategori, lokasi, harga_tiket, deskripsi, foto
-     FROM wisata $syarat ORDER BY id ASC LIMIT ? OFFSET ?"
+     FROM wisata $syarat ORDER BY id DESC LIMIT ? OFFSET ?"
 );
 
 if ($sedang_mencari) {

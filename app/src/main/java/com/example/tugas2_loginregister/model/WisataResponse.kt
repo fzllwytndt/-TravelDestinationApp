@@ -40,3 +40,16 @@ data class WisataDetailResponse(
     @SerializedName("data")
     val data: Wisata? = null
 )
+
+/** Balasan aksi CRUD (Tambah, Edit, Hapus data). */
+data class WisataActionResponse(
+
+    @SerializedName("success")
+    val success: Boolean = false,
+
+    @SerializedName("message")
+    val message: String = "",
+
+    @SerializedName("data")
+    val data: Wisata? = null
+)

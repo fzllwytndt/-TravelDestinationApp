@@ -14,7 +14,14 @@
     <color name="teks_kedua">#FF6E7A72</color>
     <color name="garis">#FFE7E2D8</color>
 
-    <!-- Warna ikon love ketika wisata sudah masuk daftar favorit -->
+    <!-- Warna ikon love dan tombol hapus -->
     <color name="merah_favorit">#FFE53935</color>
+    <color name="merah_hapus">#FFC62828</color>
+    <color name="merah_hapus_gelap">#FFB71C1C</color>
+
+    <!-- Warna tombol aksi CRUD -->
+    <color name="ungu_tombol">#FF604EAA</color>
+    <color name="biru_tombol">#FF1565C0</color>
+    <color name="abu_pilih_foto">#FFE0E0E0</color>
 
 </resources>
