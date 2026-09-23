@@ -4,12 +4,16 @@ header("Content-Type: application/json");
 
 include "koneksi.php";
 
-$nama_wisata = trim($_POST["nama_wisata"] ?? "");
-$kategori    = trim($_POST["kategori"] ?? "");
-$lokasi      = trim($_POST["lokasi"] ?? "");
-$harga_tiket = (int) ($_POST["harga_tiket"] ?? 0);
-$deskripsi   = trim($_POST["deskripsi"] ?? "");
-$foto        = trim($_POST["foto"] ?? "");
+// Mendukung pembacaan dari $_POST, $_REQUEST, maupun raw JSON body
+$raw_body    = file_get_contents("php://input");
+$json_data   = json_decode($raw_body, true) ?? [];
+
+$nama_wisata = trim($_POST["nama_wisata"] ?? $_REQUEST["nama_wisata"] ?? $json_data["nama_wisata"] ?? "");
+$kategori    = trim($_POST["kategori"] ?? $_REQUEST["kategori"] ?? $json_data["kategori"] ?? "");
+$lokasi      = trim($_POST["lokasi"] ?? $_REQUEST["lokasi"] ?? $json_data["lokasi"] ?? "");
+$harga_tiket = (int) ($_POST["harga_tiket"] ?? $_REQUEST["harga_tiket"] ?? $json_data["harga_tiket"] ?? 0);
+$deskripsi   = trim($_POST["deskripsi"] ?? $_REQUEST["deskripsi"] ?? $json_data["deskripsi"] ?? "");
+$foto        = trim($_POST["foto"] ?? $_REQUEST["foto"] ?? $json_data["foto"] ?? "");
 
 if (empty($nama_wisata) || empty($kategori) || empty($lokasi) || empty($deskripsi)) {
     echo json_encode([
@@ -49,7 +53,7 @@ if (mysqli_stmt_execute($stmt)) {
 
     echo json_encode([
         "success" => true,
-        "message" => "Data wisata berhasil ditambahkan",
+        "message" => "Data wisata berhasil ditambahkan ke database MySQL",
         "data"    => [
             "id"          => $new_id,
             "nama_wisata" => $nama_wisata,
