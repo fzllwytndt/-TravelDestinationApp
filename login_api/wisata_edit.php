@@ -69,6 +69,11 @@ $stmt = mysqli_prepare(
 mysqli_stmt_bind_param($stmt, "sssissi", $nama_wisata, $kategori, $lokasi, $harga_tiket, $deskripsi, $foto, $id);
 
 if (mysqli_stmt_execute($stmt)) {
+    // Foto lama sudah tidak dipakai lagi bila fotonya berganti
+    if ($foto !== $existing["foto"]) {
+        hapus_foto($existing["foto"]);
+    }
+
     $base_url = "http://" . $_SERVER["HTTP_HOST"] . "/login_api/uploads/";
     $foto_url = (filter_var($foto, FILTER_VALIDATE_URL)) ? $foto : $base_url . rawurlencode($foto);
 
