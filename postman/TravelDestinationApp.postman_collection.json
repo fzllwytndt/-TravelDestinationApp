@@ -1,0 +1,256 @@
+{
+  "info": {
+    "name": "TravelDestinationApp API",
+    "description": "Koleksi endpoint login_api untuk TravelDestinationApp (Jelajah Jateng).\n\nPostman tidak terhubung langsung ke MySQL. Seluruh permintaan di sini dikirim ke API PHP, lalu API itu yang membaca dan menulis ke database MySQL `login_register`.\n\nSebelum dipakai:\n1. Nyalakan Apache dan MySQL pada XAMPP.\n2. Sesuaikan variabel `base_url` bila alamat servernya berbeda.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost/login_api",
+      "type": "string"
+    },
+    {
+      "key": "id_wisata",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "username", "value": "usercoba", "type": "text" },
+                { "key": "password", "value": "rahasia123", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/register.php",
+              "host": ["{{base_url}}"],
+              "path": ["register.php"]
+            },
+            "description": "Mendaftarkan user baru.\n\nAturan: username 3-20 karakter, hanya huruf, angka, dan _. Password minimal 6 karakter. Password disimpan dalam bentuk hash."
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "username", "value": "usercoba", "type": "text" },
+                { "key": "password", "value": "rahasia123", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/login.php",
+              "host": ["{{base_url}}"],
+              "path": ["login.php"]
+            },
+            "description": "Memeriksa username dan password. Balasan berisi user_id dan username bila berhasil."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wisata - Read",
+      "item": [
+        {
+          "name": "Daftar Wisata (pagination + pencarian)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/wisata.php?page=1&q=",
+              "host": ["{{base_url}}"],
+              "path": ["wisata.php"],
+              "query": [
+                { "key": "page", "value": "1", "description": "Nomor halaman, 10 data per halaman" },
+                { "key": "q", "value": "", "description": "Kata kunci pencarian pada nama_wisata dan deskripsi. Kosongkan untuk semua data" }
+              ]
+            },
+            "description": "Mengambil daftar wisata. Balasannya berisi `data` dan `meta` (total_data, total_page, current_page, per_page, keyword)."
+          }
+        },
+        {
+          "name": "Detail Wisata",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/wisata_detail.php?id={{id_wisata}}",
+              "host": ["{{base_url}}"],
+              "path": ["wisata_detail.php"],
+              "query": [
+                { "key": "id", "value": "{{id_wisata}}", "description": "ID wisata yang ingin dilihat" }
+              ]
+            },
+            "description": "Mengambil satu data wisata berdasarkan id."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wisata - Create",
+      "item": [
+        {
+          "name": "Tambah Wisata (tanpa unggah foto)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "nama_wisata", "value": "Candi Gedong Songo", "type": "text" },
+                { "key": "kategori", "value": "Sejarah", "type": "text" },
+                { "key": "lokasi", "value": "Bandungan, Kabupaten Semarang", "type": "text" },
+                { "key": "harga_tiket", "value": "30000", "type": "text" },
+                { "key": "deskripsi", "value": "Kompleks candi Hindu di lereng Gunung Ungaran.", "type": "text" },
+                { "key": "foto", "value": "", "type": "text", "description": "Boleh diisi URL gambar atau nama file. Kalau kosong, server memakai logo_wisata.png" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/wisata_add.php",
+              "host": ["{{base_url}}"],
+              "path": ["wisata_add.php"]
+            },
+            "description": "Menambah data wisata tanpa mengunggah file. Kolom `foto` boleh berisi URL gambar, nama file yang sudah ada di folder uploads, atau dikosongkan."
+          }
+        },
+        {
+          "name": "Tambah Wisata (dengan unggah foto)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "nama_wisata", "value": "Dusun Semilir", "type": "text" },
+                { "key": "kategori", "value": "Rekreasi", "type": "text" },
+                { "key": "lokasi", "value": "Bawen, Kabupaten Semarang", "type": "text" },
+                { "key": "harga_tiket", "value": "25000", "type": "text" },
+                { "key": "deskripsi", "value": "Kawasan wisata dengan bangunan ala Eropa dan perahu.", "type": "text" },
+                { "key": "foto_file", "type": "file", "src": [], "description": "Pilih file gambar dari komputer. Nama field WAJIB foto_file" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/wisata_add.php",
+              "host": ["{{base_url}}"],
+              "path": ["wisata_add.php"]
+            },
+            "description": "Menambah data wisata sekaligus mengunggah file gambar.\n\nPada tab Body pilih form-data, lalu untuk baris `foto_file` ubah tipenya dari Text menjadi File, baru pilih gambarnya. File akan disimpan ke folder login_api/uploads/ dan nama filenya dicatat di database."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wisata - Update",
+      "item": [
+        {
+          "name": "Edit Wisata (tanpa ganti foto)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "id", "value": "{{id_wisata}}", "type": "text" },
+                { "key": "nama_wisata", "value": "Candi Gedong Songo", "type": "text" },
+                { "key": "kategori", "value": "Sejarah", "type": "text" },
+                { "key": "lokasi", "value": "Bandungan, Kabupaten Semarang", "type": "text" },
+                { "key": "harga_tiket", "value": "35000", "type": "text" },
+                { "key": "deskripsi", "value": "Deskripsi yang sudah diperbarui.", "type": "text" },
+                { "key": "foto", "value": "", "type": "text", "description": "Kosongkan agar foto lama tetap dipakai" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/wisata_edit.php",
+              "host": ["{{base_url}}"],
+              "path": ["wisata_edit.php"]
+            },
+            "description": "Memperbarui data wisata. Seluruh kolom wajib dikirim ulang, bukan hanya yang berubah."
+          }
+        },
+        {
+          "name": "Edit Wisata (JSON)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"nama_wisata\": \"Candi Gedong Songo\",\n  \"kategori\": \"Sejarah\",\n  \"lokasi\": \"Bandungan, Kabupaten Semarang\",\n  \"harga_tiket\": 35000,\n  \"deskripsi\": \"Dikirim memakai raw JSON.\",\n  \"foto\": \"\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/wisata_edit.php",
+              "host": ["{{base_url}}"],
+              "path": ["wisata_edit.php"]
+            },
+            "description": "wisata_add.php dan wisata_edit.php juga menerima raw JSON. Cara ini tidak bisa dipakai untuk mengunggah file."
+          }
+        },
+        {
+          "name": "Edit Wisata (ganti foto)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "id", "value": "{{id_wisata}}", "type": "text" },
+                { "key": "nama_wisata", "value": "Candi Gedong Songo", "type": "text" },
+                { "key": "kategori", "value": "Sejarah", "type": "text" },
+                { "key": "lokasi", "value": "Bandungan, Kabupaten Semarang", "type": "text" },
+                { "key": "harga_tiket", "value": "35000", "type": "text" },
+                { "key": "deskripsi", "value": "Foto diganti dengan gambar baru.", "type": "text" },
+                { "key": "foto_file", "type": "file", "src": [], "description": "Ubah tipe baris ini menjadi File, lalu pilih gambarnya" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/wisata_edit.php",
+              "host": ["{{base_url}}"],
+              "path": ["wisata_edit.php"]
+            },
+            "description": "Mengganti foto wisata. File foto lama di folder uploads ikut dihapus, kecuali foto bawaan dan foto yang berupa URL luar."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wisata - Delete",
+      "item": [
+        {
+          "name": "Hapus Wisata",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "id", "value": "{{id_wisata}}", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/wisata_delete.php",
+              "host": ["{{base_url}}"],
+              "path": ["wisata_delete.php"]
+            },
+            "description": "Menghapus data wisata beserta file fotonya di folder uploads.\n\nHati-hati: endpoint ini langsung menghapus. Konfirmasi Alert Dialog hanya ada di aplikasi Android, bukan di API."
+          }
+        }
+      ]
+    }
+  ]
+}

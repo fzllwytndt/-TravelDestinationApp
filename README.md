@@ -184,6 +184,7 @@ private fun konfirmasiHapus() {
 | Berkas | Kegunaan |
 |---|---|
 | `utils/PesanGagal.kt` | Menerjemahkan kegagalan request API menjadi kalimat yang mudah dipahami, dipakai bersama oleh ViewModel Tambah, Edit, dan Hapus |
+| `postman/TravelDestinationApp.postman_collection.json` | Koleksi Postman berisi seluruh endpoint API untuk menguji CRUD tanpa membuka aplikasi Android |
 
 ## File yang Berubah
 
@@ -247,6 +248,36 @@ private fun konfirmasiHapus() {
 | Daftar data | RecyclerView + ListAdapter |
 | Gambar | Glide |
 | Tata letak | ConstraintLayout + Material Components |
+
+## Menguji API dengan Postman
+
+Postman tidak dapat tersambung langsung ke MySQL, karena MySQL memakai protokolnya sendiri pada port 3306 sedangkan Postman hanya berbicara lewat HTTP. Yang dihubungi Postman adalah **API PHP**, lalu API itu yang membaca dan menulis ke database.
+
+```
+Postman  ->  HTTP  ->  API PHP (login_api)  ->  MySQL (login_register)
+```
+
+Berkas `postman/TravelDestinationApp.postman_collection.json` berisi seluruh endpoint yang siap dipakai. Cara memakainya:
+
+1. Buka Postman, pilih **Import**, lalu pilih berkas koleksi tersebut.
+2. Buka tab **Variables** pada koleksi, sesuaikan `base_url` bila perlu:
+   - Dijalankan dari laptop yang sama: `http://localhost/login_api`
+   - Dijalankan dari HP atau perangkat lain: `http://<IP laptop>/login_api`
+3. Untuk permintaan yang mengunggah foto, buka tab **Body**, pilih **form-data**, lalu pada baris `foto_file` ubah tipenya dari **Text** menjadi **File** dan pilih gambarnya.
+
+| Permintaan | Method | Endpoint | Catatan |
+|---|---|---|---|
+| Register | POST | `register.php` | `username`, `password` |
+| Login | POST | `login.php` | `username`, `password` |
+| Daftar Wisata | GET | `wisata.php` | `page`, `q` |
+| Detail Wisata | GET | `wisata_detail.php` | `id` |
+| Tambah Wisata | POST | `wisata_add.php` | Tersedia versi tanpa foto dan versi unggah `foto_file` |
+| Edit Wisata | POST | `wisata_edit.php` | Tersedia versi form, raw JSON, dan ganti foto |
+| Hapus Wisata | POST | `wisata_delete.php` | `id` |
+
+Kolom `foto` dan bagian `foto_file` bersifat pilihan. Bila keduanya kosong, server memakai gambar bawaan `logo_wisata.png`.
+
+Perlu diingat, endpoint `wisata_delete.php` langsung menghapus data begitu dipanggil. Alert Dialog konfirmasi hanya ada di aplikasi Android, bukan di API.
 
 ## Cara Menjalankan
 
