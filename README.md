@@ -89,25 +89,28 @@ Kolom `foto` pada MySQL hanya menyimpan **nama file**, sedangkan gambarnya berup
 ## Alur Unggah Foto Wisata
 
 ```
-        Menekan Area Foto
-                |
-      Pemilih Gambar Android
-                |
-        Foto Dipilih -> Pratinjau
-                |
-      Diperkecil jadi JPEG (maks 1280px)
-                |
-      Dikirim sebagai multipart "foto_file"
-                |
-        +-------+-------+
-        |               |
-  Folder uploads/   Kolom foto
-   (file gambar)    (nama file)
-        |               |
-        +-------+-------+
-                |
-          Kolom foto_url
-   (alamat lengkap untuk Glide)
+Pengguna menekan area foto pada form
+        |
+        v
+Pemilih gambar bawaan Android terbuka
+        |
+        v
+Foto dipilih  ->  langsung tampil sebagai pratinjau
+        |
+        v
+Foto diperkecil menjadi JPEG maksimal 1280 piksel
+        |
+        v
+Dikirim ke API sebagai multipart "foto_file"
+        |
+        v
+PHP menyimpan file gambar ke folder uploads/
+        |
+        v
+MySQL mencatat nama filenya pada kolom foto
+        |
+        v
+API mengembalikan foto_url untuk ditampilkan Glide
 ```
 
 ## File Baru pada Tugas Ini
@@ -154,7 +157,47 @@ Kolom `foto` pada MySQL hanya menyimpan **nama file**, sedangkan gambarnya berup
 | `res/values/colors.xml` | Menambahkan warna tombol CRUD (`ungu_tombol`, `biru_tombol`, `merah_hapus`) dan `putih_kabut` |
 | `res/values/strings.xml` | Menambahkan string pendukung halaman Tambah, Edit, dan Hapus Wisata |
 
-## Tangkapan Layar (Tugas 7)
+## Penanganan Kondisi
+
+| Kondisi | Yang ditampilkan aplikasi |
+|---|---|
+| Sedang mengirim data ke API | ProgressBar tampil dan tombol Simpan dinonaktifkan sementara |
+| Form kosong | Muncul pesan singkat "Form Kosong: Harap isi semua field data wisata" dan data tidak jadi dikirim |
+| Foto belum dipilih | Data tetap dapat disimpan, server memakai gambar bawaan `logo_wisata.png` |
+| Foto berhasil dipilih | Foto langsung tampil sebagai pratinjau dan label berubah menjadi "Ganti Foto Wisata" |
+| Foto gagal dibaca | Muncul pesan "Foto yang dipilih tidak dapat dibaca. Coba pilih foto lain." |
+| Layar diputar saat mengisi form | Foto yang sudah dipilih tetap tampil karena disimpan pada `onSaveInstanceState` |
+| Tambah atau Edit berhasil | Muncul pesan dari server, halaman ditutup, dan daftar pada Home dimuat ulang otomatis |
+| Tambah, Edit, atau Hapus gagal | Pesan kegagalan dari server ditampilkan dan tombol aktif kembali |
+| Menekan tombol Hapus Wisata | Muncul dialog konfirmasi lebih dulu, penghapusan baru berjalan setelah dibenarkan |
+| Server tidak terjangkau | Muncul keterangan gagal beserta dialog **Alamat server** untuk mengganti IP |
+
+## Teknologi
+
+| Bagian | Yang dipakai |
+|---|---|
+| Bahasa | Kotlin |
+| Backend | PHP + MySQL (XAMPP) |
+| Jaringan | Retrofit + Gson + OkHttp Logging Interceptor |
+| Unggah berkas | Retrofit `@Multipart` + OkHttp `MultipartBody` |
+| Pemilih gambar | `ActivityResultContracts.PickVisualMedia` (tanpa izin penyimpanan) |
+| Arsitektur | MVVM (Repository, ViewModel, LiveData) |
+| Proses latar | Coroutine (`viewModelScope`, `Dispatchers.IO`) |
+| Database lokal | Room 2.8.5 |
+| Gambar | Glide |
+| Tata letak | ConstraintLayout + Material Components |
+
+## Cara Menjalankan
+
+1. Nyalakan **Apache** dan **MySQL** pada XAMPP.
+2. Pastikan folder `login_api` berada di dalam `htdocs`, lalu import `database.sql` dan `database_wisata.sql`.
+3. Pastikan folder `login_api/uploads/` dapat ditulis oleh Apache, karena foto yang diunggah disimpan di sana.
+4. Samakan alamat server pada aplikasi dengan IP laptop (`ipconfig`). Alamat dapat diubah lewat dialog **Alamat server** yang muncul ketika aplikasi gagal terhubung.
+5. Jalankan aplikasi, lakukan Login, lalu tekan **Floating Action Button** pada halaman Home untuk membuka form Tambah Wisata.
+6. Tekan area foto untuk memilih gambar dari galeri, lengkapi sisa form, lalu tekan **Simpan Wisata**.
+7. Untuk mengubah atau menghapus, buka salah satu wisata pada Home lalu pakai tombol **EDIT WISATA** atau **Hapus Wisata**.
+
+## Tangkapan Layar
 
 | Form Tambah Wisata | Detail Wisata dengan Edit & Hapus | Form Edit Wisata |
 |:---:|:---:|:---:|
@@ -166,7 +209,7 @@ Kolom `foto` pada MySQL hanya menyimpan **nama file**, sedangkan gambarnya berup
 | <img src="screenshot/33-pilih-foto-galeri.png" width="230"> | <img src="screenshot/34-tambah-wisata-foto-terpilih.png" width="230"> | <img src="screenshot/35-edit-wisata-ganti-foto.png" width="230"> |
 | Menekan area foto membuka pemilih gambar bawaan Android, tanpa meminta izin penyimpanan | Foto langsung tampil sebagai pratinjau dan labelnya berubah menjadi **Ganti Foto Wisata** | Halaman Edit menampilkan foto lama dari server, siap diganti dengan foto baru |
 
-## Catatan (Tugas 7)
+## Catatan
 
 - Pemilih gambar memakai `ActivityResultContracts.PickVisualMedia`, jadi aplikasi **tidak memerlukan izin akses penyimpanan** sama sekali.
 - Foto diperkecil menjadi JPEG dengan sisi terpanjang 1280 piksel sebelum dikirim. Tanpa langkah ini, foto ponsel yang berukuran 3-8 MB akan ditolak XAMPP yang secara bawaan hanya menerima unggahan 2 MB.
