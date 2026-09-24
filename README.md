@@ -198,6 +198,10 @@ private fun konfirmasiHapus() {
 | `ui/activity/EditWisataActivity.kt` | Pemeriksaan form kosong dihapus dari Activity dengan alasan yang sama |
 | `ui/activity/DetailWisataActivity.kt` | Judul Alert Dialog hapus diambil dari `strings.xml`, tidak lagi ditulis langsung di kode |
 | `utils/FotoHelper.kt` | Memperbaiki pembacaan foto galeri yang selalu gagal sehingga unggah foto pada Create dan Update kini berjalan |
+| `data/local/room/FavoriteWisata.kt` | Menambah kolom `username` dan memakai kunci utama gabungan `id` + `username` supaya favorit terpisah per akun |
+| `data/local/room/FavoriteWisataDao.kt` | Seluruh query favorit disaring berdasarkan akun yang sedang login |
+| `data/local/room/WisataDatabase.kt` | Naik ke versi 2 beserta migrasi `MIGRASI_1_2` |
+| `repository/FavoriteRepository.kt` | Menentukan pemilik data favorit dari `SessionManager`, dan memisahkan batal favorit dari penghapusan wisata |
 
 ## Penanganan Kondisi
 
@@ -311,6 +315,8 @@ Alamat `http://localhost/login_api` saja bukan endpoint, melainkan nama folder. 
 - Pesan gagal CRUD dikumpulkan di `PesanGagal` supaya Tambah, Edit, dan Hapus memakai gaya kalimat yang sama, dan pengguna tidak lagi melihat pesan teknis seperti `java.net.ConnectException`.
 - Alert Dialog hapus memakai tombol **Ya, Hapus** dan **Batal**. Memilih **Batal** tidak mengirim apa pun ke API, jadi data tetap utuh.
 - Setelah Create, Update, atau Delete berhasil, Home Fragment memuat ulang daftar dari halaman pertama lewat `refreshData()` sehingga daftar selalu sama dengan isi database.
+- Daftar favorit sebelumnya ikut terbawa ketika pengguna berganti akun, karena tabel `favorite_wisata` sama sekali tidak menyimpan penanda pemilik. Sekarang setiap baris menyimpan `username` pemiliknya dan seluruh query menyaring berdasarkan akun yang sedang login, jadi satu perangkat dapat dipakai beberapa akun dengan daftar favorit masing-masing.
+- Menghapus wisata dari server membuang wisata itu dari favorit **seluruh akun** (`hapusSemuaAkun`), sedangkan menekan ikon love hanya membatalkan favorit **akun yang sedang login** (`hapus`). Dua hal ini dulu memakai perintah yang sama.
 - Unggah foto sebelumnya selalu gagal dengan pesan "Foto yang dipilih tidak dapat dibaca". Penyebabnya pada `FotoHelper`: ketika `inJustDecodeBounds` bernilai `true`, `BitmapFactory.decodeStream()` memang selalu mengembalikan `null` dan hanya mengisi `outWidth` serta `outHeight`, tetapi nilai `null` itu ikut diperiksa sehingga proses berhenti sebelum gambar sempat dibaca. Sekarang keberhasilannya diperiksa dari ukuran gambar, bukan dari nilai kembalian `decodeStream()`.
 
 ---

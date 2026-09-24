@@ -52,8 +52,8 @@ class DetailWisataViewModel(aplikasi: Application) : AndroidViewModel(aplikasi) 
             try {
                 val balasan = wisataRepository.hapusWisata(id)
                 if (balasan.success) {
-                    // Hapus dari Room Database favorit jika sebelumnya di-favorite
-                    favoriteRepository.hapus(id)
+                    // Wisatanya sudah tidak ada di server, jadi dibuang dari favorit seluruh akun
+                    favoriteRepository.hapusSemuaAkun(id)
                     _kondisiHapus.value = UiState.Berhasil(balasan.message.ifBlank { "Data wisata berhasil dihapus" })
                 } else {
                     _kondisiHapus.value = UiState.Gagal(balasan.message.ifBlank { "Gagal menghapus data wisata" })
