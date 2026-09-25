@@ -1,0 +1,14 @@
+# Perhitungan bahasa pada halaman GitHub mengikuti kode aplikasi Android saja.
+# Berkas pendukung di bawah ini ditandai supaya tidak ikut dihitung,
+# sehingga bagian Bahasa menampilkan Kotlin sebagai bahasa aplikasi ini.
+
+# Backend API PHP
+login_api/** linguist-vendored
+
+# Skrip bawaan Gradle Wrapper, bukan tulisan sendiri
+gradlew      linguist-vendored
+gradlew.bat  linguist-vendored
+
+# Berkas data dan tata letak
+*.xml linguist-detectable=false
+*.sql linguist-detectable=false
