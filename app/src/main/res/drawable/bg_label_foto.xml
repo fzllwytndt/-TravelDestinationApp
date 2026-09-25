@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Latar tanda + supaya tetap terbaca walaupun menumpuk di atas foto wisata -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <solid android:color="@color/putih_kabut" />
+
+    <corners android:radius="12dp" />
+
+</shape>

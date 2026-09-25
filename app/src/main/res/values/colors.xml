@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Warna utama, diambil langsung dari logo Jelajah Jateng -->
+    <color name="hijau_malam">#FF050F0E</color>
+    <color name="hijau_hutan">#FF142F1E</color>
+    <color name="emas">#FFE4B671</color>
+    <color name="emas_muda">#FFF7EBD6</color>
+
+    <!-- Warna netral untuk latar, kartu, dan teks -->
+    <color name="krem">#FFF6F3EC</color>
+    <color name="putih">#FFFFFFFF</color>
+    <color name="teks_utama">#FF16211B</color>
+    <color name="teks_kedua">#FF6E7A72</color>
+    <color name="garis">#FFE7E2D8</color>
+
+    <!-- Warna ikon love dan tombol hapus -->
+    <color name="merah_favorit">#FFE53935</color>
+    <color name="merah_hapus">#FFC62828</color>
+    <color name="merah_hapus_gelap">#FFB71C1C</color>
+
+    <!-- Warna tombol aksi CRUD -->
+    <color name="ungu_tombol">#FF604EAA</color>
+    <color name="biru_tombol">#FF1565C0</color>
+    <color name="abu_pilih_foto">#FFE0E0E0</color>
+
+    <!-- Putih tembus pandang untuk latar tanda + di atas foto wisata -->
+    <color name="putih_kabut">#E6FFFFFF</color>
+
+</resources>
