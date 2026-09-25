@@ -184,7 +184,6 @@ private fun konfirmasiHapus() {
 | Berkas | Kegunaan |
 |---|---|
 | `utils/PesanGagal.kt` | Menerjemahkan kegagalan request API menjadi kalimat yang mudah dipahami, dipakai bersama oleh ViewModel Tambah, Edit, dan Hapus |
-| `postman/TravelDestinationApp.postman_collection.json` | Koleksi Postman berisi seluruh endpoint API untuk menguji CRUD tanpa membuka aplikasi Android |
 | `login_api/index.php` | Halaman depan folder API, mengarahkan `login_api/` ke `wisata.php` sekaligus menutup daftar isi folder yang sebelumnya terbuka |
 
 ## File yang Berubah
@@ -262,13 +261,12 @@ Postman tidak dapat tersambung langsung ke MySQL, karena MySQL memakai protokoln
 Postman  ->  HTTP  ->  API PHP (login_api)  ->  MySQL (login_register)
 ```
 
-Berkas `postman/TravelDestinationApp.postman_collection.json` berisi seluruh endpoint yang siap dipakai. Cara memakainya:
+Seluruh endpoint di bawah dapat dibuat sendiri di Postman. Dua hal yang perlu disesuaikan:
 
-1. Buka Postman, pilih **Import**, lalu pilih berkas koleksi tersebut.
-2. Buka tab **Variables** pada koleksi, sesuaikan `base_url` bila perlu:
+1. Alamat dasar sebelum nama berkas endpoint:
    - Dijalankan dari laptop yang sama: `http://localhost/login_api`
    - Dijalankan dari HP atau perangkat lain: `http://<IP laptop>/login_api`
-3. Untuk permintaan yang mengunggah foto, buka tab **Body**, pilih **form-data**, lalu pada baris `foto_file` ubah tipenya dari **Text** menjadi **File** dan pilih gambarnya.
+2. Untuk permintaan yang mengunggah foto, buka tab **Body**, pilih **form-data**, lalu pada baris `foto_file` ubah tipenya dari **Text** menjadi **File** dan pilih gambarnya.
 
 | Permintaan | Method | Endpoint | Catatan |
 |---|---|---|---|
