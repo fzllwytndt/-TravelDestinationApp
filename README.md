@@ -246,18 +246,18 @@ Kedua dashboard memakai susunan yang sama, yaitu `BottomNavigationView` dengan t
 
 | Menu | Dashboard Admin (`AdminWisataActivity`) | Dashboard User (`MainActivity`) |
 |---|---|---|
-| Home | `HomeAdminFragment` — daftar wisata **+ tombol Tambah** | `HomeUserFragment` — daftar wisata saja |
-| Favorit | `FavoriteAdminFragment` | `FavoriteUserFragment` |
+| Home | `AdminHomeFragment` — daftar wisata **+ tombol Tambah** | `UserHomeFragment` — daftar wisata saja |
+| Favorit | `AdminFavoriteFragment` | `UserFavoriteFragment` |
 | Profil | `ProfileFragment` | `ProfileFragment` |
 
 Halaman detail juga dipisah:
 
 | Halaman | Isi |
 |---|---|
-| `DetailWisataAdminActivity` | Detail + tombol favorit + tombol **EDIT WISATA** dan **Hapus Wisata** |
-| `DetailWisataUserActivity` | Detail + tombol favorit saja |
+| `AdminDetailWisataActivity` | Detail + tombol favorit + tombol **EDIT WISATA** dan **Hapus Wisata** |
+| `UserDetailWisataActivity` | Detail + tombol favorit saja |
 
-Halaman `AddWisataAdminActivity` dan `EditWisataActivity` hanya dapat dicapai dari halaman milik Admin, jadi Role User tidak memiliki jalan masuk ke sana.
+Halaman `AdminAddWisataActivity` dan `AdminEditWisataActivity` hanya dapat dicapai dari halaman milik Admin, jadi Role User tidak memiliki jalan masuk ke sana.
 
 Halaman **Profil** dipakai bersama karena isinya sama untuk kedua role, hanya saja sekarang menampilkan role akun yang sedang login di bawah namanya.
 
@@ -268,9 +268,9 @@ Halaman **Profil** dipakai bersama karena isinya sama untuk kedua role, hanya sa
 | `login_api/cek_admin.php` | Penjaga hak akses endpoint CRUD, memastikan pengirim permintaan benar-benar terdaftar pada tabel `admin` |
 | `login_api/akun.php` | Menampilkan daftar akun dari tabel `admin` dan `user`, dipakai untuk memeriksa isi kedua tabel lewat Postman |
 | `ui/activity/AdminWisataActivity.kt` | Dashboard Admin, memuat Fragment versi Admin |
-| `ui/activity/DetailWisataUserActivity.kt` | Halaman Detail Wisata untuk Role User, tanpa tombol Edit dan Hapus |
-| `ui/fragment/HomeUserFragment.kt` | Halaman Home untuk Role User, tanpa tombol Tambah Wisata |
-| `ui/fragment/FavoriteUserFragment.kt` | Halaman Favorit untuk Role User, membuka detail versi User |
+| `ui/activity/UserDetailWisataActivity.kt` | Halaman Detail Wisata untuk Role User, tanpa tombol Edit dan Hapus |
+| `ui/fragment/UserHomeFragment.kt` | Halaman Home untuk Role User, tanpa tombol Tambah Wisata |
+| `ui/fragment/UserFavoriteFragment.kt` | Halaman Favorit untuk Role User, membuka detail versi User |
 | `res/layout/activity_admin_wisata.xml` | Tata letak Dashboard Admin |
 | `res/layout/activity_detail_wisata_user.xml` | Tata letak Detail Wisata versi User |
 | `res/layout/fragment_home_user.xml` | Tata letak Home versi User |
@@ -299,15 +299,16 @@ Halaman **Profil** dipakai bersama karena isinya sama untuk kedua role, hanya sa
 | `ui/activity/SplashActivity.kt` | Memeriksa session lalu membuka dashboard sesuai role |
 | `ui/activity/LoginActivity.kt` | Menyimpan role hasil login lalu membuka dashboard sesuai role |
 | `ui/activity/MainActivity.kt` | Menjadi Dashboard User, memuat Fragment versi User |
-| `ui/activity/DetailWisataAdminActivity.kt` | Ganti nama dari `DetailWisataActivity`, kini khusus Role Admin |
-| `ui/activity/AddWisataAdminActivity.kt` | Ganti nama dari `AddWisataActivity`, kini khusus Role Admin |
-| `ui/fragment/HomeAdminFragment.kt` | Ganti nama dari `HomeFragment`, kini khusus Role Admin |
-| `ui/fragment/FavoriteAdminFragment.kt` | Ganti nama dari `FavoriteFragment`, kini khusus Role Admin |
+| `ui/activity/AdminDetailWisataActivity.kt` | Ganti nama dari `DetailWisataActivity`, kini khusus Role Admin |
+| `ui/activity/AdminAddWisataActivity.kt` | Ganti nama dari `AddWisataActivity`, kini khusus Role Admin |
+| `ui/activity/AdminEditWisataActivity.kt` | Ganti nama dari `EditWisataActivity`, kini khusus Role Admin |
+| `ui/fragment/AdminHomeFragment.kt` | Ganti nama dari `HomeFragment`, kini khusus Role Admin |
+| `ui/fragment/AdminFavoriteFragment.kt` | Ganti nama dari `FavoriteFragment`, kini khusus Role Admin |
 | `ui/fragment/ProfileFragment.kt` | Menampilkan role akun yang sedang login |
 | `res/layout/fragment_profile.xml` | Menambah keterangan role di bawah nama akun |
 | `res/layout/fragment_home_admin.xml` | Ganti nama dari `fragment_home.xml` |
 | `res/layout/activity_detail_wisata_admin.xml` | Ganti nama dari `activity_detail_wisata.xml` |
-| `AndroidManifest.xml` | Mendaftarkan `AdminWisataActivity` dan `DetailWisataUserActivity`, serta mengelompokkan Activity per role |
+| `AndroidManifest.xml` | Mendaftarkan `AdminWisataActivity` dan `UserDetailWisataActivity`, serta mengelompokkan Activity per role |
 
 ## Penanganan Kondisi
 
@@ -432,12 +433,12 @@ Seluruh gambar di bawah diambil dari satu perangkat yang sama, hanya berbeda aku
 | Dashboard Admin – ada tombol Tambah | Dashboard User – tanpa tombol Tambah |
 |:---:|:---:|
 | <img src="screenshot/37-home-admin.png" width="230"> | <img src="screenshot/38-home-user.png" width="230"> |
-| `HomeAdminFragment` di dalam `AdminWisataActivity`. **Floating Action Button** untuk menambah wisata tersedia di kanan bawah | `HomeUserFragment` di dalam `MainActivity`. Daftar dan pencarian tetap sama, tetapi tombol tambah memang tidak dibuat |
+| `AdminHomeFragment` di dalam `AdminWisataActivity`. **Floating Action Button** untuk menambah wisata tersedia di kanan bawah | `UserHomeFragment` di dalam `MainActivity`. Daftar dan pencarian tetap sama, tetapi tombol tambah memang tidak dibuat |
 
 | Detail Wisata – Role Admin | Detail Wisata – Role User |
 |:---:|:---:|
 | <img src="screenshot/39-detail-admin-crud.png" width="230"> | <img src="screenshot/40-detail-user-tanpa-crud.png" width="230"> |
-| `DetailWisataAdminActivity` menyediakan **EDIT WISATA** dan **Hapus Wisata** di baris paling bawah | `DetailWisataUserActivity` hanya menampilkan detail dan tombol favorit, tanpa baris aksi CRUD |
+| `AdminDetailWisataActivity` menyediakan **EDIT WISATA** dan **Hapus Wisata** di baris paling bawah | `UserDetailWisataActivity` hanya menampilkan detail dan tombol favorit, tanpa baris aksi CRUD |
 
 | Profil – Role Admin | Profil – Role User |
 |:---:|:---:|
