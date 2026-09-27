@@ -12,6 +12,37 @@ if (!$conn) {
 }
 
 /**
+ * Akun disimpan pada dua tabel terpisah: `admin` dan `user`.
+ * Nama tabelnya sekaligus menjadi role akun, jadi tidak ada kolom role.
+ *
+ * Fungsi ini mencari satu username pada kedua tabel, lalu mengembalikan
+ * datanya beserta role-nya. Tabel admin diperiksa lebih dulu.
+ * Bila username tidak ditemukan di mana pun, hasilnya null.
+ */
+function cari_akun($conn, $username)
+{
+    foreach (["admin", "user"] as $role) {
+
+        $stmt = mysqli_prepare(
+            $conn,
+            "SELECT id, username, password FROM `" . $role . "` WHERE username = ?"
+        );
+
+        mysqli_stmt_bind_param($stmt, "s", $username);
+        mysqli_stmt_execute($stmt);
+
+        $baris = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+
+        if ($baris) {
+            $baris["role"] = $role;
+            return $baris;
+        }
+    }
+
+    return null;
+}
+
+/**
  * Menghapus file foto di folder uploads agar tidak menumpuk jadi sampah.
  * Foto bawaan dan foto yang berupa URL luar sengaja dilewati.
  */

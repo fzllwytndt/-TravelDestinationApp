@@ -29,7 +29,7 @@ Sebelumnya siapa pun yang berhasil login langsung mendapat halaman yang sama bes
 - **Role User** — hanya dapat melihat. Daftar wisata, pencarian, detail wisata, dan favorit tetap tersedia, tetapi tombol **Tambah**, **Edit**, dan **Hapus** tidak ada sama sekali.
 - **Role Admin** — mendapat seluruh fitur User ditambah **CRUD** data wisata.
 
-Role tidak ditebak oleh aplikasi. Ketika login, Backend memeriksa akun beserta kolom `role` pada tabel `users`, lalu mengirimkannya kembali lewat response API. Aplikasi menyimpan role itu ke **Session** memakai **SharedPreferences**, dan dari situlah aplikasi menentukan dashboard mana yang dibuka.
+Role tidak ditebak oleh aplikasi. Akun disimpan pada **dua tabel terpisah**, yaitu `admin` dan `user`, sehingga nama tabelnya sekaligus menjadi role akun. Ketika login, Backend mencari akun pada kedua tabel, lalu mengirimkan role-nya kembali lewat response API. Aplikasi menyimpan role itu ke **Session** memakai **SharedPreferences**, dan dari situlah aplikasi menentukan dashboard mana yang dibuka.
 
 Selama pengguna belum menekan **Logout**, session tetap tersimpan. Jadi ketika aplikasi ditutup lalu dibuka lagi, pengguna tidak perlu login ulang dan langsung diarahkan ke dashboard sesuai role-nya. Saat Logout, session beserta role dihapus sehingga pengguna kembali ke halaman Login dan tidak dapat masuk lagi memakai session lama.
 
@@ -38,7 +38,7 @@ Seluruh kode ditulis dengan cara yang paling sederhana supaya bagian Role, Login
 ## Ketentuan Fitur
 
 - Mengimplementasikan **Role User** dan **Role Admin** pada sistem login.
-- Role pengguna ditentukan oleh **Backend**, yaitu dari kolom `role` pada tabel `users`, lalu dikirim ke aplikasi setelah login berhasil.
+- Role pengguna ditentukan oleh **Backend**, yaitu dari tabel tempat akun tersimpan (`admin` atau `user`), lalu dikirim ke aplikasi setelah login berhasil.
 - Halaman **Register** menyediakan pilihan **Daftar sebagai: User atau Admin**, sehingga role akun ditentukan sejak pendaftaran.
 - Login dengan **Role User** diarahkan ke **Dashboard User**.
 - Login dengan **Role Admin** diarahkan ke **Dashboard Admin**.
@@ -121,15 +121,72 @@ Riwayat halaman ikut dibersihkan memakai `FLAG_ACTIVITY_NEW_TASK` + `FLAG_ACTIVI
 
 ## Role pada Backend
 
-Kolom `role` ditambahkan ke tabel `users` sebagai `ENUM('admin', 'user')` dengan nilai bawaan `user`:
+Akun **tidak** disimpan pada satu tabel dengan kolom `role`, melainkan dipisah menjadi **dua tabel**: `admin` dan `user`. Nama tabelnya sekaligus menjadi role akun, jadi tidak ada kolom `role` sama sekali.
 
-```sql
-ALTER TABLE users ADD role ENUM('admin', 'user') NOT NULL DEFAULT 'user' AFTER password;
+```
+login_register
+  |
+  +-- admin    -> akun ber-role Admin
+  +-- user     -> akun ber-role User
+  +-- wisata   -> data wisata
 ```
 
-Nilai bawaan `user` membuat seluruh akun yang sudah terdaftar sebelumnya otomatis menjadi pengguna biasa.
+Struktur keduanya dibuat sama persis supaya dapat dicari memakai perintah yang sama:
 
-Untuk akun baru, role diambil dari pilihan **Daftar sebagai** pada halaman Register lalu dikirim ke `register.php`. Nilai selain `admin` dan `user` ditolak supaya kolom ENUM tidak terisi nilai yang tidak dikenal:
+```sql
+CREATE TABLE IF NOT EXISTS admin (
+    id         INT(11) NOT NULL AUTO_INCREMENT,
+    username   VARCHAR(50) NOT NULL,
+    password   VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY username (username)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `user` (
+    ... struktur sama persis ...
+);
+```
+
+### Mencari Akun pada Dua Tabel
+
+Karena akunnya terpisah, pencarian dikumpulkan pada satu fungsi `cari_akun()` di `koneksi.php` supaya `login.php`, `register.php`, dan `cek_admin.php` tidak menulis ulang perintah yang sama:
+
+```
+cari_akun($conn, $username)
+        |
+   cek tabel admin
+        |
+   ketemu? --- ya ---> kembalikan data + role = "admin"
+        |
+      tidak
+        |
+   cek tabel user
+        |
+   ketemu? --- ya ---> kembalikan data + role = "user"
+        |
+      tidak
+        |
+   kembalikan null
+```
+
+`login.php` memakai hasilnya untuk mengirim role pada response:
+
+```json
+{
+    "success": true,
+    "message": "Login berhasil sebagai admin",
+    "user_id": 1,
+    "username": "atik",
+    "role": "admin"
+}
+```
+
+Bentuk response-nya sama persis seperti sebelumnya, jadi **sisi Android tidak perlu diubah sama sekali** ketika struktur tabel diganti. Aplikasi cukup tahu role-nya, bukan dari tabel mana datangnya.
+
+### Register Menentukan Tabel Tujuan
+
+Pilihan **Daftar sebagai** pada halaman Register menentukan akun disimpan ke tabel yang mana. Nilai selain `admin` dan `user` ditolak supaya tidak ada percobaan menulis ke tabel yang tidak dikenal:
 
 ```php
 if ($role !== "admin" && $role !== "user") {
@@ -139,36 +196,22 @@ if ($role !== "admin" && $role !== "user") {
     ]);
     exit;
 }
+
+$stmt = mysqli_prepare($conn, "INSERT INTO `" . $role . "` (username, password) VALUES (?, ?)");
 ```
 
-Role sebuah akun juga tetap dapat diubah langsung dari database:
-
-```sql
-UPDATE users SET role = 'admin' WHERE username = 'admin';
-```
-
-`login.php` ikut membaca kolom tersebut lalu mengirimkannya pada response:
-
-```json
-{
-    "success": true,
-    "message": "Login berhasil sebagai admin",
-    "user_id": 21,
-    "username": "admin",
-    "role": "admin"
-}
-```
+Username diperiksa pada **kedua tabel**, bukan hanya tabel tujuan. Tanpa itu, satu username yang sama bisa terdaftar sebagai Admin sekaligus sebagai User, dan Login tidak akan tahu yang mana yang dimaksud.
 
 ### Endpoint CRUD Dijaga di Sisi Server
 
-Menyembunyikan tombol CRUD di aplikasi saja belum cukup, karena `wisata_add.php`, `wisata_edit.php`, dan `wisata_delete.php` masih bisa dipanggil langsung lewat browser atau Postman. Karena itu aplikasi mengirimkan `username` akun yang sedang login pada setiap permintaan CRUD, lalu `cek_admin.php` memeriksa ulang role-nya langsung ke database:
+Menyembunyikan tombol CRUD di aplikasi saja belum cukup, karena `wisata_add.php`, `wisata_edit.php`, dan `wisata_delete.php` masih bisa dipanggil langsung lewat browser atau Postman. Karena itu aplikasi mengirimkan `username` akun yang sedang login pada setiap permintaan CRUD, lalu `cek_admin.php` memeriksa apakah username itu benar-benar berada di tabel `admin`:
 
 ```
-Aplikasi  ->  username akun yang login  ->  cek_admin.php  ->  SELECT role FROM users
+Aplikasi  ->  username akun yang login  ->  cek_admin.php  ->  cari_akun()
                                                    |
                           +------------------------+------------------------+
                           |                        |                        |
-                   username kosong          role = user               role = admin
+                   username kosong        ada di tabel user        ada di tabel admin
                           |                        |                        |
              "Anda harus login          "Hanya Admin yang          permintaan diteruskan
               terlebih dahulu."          boleh mengubah
@@ -220,7 +263,7 @@ Halaman **Profil** dipakai bersama karena isinya sama untuk kedua role, hanya sa
 
 | Berkas | Kegunaan |
 |---|---|
-| `login_api/cek_admin.php` | Penjaga hak akses endpoint CRUD, memastikan pengirim permintaan benar-benar ber-role `admin` |
+| `login_api/cek_admin.php` | Penjaga hak akses endpoint CRUD, memastikan pengirim permintaan benar-benar terdaftar pada tabel `admin` |
 | `ui/activity/AdminWisataActivity.kt` | Dashboard Admin, memuat Fragment versi Admin |
 | `ui/activity/DetailWisataUserActivity.kt` | Halaman Detail Wisata untuk Role User, tanpa tombol Edit dan Hapus |
 | `ui/fragment/HomeUserFragment.kt` | Halaman Home untuk Role User, tanpa tombol Tambah Wisata |
@@ -233,9 +276,10 @@ Halaman **Profil** dipakai bersama karena isinya sama untuk kedua role, hanya sa
 
 | Berkas | Perubahan |
 |---|---|
-| `login_api/database.sql` | Tabel `users` memiliki kolom `role ENUM('admin','user') DEFAULT 'user'`, beserta catatan `ALTER TABLE` untuk database yang sudah terlanjur dibuat |
-| `login_api/login.php` | Ikut membaca kolom `role` dan mengirimkannya pada response |
-| `login_api/register.php` | Menerima pilihan `role` dari aplikasi, menolak nilai selain `admin`/`user`, dan mengirim role pada response |
+| `login_api/database.sql` | Tabel `users` diganti dua tabel terpisah, `admin` dan `user`, beserta catatan cara memindahkan data dari struktur lama |
+| `login_api/koneksi.php` | Menambah `cari_akun()` yang mencari satu username pada tabel `admin` lalu tabel `user`, dan mengembalikan role-nya |
+| `login_api/login.php` | Mencari akun lewat `cari_akun()` lalu mengirim role pada response |
+| `login_api/register.php` | Pilihan `role` menentukan tabel tujuan, nilai selain `admin`/`user` ditolak, dan username diperiksa pada kedua tabel |
 | `login_api/wisata_add.php` | Dijaga `wajib_admin()` sebelum data diproses |
 | `login_api/wisata_edit.php` | Dijaga `wajib_admin()` sebelum data diproses |
 | `login_api/wisata_delete.php` | Dijaga `wajib_admin()` sebelum data diproses |
@@ -272,11 +316,12 @@ Halaman **Profil** dipakai bersama karena isinya sama untuk kedua role, hanya sa
 | Session masih tersedia | Halaman Login dilewati, pengguna langsung masuk ke dashboard sesuai role tersimpan |
 | Session tidak tersedia | Pengguna diarahkan ke halaman Login |
 | Logout | Session dan role dihapus, pengguna kembali ke Login, riwayat halaman dibersihkan |
-| Register dengan pilihan Admin | Akun tersimpan dengan role `admin`, dan setelah Login langsung masuk Dashboard Admin |
-| Register dengan pilihan User | Akun tersimpan dengan role `user`, dan setelah Login masuk Dashboard User |
+| Register dengan pilihan Admin | Akun tersimpan pada tabel `admin`, dan setelah Login langsung masuk Dashboard Admin |
+| Register dengan pilihan User | Akun tersimpan pada tabel `user`, dan setelah Login masuk Dashboard User |
+| Username sudah dipakai di tabel lain | Register ditolak dengan pesan "Username sudah digunakan", supaya satu username tidak terdaftar di dua tabel |
 | Role yang dikirim tidak dikenali | Register ditolak dengan pesan "Role hanya boleh admin atau user" |
 | Role tersimpan tidak dikenali | Dianggap `user`, jadi aplikasi memilih hak akses paling terbatas |
-| User memanggil endpoint CRUD langsung | Ditolak Backend dengan pesan "Hanya Admin yang boleh mengubah data wisata." |
+| Akun dari tabel `user` memanggil endpoint CRUD langsung | Ditolak Backend dengan pesan "Hanya Admin yang boleh mengubah data wisata." |
 | Permintaan CRUD tanpa akun | Ditolak Backend dengan pesan "Anda harus login terlebih dahulu." |
 
 ## Teknologi
@@ -285,7 +330,7 @@ Halaman **Profil** dipakai bersama karena isinya sama untuk kedua role, hanya sa
 |---|---|
 | Bahasa | Kotlin |
 | Session | SharedPreferences melalui `SessionManager` |
-| Role | Kolom `ENUM('admin','user')` pada tabel `users` |
+| Role | Dua tabel terpisah, `admin` dan `user` |
 | Arsitektur | MVVM + Repository (ViewModel, LiveData, `UiState`) |
 | Jaringan | Retrofit + Gson + OkHttp Logging Interceptor |
 | Backend | PHP + MySQL (XAMPP) |
@@ -293,32 +338,60 @@ Halaman **Profil** dipakai bersama karena isinya sama untuk kedua role, hanya sa
 
 ## Menguji Role dengan Postman
 
+Alamat dasar yang dipakai Postman:
+
+- Dijalankan dari laptop yang sama: `http://localhost/login_api`
+- Dijalankan dari HP atau perangkat lain: `http://<IP laptop>/login_api`
+
+Seluruh permintaan POST di bawah memakai tab **Body** → **x-www-form-urlencoded**.
+
+### Membuktikan Akun Tersimpan pada Dua Tabel
+
 | Permintaan | Method | Endpoint | Parameter | Hasil yang diharapkan |
 |---|---|---|---|---|
-| Login Admin | POST | `login.php` | `username`, `password` | `"role": "admin"` |
-| Login User | POST | `login.php` | `username`, `password` | `"role": "user"` |
-| Register sebagai User | POST | `register.php` | `username`, `password`, `role=user` | `"role": "user"` |
-| Register sebagai Admin | POST | `register.php` | `username`, `password`, `role=admin` | `"role": "admin"` |
-| Register role ngawur | POST | `register.php` | `username`, `password`, `role=superadmin` | Ditolak |
-| Tambah sebagai Admin | POST | `wisata_add.php` | `username` **Admin** + data wisata | Berhasil |
-| Tambah sebagai User | POST | `wisata_add.php` | `username` **User** + data wisata | Ditolak |
-| Tambah tanpa `username` | POST | `wisata_add.php` | data wisata saja | Ditolak |
-| Edit sebagai User | POST | `wisata_edit.php` | `username` **User** + `id` + data | Ditolak |
-| Hapus sebagai User | POST | `wisata_delete.php` | `username` **User** + `id` | Ditolak |
+| Register ke tabel `admin` | POST | `register.php` | `username`, `password`, `role=admin` | `"role": "admin"` |
+| Register ke tabel `user` | POST | `register.php` | `username`, `password`, `role=user` | `"role": "user"` |
+| Register dengan role ngawur | POST | `register.php` | `username`, `password`, `role=superadmin` | Ditolak: "Role hanya boleh admin atau user" |
+| Username bentrok lintas tabel | POST | `register.php` | `username` yang sudah ada di tabel lain | Ditolak: "Username sudah digunakan" |
+
+Setelah dua permintaan pertama, isi kedua tabel dapat dilihat langsung di phpMyAdmin:
+
+```sql
+SELECT 'admin' AS tabel, id, username FROM admin
+UNION ALL
+SELECT 'user', id, username FROM `user`;
+```
+
+### Membuktikan Role Menentukan Dashboard
+
+| Permintaan | Method | Endpoint | Parameter | Hasil yang diharapkan |
+|---|---|---|---|---|
+| Login akun dari tabel `admin` | POST | `login.php` | `username`, `password` | `"role": "admin"` |
+| Login akun dari tabel `user` | POST | `login.php` | `username`, `password` | `"role": "user"` |
+| Login password salah | POST | `login.php` | `username`, `password` salah | Ditolak: "Username atau password salah" |
+
+Nilai `role` pada response inilah yang dipakai aplikasi untuk memilih `AdminWisataActivity` atau `MainActivity`.
+
+### Membuktikan Endpoint CRUD Dijaga
+
+| Permintaan | Method | Endpoint | Parameter | Hasil yang diharapkan |
+|---|---|---|---|---|
+| Tambah sebagai Admin | POST | `wisata_add.php` | `username` dari tabel `admin` + data wisata | Berhasil |
+| Tambah sebagai User | POST | `wisata_add.php` | `username` dari tabel `user` + data wisata | Ditolak: "Hanya Admin yang boleh mengubah data wisata." |
+| Tambah tanpa `username` | POST | `wisata_add.php` | data wisata saja | Ditolak: "Anda harus login terlebih dahulu." |
+| Edit sebagai User | POST | `wisata_edit.php` | `username` dari tabel `user` + `id` + data | Ditolak |
+| Hapus sebagai User | POST | `wisata_delete.php` | `username` dari tabel `user` + `id` | Ditolak |
+| Hapus sebagai Admin | POST | `wisata_delete.php` | `username` dari tabel `admin` + `id` | Berhasil |
 | Daftar Wisata | GET | `wisata.php` | `page`, `q` | Berhasil untuk kedua role |
+| Detail Wisata | GET | `wisata_detail.php` | `id` | Berhasil untuk kedua role |
+
+Dua permintaan terakhir memang sengaja tidak dijaga, karena melihat daftar dan detail wisata adalah hak kedua role.
 
 ## Cara Menjalankan
 
 1. Nyalakan **Apache** dan **MySQL** pada XAMPP.
-2. Tambahkan kolom `role` pada tabel `users`:
-   ```sql
-   ALTER TABLE users ADD role ENUM('admin', 'user') NOT NULL DEFAULT 'user' AFTER password;
-   ```
-   Bila database dibuat dari awal, cukup import ulang `login_api/database.sql` karena kolomnya sudah disertakan.
-3. Siapkan akun Admin. Cara termudah lewat aplikasi: buka **Daftar Akun**, isi username dan password, lalu pilih **Daftar sebagai: Admin**. Akun yang sudah ada juga bisa dinaikkan langsung dari database:
-   ```sql
-   UPDATE users SET role = 'admin' WHERE username = 'admin';
-   ```
+2. Import `login_api/database.sql` untuk membuat tabel `admin` dan `user`. Bila database dari tugas sebelumnya masih memakai satu tabel `users`, perintah pemindahan datanya sudah disertakan sebagai catatan di dalam berkas yang sama.
+3. Siapkan akun Admin. Cara termudah lewat aplikasi: buka **Daftar Akun**, isi username dan password, lalu pilih **Daftar sebagai: Admin**. Akun akan langsung masuk ke tabel `admin`.
 4. Samakan alamat server pada aplikasi dengan IP laptop (`ipconfig`). Alamat dapat diubah lewat dialog **Alamat server**.
 5. Jalankan aplikasi, lalu login memakai akun **Admin**. Halaman Home akan memiliki tombol Tambah, dan halaman Detail memiliki tombol Edit serta Hapus.
 6. Tutup aplikasi lalu buka lagi. Aplikasi langsung masuk ke Dashboard Admin tanpa login ulang, karena session masih tersimpan.
@@ -350,10 +423,11 @@ Seluruh gambar di bawah diambil dari satu perangkat yang sama, hanya berbeda aku
 
 ## Catatan
 
-- Role tidak pernah ditentukan sendiri oleh aplikasi. Aplikasi hanya menyimpan role yang dikirim Backend setelah login berhasil, jadi perubahan role cukup dilakukan di database tanpa mengubah kode.
+- Role tidak pernah ditentukan sendiri oleh aplikasi. Aplikasi hanya menyimpan role yang dikirim Backend setelah login berhasil.
+- Memisahkan akun menjadi dua tabel membuat role terbaca langsung dari struktur database: cukup melihat isi tabel `admin` untuk tahu siapa saja yang punya akses CRUD. Konsekuensinya, memindahkan akun antar role berarti memindahkan barisnya antar tabel, bukan sekadar mengubah satu kolom.
+- Bentuk response API tidak berubah ketika struktur tabel diganti, sehingga seluruh kode Android tetap sama. Aplikasi hanya perlu tahu role-nya, bukan dari tabel mana datangnya.
 - Halaman Register menyediakan pilihan **Daftar sebagai**, jadi role sebuah akun sudah ditentukan sejak pendaftaran tanpa perlu menyentuh database. Konsekuensinya, siapa pun yang memasang aplikasi dapat mendaftarkan dirinya sebagai Admin. Bila suatu saat pendaftaran perlu dibatasi, pilihan tersebut cukup dihapus dari halaman Register dan `register.php` dikembalikan memakai role `user` secara tetap.
 - Pembedaan role dikerjakan di dua tempat sekaligus. Di aplikasi, tombol dan halaman CRUD memang tidak dibuat untuk Role User. Di server, `cek_admin.php` memeriksa ulang role pengirimnya, sehingga endpoint CRUD tetap aman walaupun dipanggil dari luar aplikasi.
-- Nilai bawaan `user` pada kolom `role` membuat seluruh akun lama tetap dapat login seperti biasa, hanya saja menjadi pengguna biasa.
 - Daftar favorit sudah dipisah per akun sejak Tugas 8, jadi Admin dan User yang memakai satu perangkat yang sama tetap memiliki daftar favorit masing-masing.
 - Dashboard Admin dan Dashboard User memakai tata letak yang sama persis supaya perpindahan antar role tidak terasa seperti berpindah aplikasi. Yang berbeda hanya isi Fragment yang dimuat.
 - Berkas sisa wizard **Basic Views Activity** bawaan Android Studio (`nav_graph.xml`, `nav_graph2.xml`, `dimens.xml` beserta variannya, `values-v23/themes.xml`, dan teks `lorem_ipsum` pada `strings.xml`) dibuang karena menunjuk ke Fragment dan layout yang tidak pernah dibuat, sehingga project tidak dapat di-build.

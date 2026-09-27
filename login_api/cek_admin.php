@@ -9,7 +9,8 @@
  * hanya akun ber-role admin yang boleh mengubah data.
  *
  * Aplikasi mengirimkan username akun yang sedang login pada setiap permintaan
- * CRUD, lalu role-nya dicek ulang di sini langsung dari database.
+ * CRUD, lalu dicek ulang di sini apakah username itu benar-benar terdaftar
+ * pada tabel `admin`. Akun di tabel `user` otomatis tidak lolos.
  */
 
 function wajib_admin($conn)
@@ -25,17 +26,13 @@ function wajib_admin($conn)
         tolak("Anda harus login terlebih dahulu.");
     }
 
-    $stmt = mysqli_prepare($conn, "SELECT role FROM users WHERE username = ?");
-    mysqli_stmt_bind_param($stmt, "s", $username);
-    mysqli_stmt_execute($stmt);
-
-    $akun = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+    $akun = cari_akun($conn, $username);
 
     if (!$akun) {
         tolak("Akun tidak dikenali. Silakan login ulang.");
     }
 
-    if (($akun["role"] ?? "user") !== "admin") {
+    if ($akun["role"] !== "admin") {
         tolak("Hanya Admin yang boleh mengubah data wisata.");
     }
 }

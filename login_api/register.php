@@ -32,8 +32,9 @@ if (!preg_match("/^[a-zA-Z0-9_]+$/", $username)) {
     exit;
 }
 
-// Pilihan role datang dari halaman Register. Nilai selain "admin" dan "user"
-// ditolak supaya kolom ENUM pada tabel users tidak terisi nilai yang tidak dikenal.
+// Pilihan role datang dari halaman Register, dan nilainya sekaligus menentukan
+// akun disimpan ke tabel yang mana. Nilai lain ditolak supaya tidak ada
+// percobaan menulis ke tabel yang tidak dikenal.
 if ($role !== "admin" && $role !== "user") {
     echo json_encode([
         "success" => false,
@@ -50,17 +51,10 @@ if (strlen($password) < 6) {
     exit;
 }
 
-$stmt = mysqli_prepare(
-    $conn,
-    "SELECT id FROM users WHERE username = ?"
-);
-
-mysqli_stmt_bind_param($stmt, "s", $username);
-mysqli_stmt_execute($stmt);
-
-$result = mysqli_stmt_get_result($stmt);
-
-if (mysqli_num_rows($result) > 0) {
+// Username diperiksa pada kedua tabel, bukan hanya tabel tujuan. Tanpa ini,
+// satu username yang sama bisa terdaftar sebagai admin sekaligus sebagai user,
+// dan Login tidak akan tahu yang mana yang dimaksud.
+if (cari_akun($conn, $username)) {
 
     echo json_encode([
         "success" => false,
@@ -74,15 +68,14 @@ $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
 $stmt = mysqli_prepare(
     $conn,
-    "INSERT INTO users (username, password, role) VALUES (?, ?, ?)"
+    "INSERT INTO `" . $role . "` (username, password) VALUES (?, ?)"
 );
 
 mysqli_stmt_bind_param(
     $stmt,
-    "sss",
+    "ss",
     $username,
-    $passwordHash,
-    $role
+    $passwordHash
 );
 
 if (mysqli_stmt_execute($stmt)) {
