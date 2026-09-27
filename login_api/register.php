@@ -6,6 +6,7 @@ include "koneksi.php";
 
 $username = trim($_POST["username"] ?? "");
 $password = $_POST["password"] ?? "";
+$role     = strtolower(trim($_POST["role"] ?? "user"));
 
 if ($username == "" || $password == "") {
     echo json_encode([
@@ -27,6 +28,16 @@ if (!preg_match("/^[a-zA-Z0-9_]+$/", $username)) {
     echo json_encode([
         "success" => false,
         "message" => "Username hanya boleh huruf, angka, dan _"
+    ]);
+    exit;
+}
+
+// Pilihan role datang dari halaman Register. Nilai selain "admin" dan "user"
+// ditolak supaya kolom ENUM pada tabel users tidak terisi nilai yang tidak dikenal.
+if ($role !== "admin" && $role !== "user") {
+    echo json_encode([
+        "success" => false,
+        "message" => "Role hanya boleh admin atau user"
     ]);
     exit;
 }
@@ -61,10 +72,6 @@ if (mysqli_num_rows($result) > 0) {
 
 $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
-// Akun baru yang dibuat lewat aplikasi selalu berperan sebagai user biasa.
-// Role admin hanya diberikan langsung dari database.
-$role = "user";
-
 $stmt = mysqli_prepare(
     $conn,
     "INSERT INTO users (username, password, role) VALUES (?, ?, ?)"
@@ -82,7 +89,7 @@ if (mysqli_stmt_execute($stmt)) {
 
     echo json_encode([
         "success" => true,
-        "message" => "Register berhasil",
+        "message" => "Register berhasil sebagai " . $role,
         "username" => $username,
         "role"     => $role
     ]);

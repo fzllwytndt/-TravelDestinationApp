@@ -23,11 +23,13 @@ interface ApiService {
         @Field("password") password: String
     ): AuthResponse
 
+    /** [role] berasal dari pilihan "Daftar sebagai" pada halaman Register. */
     @FormUrlEncoded
     @POST("register.php")
     suspend fun register(
         @Field("username") username: String,
-        @Field("password") password: String
+        @Field("password") password: String,
+        @Field("role") role: String
     ): AuthResponse
 
     @GET("wisata.php")

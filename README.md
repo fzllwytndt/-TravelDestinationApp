@@ -39,6 +39,7 @@ Seluruh kode ditulis dengan cara yang paling sederhana supaya bagian Role, Login
 
 - Mengimplementasikan **Role User** dan **Role Admin** pada sistem login.
 - Role pengguna ditentukan oleh **Backend**, yaitu dari kolom `role` pada tabel `users`, lalu dikirim ke aplikasi setelah login berhasil.
+- Halaman **Register** menyediakan pilihan **Daftar sebagai: User atau Admin**, sehingga role akun ditentukan sejak pendaftaran.
 - Login dengan **Role User** diarahkan ke **Dashboard User**.
 - Login dengan **Role Admin** diarahkan ke **Dashboard Admin**.
 - Menggunakan **Session Management** memakai **SharedPreferences** lewat `SessionManager`.
@@ -126,7 +127,21 @@ Kolom `role` ditambahkan ke tabel `users` sebagai `ENUM('admin', 'user')` dengan
 ALTER TABLE users ADD role ENUM('admin', 'user') NOT NULL DEFAULT 'user' AFTER password;
 ```
 
-Nilai bawaan `user` membuat seluruh akun yang sudah terdaftar sebelumnya otomatis menjadi pengguna biasa, dan akun baru dari halaman Register juga selalu berperan sebagai `user`. Role Admin hanya diberikan langsung dari database:
+Nilai bawaan `user` membuat seluruh akun yang sudah terdaftar sebelumnya otomatis menjadi pengguna biasa.
+
+Untuk akun baru, role diambil dari pilihan **Daftar sebagai** pada halaman Register lalu dikirim ke `register.php`. Nilai selain `admin` dan `user` ditolak supaya kolom ENUM tidak terisi nilai yang tidak dikenal:
+
+```php
+if ($role !== "admin" && $role !== "user") {
+    echo json_encode([
+        "success" => false,
+        "message" => "Role hanya boleh admin atau user"
+    ]);
+    exit;
+}
+```
+
+Role sebuah akun juga tetap dapat diubah langsung dari database:
 
 ```sql
 UPDATE users SET role = 'admin' WHERE username = 'admin';
@@ -220,12 +235,17 @@ Halaman **Profil** dipakai bersama karena isinya sama untuk kedua role, hanya sa
 |---|---|
 | `login_api/database.sql` | Tabel `users` memiliki kolom `role ENUM('admin','user') DEFAULT 'user'`, beserta catatan `ALTER TABLE` untuk database yang sudah terlanjur dibuat |
 | `login_api/login.php` | Ikut membaca kolom `role` dan mengirimkannya pada response |
-| `login_api/register.php` | Akun baru selalu disimpan dengan role `user`, dan role ikut dikirim pada response |
+| `login_api/register.php` | Menerima pilihan `role` dari aplikasi, menolak nilai selain `admin`/`user`, dan mengirim role pada response |
 | `login_api/wisata_add.php` | Dijaga `wajib_admin()` sebelum data diproses |
 | `login_api/wisata_edit.php` | Dijaga `wajib_admin()` sebelum data diproses |
 | `login_api/wisata_delete.php` | Dijaga `wajib_admin()` sebelum data diproses |
 | `network/AuthResponse.kt` | Menambah kolom `role` |
-| `network/ApiService.kt` | Endpoint Tambah, Edit, dan Hapus ikut mengirim `username`, termasuk versi multipart |
+| `network/AuthRequest.kt` | Menambah kolom `role`, dipakai saat Register |
+| `ui/activity/RegisterActivity.kt` | Membaca pilihan **Daftar sebagai** lalu mengirimkannya bersama username dan password |
+| `res/layout/activity_register.xml` | Menambah `RadioGroup` pilihan role: User atau Admin |
+| `viewmodel/AuthViewModel.kt` | `register()` menerima parameter `role` |
+| `repository/AuthRepository.kt` | Meneruskan `role` ke `register.php` |
+| `network/ApiService.kt` | Endpoint Register ikut mengirim `role`; endpoint Tambah, Edit, dan Hapus ikut mengirim `username`, termasuk versi multipart |
 | `repository/WisataRepository.kt` | Mengisi `username` pada setiap permintaan CRUD dari `SessionManager` |
 | `utils/SessionManager.kt` | Menyimpan dan membaca role, serta menentukan dashboard sesuai role |
 | `ui/activity/SplashActivity.kt` | Memeriksa session lalu membuka dashboard sesuai role |
@@ -251,7 +271,10 @@ Halaman **Profil** dipakai bersama karena isinya sama untuk kedua role, hanya sa
 | Session masih tersedia | Halaman Login dilewati, pengguna langsung masuk ke dashboard sesuai role tersimpan |
 | Session tidak tersedia | Pengguna diarahkan ke halaman Login |
 | Logout | Session dan role dihapus, pengguna kembali ke Login, riwayat halaman dibersihkan |
-| Role tidak dikenali | Dianggap `user`, jadi aplikasi memilih hak akses paling terbatas |
+| Register dengan pilihan Admin | Akun tersimpan dengan role `admin`, dan setelah Login langsung masuk Dashboard Admin |
+| Register dengan pilihan User | Akun tersimpan dengan role `user`, dan setelah Login masuk Dashboard User |
+| Role yang dikirim tidak dikenali | Register ditolak dengan pesan "Role hanya boleh admin atau user" |
+| Role tersimpan tidak dikenali | Dianggap `user`, jadi aplikasi memilih hak akses paling terbatas |
 | User memanggil endpoint CRUD langsung | Ditolak Backend dengan pesan "Hanya Admin yang boleh mengubah data wisata." |
 | Permintaan CRUD tanpa akun | Ditolak Backend dengan pesan "Anda harus login terlebih dahulu." |
 
@@ -273,7 +296,9 @@ Halaman **Profil** dipakai bersama karena isinya sama untuk kedua role, hanya sa
 |---|---|---|---|---|
 | Login Admin | POST | `login.php` | `username`, `password` | `"role": "admin"` |
 | Login User | POST | `login.php` | `username`, `password` | `"role": "user"` |
-| Register | POST | `register.php` | `username`, `password` | `"role": "user"` |
+| Register sebagai User | POST | `register.php` | `username`, `password`, `role=user` | `"role": "user"` |
+| Register sebagai Admin | POST | `register.php` | `username`, `password`, `role=admin` | `"role": "admin"` |
+| Register role ngawur | POST | `register.php` | `username`, `password`, `role=superadmin` | Ditolak |
 | Tambah sebagai Admin | POST | `wisata_add.php` | `username` **Admin** + data wisata | Berhasil |
 | Tambah sebagai User | POST | `wisata_add.php` | `username` **User** + data wisata | Ditolak |
 | Tambah tanpa `username` | POST | `wisata_add.php` | data wisata saja | Ditolak |
@@ -289,7 +314,7 @@ Halaman **Profil** dipakai bersama karena isinya sama untuk kedua role, hanya sa
    ALTER TABLE users ADD role ENUM('admin', 'user') NOT NULL DEFAULT 'user' AFTER password;
    ```
    Bila database dibuat dari awal, cukup import ulang `login_api/database.sql` karena kolomnya sudah disertakan.
-3. Tentukan akun mana yang menjadi Admin:
+3. Siapkan akun Admin. Cara termudah lewat aplikasi: buka **Daftar Akun**, isi username dan password, lalu pilih **Daftar sebagai: Admin**. Akun yang sudah ada juga bisa dinaikkan langsung dari database:
    ```sql
    UPDATE users SET role = 'admin' WHERE username = 'admin';
    ```
@@ -301,7 +326,7 @@ Halaman **Profil** dipakai bersama karena isinya sama untuk kedua role, hanya sa
 ## Catatan
 
 - Role tidak pernah ditentukan sendiri oleh aplikasi. Aplikasi hanya menyimpan role yang dikirim Backend setelah login berhasil, jadi perubahan role cukup dilakukan di database tanpa mengubah kode.
-- Halaman Register selalu membuat akun ber-role `user`. Bila role bisa dipilih sendiri dari halaman Register, siapa pun dapat mendaftar sebagai Admin.
+- Halaman Register menyediakan pilihan **Daftar sebagai**, jadi role sebuah akun sudah ditentukan sejak pendaftaran tanpa perlu menyentuh database. Konsekuensinya, siapa pun yang memasang aplikasi dapat mendaftarkan dirinya sebagai Admin. Bila suatu saat pendaftaran perlu dibatasi, pilihan tersebut cukup dihapus dari halaman Register dan `register.php` dikembalikan memakai role `user` secara tetap.
 - Pembedaan role dikerjakan di dua tempat sekaligus. Di aplikasi, tombol dan halaman CRUD memang tidak dibuat untuk Role User. Di server, `cek_admin.php` memeriksa ulang role pengirimnya, sehingga endpoint CRUD tetap aman walaupun dipanggil dari luar aplikasi.
 - Nilai bawaan `user` pada kolom `role` membuat seluruh akun lama tetap dapat login seperti biasa, hanya saja menjadi pengguna biasa.
 - Daftar favorit sudah dipisah per akun sejak Tugas 8, jadi Admin dan User yang memakai satu perangkat yang sama tetap memiliki daftar favorit masing-masing.

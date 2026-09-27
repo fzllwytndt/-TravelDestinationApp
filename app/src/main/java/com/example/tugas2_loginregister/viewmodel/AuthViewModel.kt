@@ -20,8 +20,8 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         kirim { repository.login(AuthRequest(username, password)) }
     }
 
-    fun register(username: String, password: String) {
-        kirim { repository.register(AuthRequest(username, password)) }
+    fun register(username: String, password: String, role: String) {
+        kirim { repository.register(AuthRequest(username, password, role)) }
     }
 
     /** Hasil yang sudah ditampilkan dikosongkan supaya tidak muncul dua kali saat layar diputar. */
