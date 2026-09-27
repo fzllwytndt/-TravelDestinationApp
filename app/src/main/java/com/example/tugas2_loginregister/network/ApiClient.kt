@@ -28,7 +28,7 @@ class GagalServer(pesan: String) : Exception(pesan)
  */
 object ApiClient {
 
-    const val HOST_DEFAULT = "192.168.15.181"
+    const val HOST_DEFAULT = "192.168.18.154"
 
     private const val NAMA_PREF = "pengaturan_server"
     private const val KUNCI_HOST = "alamat_server"

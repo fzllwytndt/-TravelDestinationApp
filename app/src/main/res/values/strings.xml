@@ -17,4 +17,7 @@
     <string name="konfirmasi_hapus">Apakah Anda yakin ingin menghapus data wisata ini?</string>
     <string name="ya_hapus">Ya, Hapus</string>
     <string name="batal">Batal</string>
+
+    <!-- Tugas 9 - Role Admin & User -->
+    <string name="label_role">Role: %1$s</string>
 </resources>

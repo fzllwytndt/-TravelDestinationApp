@@ -7,23 +7,23 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import com.example.tugas2_loginregister.R
-import com.example.tugas2_loginregister.ui.fragment.UserFavoriteFragment
-import com.example.tugas2_loginregister.ui.fragment.UserHomeFragment
+import com.example.tugas2_loginregister.ui.fragment.AdminFavoriteFragment
+import com.example.tugas2_loginregister.ui.fragment.AdminHomeFragment
 import com.example.tugas2_loginregister.ui.fragment.ProfileFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 /**
- * Dashboard User.
+ * Dashboard Admin.
  *
- * Halaman ini dibuka ketika akun yang login memiliki role `user`. Isinya hanya
- * untuk melihat-lihat: daftar wisata, detail wisata, dan favorit. Tidak ada
- * tombol Tambah, Edit, maupun Hapus karena itu wewenang Admin.
+ * Halaman ini dibuka ketika akun yang login memiliki role `admin`. Susunannya
+ * sama dengan Dashboard User, bedanya halaman Home dan Detail di sini memuat
+ * fitur CRUD: tombol Tambah, Edit, dan Hapus data wisata.
  */
-class MainActivity : AppCompatActivity() {
+class AdminWisataActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_admin_wisata)
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
 
@@ -31,15 +31,15 @@ class MainActivity : AppCompatActivity() {
 
         if (savedInstanceState == null) {
             bottomNav.selectedItemId = R.id.menuHome
-            bukaHalaman(UserHomeFragment())
+            bukaHalaman(AdminHomeFragment())
         }
 
         bottomNav.setOnItemSelectedListener { menu ->
             bukaHalaman(
                 when (menu.itemId) {
-                    R.id.menuFavorit -> UserFavoriteFragment()
+                    R.id.menuFavorit -> AdminFavoriteFragment()
                     R.id.menuProfil -> ProfileFragment()
-                    else -> UserHomeFragment()
+                    else -> AdminHomeFragment()
                 }
             )
             true

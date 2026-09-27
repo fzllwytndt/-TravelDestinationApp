@@ -22,7 +22,13 @@ import com.example.tugas2_loginregister.viewmodel.DetailWisataViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class DetailWisataActivity : AppCompatActivity() {
+/**
+ * Halaman Detail Wisata untuk Role Admin.
+ *
+ * Selain menampilkan detail dan tombol favorit, halaman ini menyediakan tombol
+ * Edit dan Hapus. Versi untuk Role User ada pada [UserDetailWisataActivity].
+ */
+class AdminDetailWisataActivity : AppCompatActivity() {
 
     private val viewModel: DetailWisataViewModel by viewModels()
 
@@ -57,7 +63,7 @@ class DetailWisataActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_detail_wisata)
+        setContentView(R.layout.activity_detail_wisata_admin)
 
         hubungkanView()
         siapkanTombolKembali()
@@ -183,9 +189,9 @@ class DetailWisataActivity : AppCompatActivity() {
 
     private fun bukaHalamanEdit() {
         val wisata = wisataSekarang ?: return
-        val intent = Intent(this, EditWisataActivity::class.java)
-        intent.putExtra(EditWisataActivity.KUNCI_WISATA, wisata)
-        intent.putExtra(EditWisataActivity.KUNCI_ID, idWisata)
+        val intent = Intent(this, AdminEditWisataActivity::class.java)
+        intent.putExtra(AdminEditWisataActivity.KUNCI_WISATA, wisata)
+        intent.putExtra(AdminEditWisataActivity.KUNCI_ID, idWisata)
         launcherEdit.launch(intent)
     }
 

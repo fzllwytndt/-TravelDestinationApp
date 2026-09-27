@@ -58,6 +58,50 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/etUsername" />
 
+    <!-- Tugas 9: pilihan role saat mendaftar. Nilainya dikirim ke register.php. -->
+    <TextView
+        android:id="@+id/tvLabelRole"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Daftar sebagai"
+        android:textColor="@color/teks_kedua"
+        android:textSize="13sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/etPassword" />
+
+    <RadioGroup
+        android:id="@+id/rgRole"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvLabelRole">
+
+        <RadioButton
+            android:id="@+id/rbUser"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="true"
+            android:text="User"
+            android:textColor="@color/teks_utama"
+            android:textSize="15sp" />
+
+        <RadioButton
+            android:id="@+id/rbAdmin"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Admin"
+            android:textColor="@color/teks_utama"
+            android:textSize="15sp" />
+
+    </RadioGroup>
+
     <Button
         android:id="@+id/btnRegister"
         android:layout_width="0dp"
@@ -67,7 +111,7 @@
         app:cornerRadius="14dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/etPassword" />
+        app:layout_constraintTop_toBottomOf="@id/rgRole" />
 
     <TextView
         android:id="@+id/tvKeLogin"

@@ -16,7 +16,11 @@ class AuthRepository(private val context: Context) {
 
     suspend fun register(permintaan: AuthRequest): AuthResponse {
         return ApiClient.panggil {
-            ApiClient.layanan(context).register(permintaan.username, permintaan.password)
+            ApiClient.layanan(context).register(
+                permintaan.username,
+                permintaan.password,
+                permintaan.role
+            )
         }
     }
 }

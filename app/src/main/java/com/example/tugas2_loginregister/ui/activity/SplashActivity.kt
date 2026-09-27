@@ -8,6 +8,13 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.tugas2_loginregister.R
 import com.example.tugas2_loginregister.utils.SessionManager
 
+/**
+ * Halaman pertama yang muncul saat aplikasi dibuka.
+ *
+ * Tugasnya memeriksa sesi:
+ * - Sesi tidak tersedia  -> halaman Login.
+ * - Sesi tersedia        -> dashboard sesuai role yang tersimpan.
+ */
 class SplashActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,11 +27,13 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun bukaHalamanBerikutnya() {
-        val tujuan =
-            if (SessionManager.sudahLogin(this)) MainActivity::class.java
-            else LoginActivity::class.java
+        if (SessionManager.sudahLogin(this)) {
+            // Role dibaca dari sesi, jadi pengguna tidak perlu login ulang.
+            SessionManager.bukaDashboard(this)
+            return
+        }
 
-        startActivity(Intent(this, tujuan))
+        startActivity(Intent(this, LoginActivity::class.java))
         finish()
     }
 
