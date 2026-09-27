@@ -240,6 +240,7 @@ Halaman **Profil** dipakai bersama karena isinya sama untuk kedua role, hanya sa
 | `login_api/wisata_edit.php` | Dijaga `wajib_admin()` sebelum data diproses |
 | `login_api/wisata_delete.php` | Dijaga `wajib_admin()` sebelum data diproses |
 | `network/AuthResponse.kt` | Menambah kolom `role` |
+| `network/ApiClient.kt` | Alamat server bawaan disesuaikan dengan IP laptop yang dipakai menguji |
 | `network/AuthRequest.kt` | Menambah kolom `role`, dipakai saat Register |
 | `ui/activity/RegisterActivity.kt` | Membaca pilihan **Daftar sebagai** lalu mengirimkannya bersama username dan password |
 | `res/layout/activity_register.xml` | Menambah `RadioGroup` pilihan role: User atau Admin |
@@ -322,6 +323,30 @@ Halaman **Profil** dipakai bersama karena isinya sama untuk kedua role, hanya sa
 5. Jalankan aplikasi, lalu login memakai akun **Admin**. Halaman Home akan memiliki tombol Tambah, dan halaman Detail memiliki tombol Edit serta Hapus.
 6. Tutup aplikasi lalu buka lagi. Aplikasi langsung masuk ke Dashboard Admin tanpa login ulang, karena session masih tersimpan.
 7. Buka menu **Profil**, tekan **Logout**, lalu login memakai akun **User**. Tombol Tambah, Edit, dan Hapus tidak akan muncul sama sekali.
+
+## Tangkapan Layar
+
+Seluruh gambar di bawah diambil dari satu perangkat yang sama, hanya berbeda akun yang login. Perbedaan tampilan pada setiap pasangan gambar murni ditentukan oleh **role** yang dikirim Backend saat Login.
+
+| Dashboard Admin – ada tombol Tambah | Dashboard User – tanpa tombol Tambah |
+|:---:|:---:|
+| <img src="screenshot/37-home-admin.png" width="230"> | <img src="screenshot/38-home-user.png" width="230"> |
+| `HomeAdminFragment` di dalam `AdminWisataActivity`. **Floating Action Button** untuk menambah wisata tersedia di kanan bawah | `HomeUserFragment` di dalam `MainActivity`. Daftar dan pencarian tetap sama, tetapi tombol tambah memang tidak dibuat |
+
+| Detail Wisata – Role Admin | Detail Wisata – Role User |
+|:---:|:---:|
+| <img src="screenshot/39-detail-admin-crud.png" width="230"> | <img src="screenshot/40-detail-user-tanpa-crud.png" width="230"> |
+| `DetailWisataAdminActivity` menyediakan **EDIT WISATA** dan **Hapus Wisata** di baris paling bawah | `DetailWisataUserActivity` hanya menampilkan detail dan tombol favorit, tanpa baris aksi CRUD |
+
+| Profil – Role Admin | Profil – Role User |
+|:---:|:---:|
+| <img src="screenshot/41-profil-admin.png" width="230"> | <img src="screenshot/42-profil-user.png" width="230"> |
+| Role dibaca dari session, bukan ditebak aplikasi | Halaman Profil dipakai bersama kedua role, termasuk tombol **Logout** yang menghapus session beserta role |
+
+| Register – pilihan Daftar sebagai | Register – memilih Admin |
+|:---:|:---:|
+| <img src="screenshot/43-register-pilihan-role.png" width="230"> | <img src="screenshot/44-register-pilih-admin.png" width="230"> |
+| Pilihan **User** menjadi bawaan, supaya akun yang dibuat tanpa disengaja tetap berperan sebagai pengguna biasa | Memilih **Admin** membuat akun tersimpan dengan role `admin`, dan setelah Login langsung masuk Dashboard Admin |
 
 ## Catatan
 
