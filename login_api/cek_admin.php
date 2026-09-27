@@ -11,9 +11,12 @@
  * Aplikasi mengirimkan username akun yang sedang login pada setiap permintaan
  * CRUD, lalu dicek ulang di sini apakah username itu benar-benar terdaftar
  * pada tabel `admin`. Akun di tabel `user` otomatis tidak lolos.
+ *
+ * [$larangan] dapat diisi supaya pesan penolakannya sesuai dengan endpoint
+ * yang memanggil, misalnya daftar akun pada akun.php.
  */
 
-function wajib_admin($conn)
+function wajib_admin($conn, $larangan = "Hanya Admin yang boleh mengubah data wisata.")
 {
     // Username bisa datang sebagai form biasa, multipart, query string, atau JSON.
     $json_data = json_decode(file_get_contents("php://input"), true) ?? [];
@@ -33,7 +36,7 @@ function wajib_admin($conn)
     }
 
     if ($akun["role"] !== "admin") {
-        tolak("Hanya Admin yang boleh mengubah data wisata.");
+        tolak($larangan);
     }
 }
 

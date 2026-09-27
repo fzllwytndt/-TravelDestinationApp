@@ -218,7 +218,9 @@ Aplikasi  ->  username akun yang login  ->  cek_admin.php  ->  cari_akun()
                                           data wisata."
 ```
 
-Endpoint **Read** (`wisata.php` dan `wisata_detail.php`) sengaja tidak dijaga, karena melihat daftar dan detail wisata memang hak kedua role.
+Penjaga yang sama dipakai `akun.php`, hanya dengan pesan penolakan yang berbeda, karena daftar akun juga tidak boleh dilihat pengguna biasa.
+
+Endpoint **Read wisata** (`wisata.php` dan `wisata_detail.php`) sengaja tidak dijaga, karena melihat daftar dan detail wisata memang hak kedua role.
 
 ## Session Management
 
@@ -264,6 +266,7 @@ Halaman **Profil** dipakai bersama karena isinya sama untuk kedua role, hanya sa
 | Berkas | Kegunaan |
 |---|---|
 | `login_api/cek_admin.php` | Penjaga hak akses endpoint CRUD, memastikan pengirim permintaan benar-benar terdaftar pada tabel `admin` |
+| `login_api/akun.php` | Menampilkan daftar akun dari tabel `admin` dan `user`, dipakai untuk memeriksa isi kedua tabel lewat Postman |
 | `ui/activity/AdminWisataActivity.kt` | Dashboard Admin, memuat Fragment versi Admin |
 | `ui/activity/DetailWisataUserActivity.kt` | Halaman Detail Wisata untuk Role User, tanpa tombol Edit dan Hapus |
 | `ui/fragment/HomeUserFragment.kt` | Halaman Home untuk Role User, tanpa tombol Tambah Wisata |
@@ -354,7 +357,32 @@ Seluruh permintaan POST di bawah memakai tab **Body** → **x-www-form-urlencode
 | Register dengan role ngawur | POST | `register.php` | `username`, `password`, `role=superadmin` | Ditolak: "Role hanya boleh admin atau user" |
 | Username bentrok lintas tabel | POST | `register.php` | `username` yang sudah ada di tabel lain | Ditolak: "Username sudah digunakan" |
 
-Setelah dua permintaan pertama, isi kedua tabel dapat dilihat langsung di phpMyAdmin:
+Setelah dua permintaan pertama, isi kedua tabel dapat dilihat langsung lewat `akun.php`:
+
+| Permintaan | Method | Endpoint | Parameter | Hasil |
+|---|---|---|---|---|
+| Seluruh akun | GET | `akun.php` | `username` milik Admin | Isi tabel `admin` dan `user` sekaligus |
+| Hanya Admin | GET | `akun.php` | `username` + `role=admin` | Isi tabel `admin` saja |
+| Hanya User | GET | `akun.php` | `username` + `role=user` | Isi tabel `user` saja |
+| Dipanggil akun User | GET | `akun.php` | `username` dari tabel `user` | Ditolak: "Hanya Admin yang boleh melihat daftar akun." |
+
+Contoh hasilnya:
+
+```json
+{
+    "success": true,
+    "message": "Daftar akun berhasil diambil",
+    "jumlah": { "admin": 1, "user": 1, "total": 2 },
+    "data": [
+        { "id": 1, "username": "atik", "role": "admin", "created_at": "2026-09-27 22:39:08" },
+        { "id": 1, "username": "adel", "role": "user",  "created_at": "2026-09-27 22:40:08" }
+    ]
+}
+```
+
+Kolom `role` pada hasil di atas bukan kolom database, melainkan nama tabel tempat akun itu ditemukan. Kolom `password` sengaja tidak pernah ikut dikirim walaupun isinya sudah berupa hash.
+
+Isi kedua tabel juga dapat dilihat langsung di phpMyAdmin:
 
 ```sql
 SELECT 'admin' AS tabel, id, username FROM admin
