@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tugas2_loginregister.R
 import com.example.tugas2_loginregister.model.Wisata
-import com.example.tugas2_loginregister.ui.activity.DetailWisataUserActivity
+import com.example.tugas2_loginregister.ui.activity.UserDetailWisataActivity
 import com.example.tugas2_loginregister.ui.adapter.WisataAdapter
 import com.example.tugas2_loginregister.utils.DialogServer
 import com.example.tugas2_loginregister.utils.Helper
@@ -29,9 +29,9 @@ import com.example.tugas2_loginregister.viewmodel.WisataViewModel
  *
  * Isinya sama dengan Home milik Admin: daftar wisata, pencarian, dan pagination.
  * Bedanya di sini tidak ada tombol Tambah Wisata, dan detail yang dibuka adalah
- * [DetailWisataUserActivity] yang juga tanpa tombol Edit dan Hapus.
+ * [UserDetailWisataActivity] yang juga tanpa tombol Edit dan Hapus.
  */
-class HomeUserFragment : Fragment() {
+class UserHomeFragment : Fragment() {
 
     private val viewModel: WisataViewModel by viewModels()
 
@@ -91,8 +91,8 @@ class HomeUserFragment : Fragment() {
 
     /** User hanya boleh melihat, jadi yang dibuka halaman detail tanpa Edit dan Hapus. */
     private fun bukaDetail(wisata: Wisata) {
-        val intent = Intent(requireContext(), DetailWisataUserActivity::class.java)
-        intent.putExtra(DetailWisataUserActivity.KUNCI_ID, wisata.id)
+        val intent = Intent(requireContext(), UserDetailWisataActivity::class.java)
+        intent.putExtra(UserDetailWisataActivity.KUNCI_ID, wisata.id)
         startActivity(intent)
     }
 

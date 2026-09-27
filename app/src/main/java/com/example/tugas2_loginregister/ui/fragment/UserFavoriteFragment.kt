@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tugas2_loginregister.R
 import com.example.tugas2_loginregister.data.local.room.FavoriteWisata
-import com.example.tugas2_loginregister.ui.activity.DetailWisataUserActivity
+import com.example.tugas2_loginregister.ui.activity.UserDetailWisataActivity
 import com.example.tugas2_loginregister.ui.adapter.FavoriteWisataAdapter
 import com.example.tugas2_loginregister.utils.Helper
 import com.example.tugas2_loginregister.viewmodel.FavoriteViewModel
@@ -21,9 +21,9 @@ import com.example.tugas2_loginregister.viewmodel.FavoriteViewModel
  *
  * Daftar favorit sudah dipisah per akun sejak Tugas 8, jadi bagian ini tidak
  * berubah. Yang membedakan dengan versi Admin hanya halaman detail yang dibuka:
- * di sini [DetailWisataUserActivity] yang tanpa tombol Edit dan Hapus.
+ * di sini [UserDetailWisataActivity] yang tanpa tombol Edit dan Hapus.
  */
-class FavoriteUserFragment : Fragment() {
+class UserFavoriteFragment : Fragment() {
 
     private val viewModel: FavoriteViewModel by viewModels()
 
@@ -58,8 +58,8 @@ class FavoriteUserFragment : Fragment() {
     }
 
     private fun bukaDetail(favorit: FavoriteWisata) {
-        val intent = Intent(requireContext(), DetailWisataUserActivity::class.java)
-        intent.putExtra(DetailWisataUserActivity.KUNCI_ID, favorit.id)
+        val intent = Intent(requireContext(), UserDetailWisataActivity::class.java)
+        intent.putExtra(UserDetailWisataActivity.KUNCI_ID, favorit.id)
         startActivity(intent)
     }
 

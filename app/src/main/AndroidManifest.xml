@@ -28,13 +28,13 @@
 
         <!-- Dashboard User -->
         <activity android:name=".ui.activity.MainActivity" />
-        <activity android:name=".ui.activity.DetailWisataUserActivity" />
+        <activity android:name=".ui.activity.UserDetailWisataActivity" />
 
         <!-- Dashboard Admin beserta halaman CRUD-nya -->
         <activity android:name=".ui.activity.AdminWisataActivity" />
-        <activity android:name=".ui.activity.DetailWisataAdminActivity" />
-        <activity android:name=".ui.activity.AddWisataAdminActivity" />
-        <activity android:name=".ui.activity.EditWisataActivity" />
+        <activity android:name=".ui.activity.AdminDetailWisataActivity" />
+        <activity android:name=".ui.activity.AdminAddWisataActivity" />
+        <activity android:name=".ui.activity.AdminEditWisataActivity" />
     </application>
 
 </manifest>

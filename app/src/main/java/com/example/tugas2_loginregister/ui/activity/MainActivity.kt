@@ -7,8 +7,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import com.example.tugas2_loginregister.R
-import com.example.tugas2_loginregister.ui.fragment.FavoriteUserFragment
-import com.example.tugas2_loginregister.ui.fragment.HomeUserFragment
+import com.example.tugas2_loginregister.ui.fragment.UserFavoriteFragment
+import com.example.tugas2_loginregister.ui.fragment.UserHomeFragment
 import com.example.tugas2_loginregister.ui.fragment.ProfileFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -31,15 +31,15 @@ class MainActivity : AppCompatActivity() {
 
         if (savedInstanceState == null) {
             bottomNav.selectedItemId = R.id.menuHome
-            bukaHalaman(HomeUserFragment())
+            bukaHalaman(UserHomeFragment())
         }
 
         bottomNav.setOnItemSelectedListener { menu ->
             bukaHalaman(
                 when (menu.itemId) {
-                    R.id.menuFavorit -> FavoriteUserFragment()
+                    R.id.menuFavorit -> UserFavoriteFragment()
                     R.id.menuProfil -> ProfileFragment()
-                    else -> HomeUserFragment()
+                    else -> UserHomeFragment()
                 }
             )
             true

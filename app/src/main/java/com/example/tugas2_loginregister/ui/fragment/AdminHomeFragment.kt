@@ -18,8 +18,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tugas2_loginregister.R
 import com.example.tugas2_loginregister.model.Wisata
-import com.example.tugas2_loginregister.ui.activity.AddWisataAdminActivity
-import com.example.tugas2_loginregister.ui.activity.DetailWisataAdminActivity
+import com.example.tugas2_loginregister.ui.activity.AdminAddWisataActivity
+import com.example.tugas2_loginregister.ui.activity.AdminDetailWisataActivity
 import com.example.tugas2_loginregister.ui.adapter.WisataAdapter
 import com.example.tugas2_loginregister.utils.DialogServer
 import com.example.tugas2_loginregister.utils.Helper
@@ -32,9 +32,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
  * Halaman Home milik Role Admin.
  *
  * Selain menampilkan daftar wisata, halaman ini menyediakan tombol Tambah Wisata
- * dan membuka [DetailWisataAdminActivity] yang berisi tombol Edit serta Hapus.
+ * dan membuka [AdminDetailWisataActivity] yang berisi tombol Edit serta Hapus.
  */
-class HomeAdminFragment : Fragment() {
+class AdminHomeFragment : Fragment() {
 
     private val viewModel: WisataViewModel by viewModels()
 
@@ -78,7 +78,7 @@ class HomeAdminFragment : Fragment() {
         amatiData()
 
         fabTambah.setOnClickListener {
-            val intent = Intent(requireContext(), AddWisataAdminActivity::class.java)
+            val intent = Intent(requireContext(), AdminAddWisataActivity::class.java)
             launcherAksi.launch(intent)
         }
     }
@@ -108,8 +108,8 @@ class HomeAdminFragment : Fragment() {
     }
 
     private fun bukaDetail(wisata: Wisata) {
-        val intent = Intent(requireContext(), DetailWisataAdminActivity::class.java)
-        intent.putExtra(DetailWisataAdminActivity.KUNCI_ID, wisata.id)
+        val intent = Intent(requireContext(), AdminDetailWisataActivity::class.java)
+        intent.putExtra(AdminDetailWisataActivity.KUNCI_ID, wisata.id)
         launcherAksi.launch(intent)
     }
 

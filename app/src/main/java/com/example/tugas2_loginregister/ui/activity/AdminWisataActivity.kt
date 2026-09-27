@@ -7,8 +7,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import com.example.tugas2_loginregister.R
-import com.example.tugas2_loginregister.ui.fragment.FavoriteAdminFragment
-import com.example.tugas2_loginregister.ui.fragment.HomeAdminFragment
+import com.example.tugas2_loginregister.ui.fragment.AdminFavoriteFragment
+import com.example.tugas2_loginregister.ui.fragment.AdminHomeFragment
 import com.example.tugas2_loginregister.ui.fragment.ProfileFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -31,15 +31,15 @@ class AdminWisataActivity : AppCompatActivity() {
 
         if (savedInstanceState == null) {
             bottomNav.selectedItemId = R.id.menuHome
-            bukaHalaman(HomeAdminFragment())
+            bukaHalaman(AdminHomeFragment())
         }
 
         bottomNav.setOnItemSelectedListener { menu ->
             bukaHalaman(
                 when (menu.itemId) {
-                    R.id.menuFavorit -> FavoriteAdminFragment()
+                    R.id.menuFavorit -> AdminFavoriteFragment()
                     R.id.menuProfil -> ProfileFragment()
-                    else -> HomeAdminFragment()
+                    else -> AdminHomeFragment()
                 }
             )
             true
