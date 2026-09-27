@@ -12,8 +12,301 @@ Repository kumpulan tugas magang di Crocodic Semarang. Setiap tugas/fitur dikerj
 | `Tugas-6-Menambahkan-Fitur-Favorit-Wisata-dengan-Room-Database` | Favorit Wisata dengan Room Database (Entity, DAO, Database, Repository, ViewModel) | Selesai |
 | `Tugas-7-Implementasi-Backend-API-CRUD-Layouting` | Implementasi Backend API CRUD & Layouting (Create, Read, Update, Delete) | Selesai |
 | `Tugas-8-Implementasi-API-CRUD-Wisata-pada-Aplikasi-Android` | Implementasi API CRUD Wisata dengan MVVM + Repository, Alert Dialog konfirmasi hapus, serta penanganan Loading, Success, Error, dan Data Kosong | Selesai |
+| `Tugas-9-Implementasi-Role-Admin-User-pada-Backend-dan-Frontend-Aplikasi-Wisata` | Role Admin & User pada Login, Session Management dengan SharedPreferences, Dashboard terpisah per role, dan Logout | Selesai |
 
 Seluruh tangkapan layar pada dokumen ini diambil ulang memakai tampilan aplikasi terkini, yaitu setelah aplikasi memakai identitas **Jelajah Jateng**. Jadi fitur dari tugas sebelumnya pun terlihat dengan warna dan tata letak yang berlaku sekarang.
+
+---
+
+# Branch `Tugas 9 – Implementasi Role Admin & User pada Backend dan Frontend Aplikasi Wisata`
+
+## Deskripsi
+
+Melanjutkan pengembangan **TravelDestinationApp** dengan menambahkan **Role User** dan **Role Admin** pada sistem login.
+
+Sebelumnya siapa pun yang berhasil login langsung mendapat halaman yang sama beserta seluruh tombol CRUD. Sekarang aplikasi membedakan pengguna berdasarkan **role** yang tersimpan di database:
+
+- **Role User** — hanya dapat melihat. Daftar wisata, pencarian, detail wisata, dan favorit tetap tersedia, tetapi tombol **Tambah**, **Edit**, dan **Hapus** tidak ada sama sekali.
+- **Role Admin** — mendapat seluruh fitur User ditambah **CRUD** data wisata.
+
+Role tidak ditebak oleh aplikasi. Ketika login, Backend memeriksa akun beserta kolom `role` pada tabel `users`, lalu mengirimkannya kembali lewat response API. Aplikasi menyimpan role itu ke **Session** memakai **SharedPreferences**, dan dari situlah aplikasi menentukan dashboard mana yang dibuka.
+
+Selama pengguna belum menekan **Logout**, session tetap tersimpan. Jadi ketika aplikasi ditutup lalu dibuka lagi, pengguna tidak perlu login ulang dan langsung diarahkan ke dashboard sesuai role-nya. Saat Logout, session beserta role dihapus sehingga pengguna kembali ke halaman Login dan tidak dapat masuk lagi memakai session lama.
+
+Seluruh kode ditulis dengan cara yang paling sederhana supaya bagian Role, Login, SharedPreferences, Session, Dashboard, dan Logout mudah dipelajari kembali.
+
+## Ketentuan Fitur
+
+- Mengimplementasikan **Role User** dan **Role Admin** pada sistem login.
+- Role pengguna ditentukan oleh **Backend**, yaitu dari kolom `role` pada tabel `users`, lalu dikirim ke aplikasi setelah login berhasil.
+- Login dengan **Role User** diarahkan ke **Dashboard User**.
+- Login dengan **Role Admin** diarahkan ke **Dashboard Admin**.
+- Menggunakan **Session Management** memakai **SharedPreferences** lewat `SessionManager`.
+- Session menyimpan status login, username, dan **role** pengguna.
+- Ketika aplikasi dibuka kembali, aplikasi memeriksa session yang tersimpan lebih dulu.
+- Session masih tersedia → pengguna tidak perlu login ulang dan langsung masuk ke dashboard sesuai role.
+- Session tidak tersedia → pengguna diarahkan ke halaman Login.
+- Menambahkan fitur **Logout** yang menghapus session, menonaktifkan status login, menghapus role, lalu mengembalikan pengguna ke halaman Login.
+- Setelah Logout, session lama tidak dapat dipakai lagi untuk masuk ke dashboard.
+- Membuat tampilan **Dashboard User** dan **Dashboard Admin** sesuai kebutuhan masing-masing role.
+- Menerapkan kode yang rapi, sederhana, dan terstruktur.
+
+## Alur Login Berdasarkan Role
+
+```
+                       Halaman Login
+                            |
+            Masukkan Username dan Password
+                            |
+                 Request POST login.php
+                            |
+              Backend memeriksa akun + role
+                            |
+                      Login Berhasil
+                            |
+              Simpan Session (login, username, role)
+                            |
+            +---------------+---------------+
+            |                               |
+       role = user                     role = admin
+            |                               |
+      MainActivity                  AdminWisataActivity
+    (Dashboard User)                 (Dashboard Admin)
+```
+
+Bila login gagal, aplikasi menampilkan pesan dari server dan tidak ada session yang disimpan.
+
+## Alur Session saat Aplikasi Dibuka Kembali
+
+`SplashActivity` adalah halaman pertama yang dijalankan, dan tugasnya hanya memeriksa session:
+
+```
+                      Aplikasi Dibuka
+                            |
+                     SplashActivity
+                            |
+                     Cek Session
+                            |
+            +---------------+---------------+
+            |                               |
+   Session tidak ada                Session tersedia
+            |                               |
+      LoginActivity                     Cek Role
+                                            |
+                            +---------------+---------------+
+                            |                               |
+                       role = user                     role = admin
+                            |                               |
+                      MainActivity                  AdminWisataActivity
+```
+
+## Alur Logout
+
+```
+   Dashboard User / Dashboard Admin
+                 |
+          Halaman Profil
+                 |
+           Tekan Logout
+                 |
+          Hapus Session
+                 |
+           Hapus Role
+                 |
+          LoginActivity
+```
+
+Riwayat halaman ikut dibersihkan memakai `FLAG_ACTIVITY_NEW_TASK` + `FLAG_ACTIVITY_CLEAR_TASK`, jadi tombol **Back** setelah Logout tidak dapat membawa pengguna kembali ke dashboard.
+
+## Role pada Backend
+
+Kolom `role` ditambahkan ke tabel `users` sebagai `ENUM('admin', 'user')` dengan nilai bawaan `user`:
+
+```sql
+ALTER TABLE users ADD role ENUM('admin', 'user') NOT NULL DEFAULT 'user' AFTER password;
+```
+
+Nilai bawaan `user` membuat seluruh akun yang sudah terdaftar sebelumnya otomatis menjadi pengguna biasa, dan akun baru dari halaman Register juga selalu berperan sebagai `user`. Role Admin hanya diberikan langsung dari database:
+
+```sql
+UPDATE users SET role = 'admin' WHERE username = 'admin';
+```
+
+`login.php` ikut membaca kolom tersebut lalu mengirimkannya pada response:
+
+```json
+{
+    "success": true,
+    "message": "Login berhasil sebagai admin",
+    "user_id": 21,
+    "username": "admin",
+    "role": "admin"
+}
+```
+
+### Endpoint CRUD Dijaga di Sisi Server
+
+Menyembunyikan tombol CRUD di aplikasi saja belum cukup, karena `wisata_add.php`, `wisata_edit.php`, dan `wisata_delete.php` masih bisa dipanggil langsung lewat browser atau Postman. Karena itu aplikasi mengirimkan `username` akun yang sedang login pada setiap permintaan CRUD, lalu `cek_admin.php` memeriksa ulang role-nya langsung ke database:
+
+```
+Aplikasi  ->  username akun yang login  ->  cek_admin.php  ->  SELECT role FROM users
+                                                   |
+                          +------------------------+------------------------+
+                          |                        |                        |
+                   username kosong          role = user               role = admin
+                          |                        |                        |
+             "Anda harus login          "Hanya Admin yang          permintaan diteruskan
+              terlebih dahulu."          boleh mengubah
+                                          data wisata."
+```
+
+Endpoint **Read** (`wisata.php` dan `wisata_detail.php`) sengaja tidak dijaga, karena melihat daftar dan detail wisata memang hak kedua role.
+
+## Session Management
+
+`utils/SessionManager.kt` adalah satu-satunya tempat yang menyentuh SharedPreferences, jadi Activity dan Fragment tidak perlu tahu cara penyimpanannya:
+
+| Fungsi | Kegunaan |
+|---|---|
+| `simpan(context, username, role)` | Dipanggil sekali saat Login berhasil |
+| `sudahLogin(context)` | Dipakai `SplashActivity` untuk memeriksa session |
+| `ambilUsername(context)` | Nama akun untuk header Home, halaman Profil, dan permintaan CRUD |
+| `ambilRole(context)` | Role yang tersimpan, `user` bila belum pernah diisi |
+| `adalahAdmin(context)` | Penyederhanaan dari `ambilRole(context) == "admin"` |
+| `halamanDashboard(context)` | Menentukan `AdminWisataActivity` atau `MainActivity` |
+| `bukaDashboard(activity)` | Membuka dashboard sesuai role, dipakai Splash dan Login |
+| `hapus(context)` | Mengosongkan seluruh isi session |
+| `keluar(activity)` | Logout: hapus session lalu kembali ke Login |
+
+Role dari server dirapikan lebih dulu oleh `rapikanRole()`: huruf dibuat kecil, dan nilai selain `admin` dianggap `user`. Jadi bila suatu saat server mengirim role yang tidak dikenali, aplikasi memilih hak akses yang paling terbatas, bukan yang paling longgar.
+
+## Pemisahan Halaman Berdasarkan Role
+
+Kedua dashboard memakai susunan yang sama, yaitu `BottomNavigationView` dengan tiga menu. Yang membedakan hanya Fragment yang dimuat:
+
+| Menu | Dashboard Admin (`AdminWisataActivity`) | Dashboard User (`MainActivity`) |
+|---|---|---|
+| Home | `HomeAdminFragment` — daftar wisata **+ tombol Tambah** | `HomeUserFragment` — daftar wisata saja |
+| Favorit | `FavoriteAdminFragment` | `FavoriteUserFragment` |
+| Profil | `ProfileFragment` | `ProfileFragment` |
+
+Halaman detail juga dipisah:
+
+| Halaman | Isi |
+|---|---|
+| `DetailWisataAdminActivity` | Detail + tombol favorit + tombol **EDIT WISATA** dan **Hapus Wisata** |
+| `DetailWisataUserActivity` | Detail + tombol favorit saja |
+
+Halaman `AddWisataAdminActivity` dan `EditWisataActivity` hanya dapat dicapai dari halaman milik Admin, jadi Role User tidak memiliki jalan masuk ke sana.
+
+Halaman **Profil** dipakai bersama karena isinya sama untuk kedua role, hanya saja sekarang menampilkan role akun yang sedang login di bawah namanya.
+
+## File Baru pada Tugas Ini
+
+| Berkas | Kegunaan |
+|---|---|
+| `login_api/cek_admin.php` | Penjaga hak akses endpoint CRUD, memastikan pengirim permintaan benar-benar ber-role `admin` |
+| `ui/activity/AdminWisataActivity.kt` | Dashboard Admin, memuat Fragment versi Admin |
+| `ui/activity/DetailWisataUserActivity.kt` | Halaman Detail Wisata untuk Role User, tanpa tombol Edit dan Hapus |
+| `ui/fragment/HomeUserFragment.kt` | Halaman Home untuk Role User, tanpa tombol Tambah Wisata |
+| `ui/fragment/FavoriteUserFragment.kt` | Halaman Favorit untuk Role User, membuka detail versi User |
+| `res/layout/activity_admin_wisata.xml` | Tata letak Dashboard Admin |
+| `res/layout/activity_detail_wisata_user.xml` | Tata letak Detail Wisata versi User |
+| `res/layout/fragment_home_user.xml` | Tata letak Home versi User |
+
+## File yang Berubah
+
+| Berkas | Perubahan |
+|---|---|
+| `login_api/database.sql` | Tabel `users` memiliki kolom `role ENUM('admin','user') DEFAULT 'user'`, beserta catatan `ALTER TABLE` untuk database yang sudah terlanjur dibuat |
+| `login_api/login.php` | Ikut membaca kolom `role` dan mengirimkannya pada response |
+| `login_api/register.php` | Akun baru selalu disimpan dengan role `user`, dan role ikut dikirim pada response |
+| `login_api/wisata_add.php` | Dijaga `wajib_admin()` sebelum data diproses |
+| `login_api/wisata_edit.php` | Dijaga `wajib_admin()` sebelum data diproses |
+| `login_api/wisata_delete.php` | Dijaga `wajib_admin()` sebelum data diproses |
+| `network/AuthResponse.kt` | Menambah kolom `role` |
+| `network/ApiService.kt` | Endpoint Tambah, Edit, dan Hapus ikut mengirim `username`, termasuk versi multipart |
+| `repository/WisataRepository.kt` | Mengisi `username` pada setiap permintaan CRUD dari `SessionManager` |
+| `utils/SessionManager.kt` | Menyimpan dan membaca role, serta menentukan dashboard sesuai role |
+| `ui/activity/SplashActivity.kt` | Memeriksa session lalu membuka dashboard sesuai role |
+| `ui/activity/LoginActivity.kt` | Menyimpan role hasil login lalu membuka dashboard sesuai role |
+| `ui/activity/MainActivity.kt` | Menjadi Dashboard User, memuat Fragment versi User |
+| `ui/activity/DetailWisataAdminActivity.kt` | Ganti nama dari `DetailWisataActivity`, kini khusus Role Admin |
+| `ui/activity/AddWisataAdminActivity.kt` | Ganti nama dari `AddWisataActivity`, kini khusus Role Admin |
+| `ui/fragment/HomeAdminFragment.kt` | Ganti nama dari `HomeFragment`, kini khusus Role Admin |
+| `ui/fragment/FavoriteAdminFragment.kt` | Ganti nama dari `FavoriteFragment`, kini khusus Role Admin |
+| `ui/fragment/ProfileFragment.kt` | Menampilkan role akun yang sedang login |
+| `res/layout/fragment_profile.xml` | Menambah keterangan role di bawah nama akun |
+| `res/layout/fragment_home_admin.xml` | Ganti nama dari `fragment_home.xml` |
+| `res/layout/activity_detail_wisata_admin.xml` | Ganti nama dari `activity_detail_wisata.xml` |
+| `AndroidManifest.xml` | Mendaftarkan `AdminWisataActivity` dan `DetailWisataUserActivity`, serta mengelompokkan Activity per role |
+
+## Penanganan Kondisi
+
+| Kondisi | Yang dilakukan aplikasi |
+|---|---|
+| Login User berhasil | Session disimpan dengan role `user`, lalu **Dashboard User** dibuka |
+| Login Admin berhasil | Session disimpan dengan role `admin`, lalu **Dashboard Admin** dibuka |
+| Login gagal | Pesan dari server ditampilkan, tidak ada session yang disimpan, pengguna tetap di halaman Login |
+| Session masih tersedia | Halaman Login dilewati, pengguna langsung masuk ke dashboard sesuai role tersimpan |
+| Session tidak tersedia | Pengguna diarahkan ke halaman Login |
+| Logout | Session dan role dihapus, pengguna kembali ke Login, riwayat halaman dibersihkan |
+| Role tidak dikenali | Dianggap `user`, jadi aplikasi memilih hak akses paling terbatas |
+| User memanggil endpoint CRUD langsung | Ditolak Backend dengan pesan "Hanya Admin yang boleh mengubah data wisata." |
+| Permintaan CRUD tanpa akun | Ditolak Backend dengan pesan "Anda harus login terlebih dahulu." |
+
+## Teknologi
+
+| Bagian | Yang dipakai |
+|---|---|
+| Bahasa | Kotlin |
+| Session | SharedPreferences melalui `SessionManager` |
+| Role | Kolom `ENUM('admin','user')` pada tabel `users` |
+| Arsitektur | MVVM + Repository (ViewModel, LiveData, `UiState`) |
+| Jaringan | Retrofit + Gson + OkHttp Logging Interceptor |
+| Backend | PHP + MySQL (XAMPP) |
+| Perpindahan halaman | `BottomNavigationView` + Fragment |
+
+## Menguji Role dengan Postman
+
+| Permintaan | Method | Endpoint | Parameter | Hasil yang diharapkan |
+|---|---|---|---|---|
+| Login Admin | POST | `login.php` | `username`, `password` | `"role": "admin"` |
+| Login User | POST | `login.php` | `username`, `password` | `"role": "user"` |
+| Register | POST | `register.php` | `username`, `password` | `"role": "user"` |
+| Tambah sebagai Admin | POST | `wisata_add.php` | `username` **Admin** + data wisata | Berhasil |
+| Tambah sebagai User | POST | `wisata_add.php` | `username` **User** + data wisata | Ditolak |
+| Tambah tanpa `username` | POST | `wisata_add.php` | data wisata saja | Ditolak |
+| Edit sebagai User | POST | `wisata_edit.php` | `username` **User** + `id` + data | Ditolak |
+| Hapus sebagai User | POST | `wisata_delete.php` | `username` **User** + `id` | Ditolak |
+| Daftar Wisata | GET | `wisata.php` | `page`, `q` | Berhasil untuk kedua role |
+
+## Cara Menjalankan
+
+1. Nyalakan **Apache** dan **MySQL** pada XAMPP.
+2. Tambahkan kolom `role` pada tabel `users`:
+   ```sql
+   ALTER TABLE users ADD role ENUM('admin', 'user') NOT NULL DEFAULT 'user' AFTER password;
+   ```
+   Bila database dibuat dari awal, cukup import ulang `login_api/database.sql` karena kolomnya sudah disertakan.
+3. Tentukan akun mana yang menjadi Admin:
+   ```sql
+   UPDATE users SET role = 'admin' WHERE username = 'admin';
+   ```
+4. Samakan alamat server pada aplikasi dengan IP laptop (`ipconfig`). Alamat dapat diubah lewat dialog **Alamat server**.
+5. Jalankan aplikasi, lalu login memakai akun **Admin**. Halaman Home akan memiliki tombol Tambah, dan halaman Detail memiliki tombol Edit serta Hapus.
+6. Tutup aplikasi lalu buka lagi. Aplikasi langsung masuk ke Dashboard Admin tanpa login ulang, karena session masih tersimpan.
+7. Buka menu **Profil**, tekan **Logout**, lalu login memakai akun **User**. Tombol Tambah, Edit, dan Hapus tidak akan muncul sama sekali.
+
+## Catatan
+
+- Role tidak pernah ditentukan sendiri oleh aplikasi. Aplikasi hanya menyimpan role yang dikirim Backend setelah login berhasil, jadi perubahan role cukup dilakukan di database tanpa mengubah kode.
+- Halaman Register selalu membuat akun ber-role `user`. Bila role bisa dipilih sendiri dari halaman Register, siapa pun dapat mendaftar sebagai Admin.
+- Pembedaan role dikerjakan di dua tempat sekaligus. Di aplikasi, tombol dan halaman CRUD memang tidak dibuat untuk Role User. Di server, `cek_admin.php` memeriksa ulang role pengirimnya, sehingga endpoint CRUD tetap aman walaupun dipanggil dari luar aplikasi.
+- Nilai bawaan `user` pada kolom `role` membuat seluruh akun lama tetap dapat login seperti biasa, hanya saja menjadi pengguna biasa.
+- Daftar favorit sudah dipisah per akun sejak Tugas 8, jadi Admin dan User yang memakai satu perangkat yang sama tetap memiliki daftar favorit masing-masing.
+- Dashboard Admin dan Dashboard User memakai tata letak yang sama persis supaya perpindahan antar role tidak terasa seperti berpindah aplikasi. Yang berbeda hanya isi Fragment yang dimuat.
+- Berkas sisa wizard **Basic Views Activity** bawaan Android Studio (`nav_graph.xml`, `nav_graph2.xml`, `dimens.xml` beserta variannya, `values-v23/themes.xml`, dan teks `lorem_ipsum` pada `strings.xml`) dibuang karena menunjuk ke Fragment dan layout yang tidak pernah dibuat, sehingga project tidak dapat di-build.
 
 ---
 

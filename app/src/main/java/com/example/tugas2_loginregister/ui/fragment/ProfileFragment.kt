@@ -10,6 +10,12 @@ import androidx.fragment.app.Fragment
 import com.example.tugas2_loginregister.R
 import com.example.tugas2_loginregister.utils.SessionManager
 
+/**
+ * Halaman Profil, dipakai bersama oleh Dashboard Admin maupun Dashboard User.
+ *
+ * Isinya dibaca dari sesi: nama akun dan role yang sedang login. Di sini juga
+ * letak tombol Logout yang menghapus sesi beserta role-nya.
+ */
 class ProfileFragment : Fragment() {
 
     override fun onCreateView(
@@ -23,8 +29,14 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.findViewById<TextView>(R.id.tvNama).text = SessionManager.ambilUsername(requireContext())
+        val konteks = requireContext()
 
+        view.findViewById<TextView>(R.id.tvNama).text = SessionManager.ambilUsername(konteks)
+
+        view.findViewById<TextView>(R.id.tvRole).text =
+            getString(R.string.label_role, SessionManager.ambilNamaRole(konteks))
+
+        // Sesi dan role dihapus, lalu pengguna dikembalikan ke halaman Login.
         view.findViewById<Button>(R.id.btnLogout).setOnClickListener {
             SessionManager.keluar(requireActivity())
         }

@@ -61,23 +61,30 @@ if (mysqli_num_rows($result) > 0) {
 
 $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
+// Akun baru yang dibuat lewat aplikasi selalu berperan sebagai user biasa.
+// Role admin hanya diberikan langsung dari database.
+$role = "user";
+
 $stmt = mysqli_prepare(
     $conn,
-    "INSERT INTO users (username, password) VALUES (?, ?)"
+    "INSERT INTO users (username, password, role) VALUES (?, ?, ?)"
 );
 
 mysqli_stmt_bind_param(
     $stmt,
-    "ss",
+    "sss",
     $username,
-    $passwordHash
+    $passwordHash,
+    $role
 );
 
 if (mysqli_stmt_execute($stmt)) {
 
     echo json_encode([
         "success" => true,
-        "message" => "Register berhasil"
+        "message" => "Register berhasil",
+        "username" => $username,
+        "role"     => $role
     ]);
 
 } else {

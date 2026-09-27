@@ -18,8 +18,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tugas2_loginregister.R
 import com.example.tugas2_loginregister.model.Wisata
-import com.example.tugas2_loginregister.ui.activity.AddWisataActivity
-import com.example.tugas2_loginregister.ui.activity.DetailWisataActivity
+import com.example.tugas2_loginregister.ui.activity.AddWisataAdminActivity
+import com.example.tugas2_loginregister.ui.activity.DetailWisataAdminActivity
 import com.example.tugas2_loginregister.ui.adapter.WisataAdapter
 import com.example.tugas2_loginregister.utils.DialogServer
 import com.example.tugas2_loginregister.utils.Helper
@@ -28,7 +28,13 @@ import com.example.tugas2_loginregister.utils.UiState
 import com.example.tugas2_loginregister.viewmodel.WisataViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class HomeFragment : Fragment() {
+/**
+ * Halaman Home milik Role Admin.
+ *
+ * Selain menampilkan daftar wisata, halaman ini menyediakan tombol Tambah Wisata
+ * dan membuka [DetailWisataAdminActivity] yang berisi tombol Edit serta Hapus.
+ */
+class HomeAdminFragment : Fragment() {
 
     private val viewModel: WisataViewModel by viewModels()
 
@@ -58,7 +64,7 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.fragment_home, container, false)
+        return inflater.inflate(R.layout.fragment_home_admin, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -72,7 +78,7 @@ class HomeFragment : Fragment() {
         amatiData()
 
         fabTambah.setOnClickListener {
-            val intent = Intent(requireContext(), AddWisataActivity::class.java)
+            val intent = Intent(requireContext(), AddWisataAdminActivity::class.java)
             launcherAksi.launch(intent)
         }
     }
@@ -102,8 +108,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun bukaDetail(wisata: Wisata) {
-        val intent = Intent(requireContext(), DetailWisataActivity::class.java)
-        intent.putExtra(DetailWisataActivity.KUNCI_ID, wisata.id)
+        val intent = Intent(requireContext(), DetailWisataAdminActivity::class.java)
+        intent.putExtra(DetailWisataAdminActivity.KUNCI_ID, wisata.id)
         launcherAksi.launch(intent)
     }
 

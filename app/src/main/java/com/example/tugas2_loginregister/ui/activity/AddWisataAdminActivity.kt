@@ -22,7 +22,7 @@ import com.example.tugas2_loginregister.viewmodel.AddWisataViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 
-class AddWisataActivity : AppCompatActivity() {
+class AddWisataAdminActivity : AppCompatActivity() {
 
     private val viewModel: AddWisataViewModel by viewModels()
 

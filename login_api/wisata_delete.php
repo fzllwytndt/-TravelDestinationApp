@@ -4,6 +4,10 @@ header("Content-Type: application/json");
 
 include "koneksi.php";
 
+// Tugas 9: hanya Admin yang boleh menjalankan endpoint ini.
+include "cek_admin.php";
+wajib_admin($conn);
+
 $id = (int) ($_POST["id"] ?? $_GET["id"] ?? 0);
 
 if ($id <= 0) {

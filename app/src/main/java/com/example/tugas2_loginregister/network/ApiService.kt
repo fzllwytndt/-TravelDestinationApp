@@ -41,9 +41,11 @@ interface ApiService {
         @Query("id") id: Int
     ): WisataDetailResponse
 
+    /** [username] dipakai Backend untuk memastikan yang mengirim benar-benar Admin. */
     @FormUrlEncoded
     @POST("wisata_add.php")
     suspend fun tambahWisata(
+        @Field("username") username: String,
         @Field("nama_wisata") namaWisata: String,
         @Field("kategori") kategori: String,
         @Field("lokasi") lokasi: String,
@@ -56,6 +58,7 @@ interface ApiService {
     @Multipart
     @POST("wisata_add.php")
     suspend fun tambahWisataDenganFoto(
+        @Part("username") username: RequestBody,
         @Part("nama_wisata") namaWisata: RequestBody,
         @Part("kategori") kategori: RequestBody,
         @Part("lokasi") lokasi: RequestBody,
@@ -67,6 +70,7 @@ interface ApiService {
     @FormUrlEncoded
     @POST("wisata_edit.php")
     suspend fun editWisata(
+        @Field("username") username: String,
         @Field("id") id: Int,
         @Field("nama_wisata") namaWisata: String,
         @Field("kategori") kategori: String,
@@ -80,6 +84,7 @@ interface ApiService {
     @Multipart
     @POST("wisata_edit.php")
     suspend fun editWisataDenganFoto(
+        @Part("username") username: RequestBody,
         @Part("id") id: RequestBody,
         @Part("nama_wisata") namaWisata: RequestBody,
         @Part("kategori") kategori: RequestBody,
@@ -92,6 +97,7 @@ interface ApiService {
     @FormUrlEncoded
     @POST("wisata_delete.php")
     suspend fun hapusWisata(
+        @Field("username") username: String,
         @Field("id") id: Int
     ): WisataActionResponse
 }

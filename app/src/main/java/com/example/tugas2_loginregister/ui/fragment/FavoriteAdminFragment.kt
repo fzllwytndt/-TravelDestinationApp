@@ -11,13 +11,19 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tugas2_loginregister.R
 import com.example.tugas2_loginregister.data.local.room.FavoriteWisata
-import com.example.tugas2_loginregister.ui.activity.DetailWisataActivity
+import com.example.tugas2_loginregister.ui.activity.DetailWisataAdminActivity
 import com.example.tugas2_loginregister.ui.adapter.FavoriteWisataAdapter
 import com.example.tugas2_loginregister.utils.Helper
 import com.example.tugas2_loginregister.viewmodel.FavoriteViewModel
 
-/** Menampilkan seluruh wisata yang tersimpan di Room Database. */
-class FavoriteFragment : Fragment() {
+/**
+ * Halaman Favorit milik Role Admin.
+ *
+ * Menampilkan seluruh wisata favorit milik akun yang sedang login dari Room
+ * Database. Detail yang dibuka adalah versi Admin, jadi Edit dan Hapus tetap
+ * dapat dilakukan langsung dari daftar favorit.
+ */
+class FavoriteAdminFragment : Fragment() {
 
     private val viewModel: FavoriteViewModel by viewModels()
 
@@ -52,8 +58,8 @@ class FavoriteFragment : Fragment() {
     }
 
     private fun bukaDetail(favorit: FavoriteWisata) {
-        val intent = Intent(requireContext(), DetailWisataActivity::class.java)
-        intent.putExtra(DetailWisataActivity.KUNCI_ID, favorit.id)
+        val intent = Intent(requireContext(), DetailWisataAdminActivity::class.java)
+        intent.putExtra(DetailWisataAdminActivity.KUNCI_ID, favorit.id)
         startActivity(intent)
     }
 

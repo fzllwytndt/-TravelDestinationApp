@@ -7,11 +7,21 @@ import com.example.tugas2_loginregister.model.WisataDetailResponse
 import com.example.tugas2_loginregister.model.WisataResponse
 import com.example.tugas2_loginregister.network.ApiClient
 import com.example.tugas2_loginregister.utils.FotoHelper
+import com.example.tugas2_loginregister.utils.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /** Penghubung antara ViewModel dengan API daftar wisata, detail, serta aksi CRUD. */
 class WisataRepository(private val context: Context) {
+
+    /**
+     * Akun yang sedang login, ikut dikirim pada setiap permintaan Tambah, Edit,
+     * dan Hapus. Backend memakainya untuk memastikan pengirimnya benar-benar Admin,
+     * jadi endpoint CRUD tetap terjaga walaupun dipanggil di luar aplikasi.
+     */
+    private fun pemilikSesi(): String {
+        return SessionManager.ambilUsername(context)
+    }
 
     suspend fun ambilDaftarWisata(halaman: Int, kataKunci: String): WisataResponse {
         return ApiClient.panggil {
@@ -43,6 +53,7 @@ class WisataRepository(private val context: Context) {
 
             return ApiClient.panggil {
                 ApiClient.layanan(context).tambahWisataDenganFoto(
+                    username = FotoHelper.teks(pemilikSesi()),
                     namaWisata = FotoHelper.teks(namaWisata),
                     kategori = FotoHelper.teks(kategori),
                     lokasi = FotoHelper.teks(lokasi),
@@ -55,6 +66,7 @@ class WisataRepository(private val context: Context) {
 
         return ApiClient.panggil {
             ApiClient.layanan(context).tambahWisata(
+                username = pemilikSesi(),
                 namaWisata = namaWisata,
                 kategori = kategori,
                 lokasi = lokasi,
@@ -80,6 +92,7 @@ class WisataRepository(private val context: Context) {
 
             return ApiClient.panggil {
                 ApiClient.layanan(context).editWisataDenganFoto(
+                    username = FotoHelper.teks(pemilikSesi()),
                     id = FotoHelper.teks(id.toString()),
                     namaWisata = FotoHelper.teks(namaWisata),
                     kategori = FotoHelper.teks(kategori),
@@ -93,6 +106,7 @@ class WisataRepository(private val context: Context) {
 
         return ApiClient.panggil {
             ApiClient.layanan(context).editWisata(
+                username = pemilikSesi(),
                 id = id,
                 namaWisata = namaWisata,
                 kategori = kategori,
@@ -106,7 +120,7 @@ class WisataRepository(private val context: Context) {
 
     suspend fun hapusWisata(id: Int): WisataActionResponse {
         return ApiClient.panggil {
-            ApiClient.layanan(context).hapusWisata(id)
+            ApiClient.layanan(context).hapusWisata(pemilikSesi(), id)
         }
     }
 

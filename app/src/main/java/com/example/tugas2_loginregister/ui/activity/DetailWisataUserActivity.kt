@@ -1,16 +1,12 @@
 package com.example.tugas2_loginregister.ui.activity
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -19,10 +15,16 @@ import com.example.tugas2_loginregister.model.Wisata
 import com.example.tugas2_loginregister.utils.Helper
 import com.example.tugas2_loginregister.utils.UiState
 import com.example.tugas2_loginregister.viewmodel.DetailWisataViewModel
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class DetailWisataActivity : AppCompatActivity() {
+/**
+ * Halaman Detail Wisata untuk Role User.
+ *
+ * Isinya sama dengan versi Admin, tetapi tombol Edit dan Hapus sengaja tidak
+ * disediakan sama sekali. Pengguna biasa hanya dapat membaca detail wisata dan
+ * menandainya sebagai favorit.
+ */
+class DetailWisataUserActivity : AppCompatActivity() {
 
     private val viewModel: DetailWisataViewModel by viewModels()
 
@@ -36,28 +38,14 @@ class DetailWisataActivity : AppCompatActivity() {
     private lateinit var pbLoading: ProgressBar
     private lateinit var tvPesan: TextView
     private lateinit var fabFavorit: FloatingActionButton
-    private lateinit var barisAksi: View
-    private lateinit var btnEdit: MaterialButton
-    private lateinit var btnHapus: MaterialButton
 
     private var idWisata = 0
     private var wisataSekarang: Wisata? = null
     private var sudahFavorit = false
-    private var dataBerubah = false
-
-    private val launcherEdit = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { hasil ->
-        if (hasil.resultCode == RESULT_OK) {
-            dataBerubah = true
-            setResult(RESULT_OK)
-            viewModel.muatDetail(idWisata)
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_detail_wisata)
+        setContentView(R.layout.activity_detail_wisata_user)
 
         hubungkanView()
         siapkanTombolKembali()
@@ -66,12 +54,9 @@ class DetailWisataActivity : AppCompatActivity() {
 
         tvPesan.setOnClickListener { viewModel.muatDetail(idWisata) }
         fabFavorit.setOnClickListener { ubahFavorit() }
-        btnEdit.setOnClickListener { bukaHalamanEdit() }
-        btnHapus.setOnClickListener { konfirmasiHapus() }
 
         amatiDetail()
         amatiStatusFavorit()
-        amatiStatusHapus()
 
         if (savedInstanceState == null) {
             viewModel.muatDetail(idWisata)
@@ -89,9 +74,6 @@ class DetailWisataActivity : AppCompatActivity() {
         pbLoading = findViewById(R.id.pbLoading)
         tvPesan = findViewById(R.id.tvPesan)
         fabFavorit = findViewById(R.id.fabFavorit)
-        barisAksi = findViewById(R.id.barisAksi)
-        btnEdit = findViewById(R.id.btnEdit)
-        btnHapus = findViewById(R.id.btnHapus)
     }
 
     private fun siapkanTombolKembali() {
@@ -103,17 +85,14 @@ class DetailWisataActivity : AppCompatActivity() {
             jarakSistem
         }
 
-        findViewById<ImageButton>(R.id.btnKembali).setOnClickListener {
-            if (dataBerubah) setResult(RESULT_OK)
-            finish()
-        }
+        findViewById<ImageButton>(R.id.btnKembali).setOnClickListener { finish() }
     }
 
     private fun amatiDetail() {
         viewModel.kondisi.observe(this) { kondisi ->
             when (kondisi) {
                 is UiState.Loading -> {
-                    Helper.sembunyi(isiDetail, tvPesan, fabFavorit, barisAksi)
+                    Helper.sembunyi(isiDetail, tvPesan, fabFavorit)
                     Helper.tampil(pbLoading)
                 }
 
@@ -137,39 +116,6 @@ class DetailWisataActivity : AppCompatActivity() {
         }
     }
 
-    private fun amatiStatusHapus() {
-        viewModel.kondisiHapus.observe(this) { kondisi ->
-            when (kondisi) {
-                is UiState.Loading -> {
-                    Helper.tampil(pbLoading)
-                    btnEdit.isEnabled = false
-                    btnHapus.isEnabled = false
-                }
-
-                is UiState.Berhasil -> {
-                    Helper.sembunyi(pbLoading)
-                    Toast.makeText(this, kondisi.data, Toast.LENGTH_SHORT).show()
-                    setResult(RESULT_OK)
-                    finish()
-                }
-
-                is UiState.Gagal -> {
-                    Helper.sembunyi(pbLoading)
-                    btnEdit.isEnabled = true
-                    btnHapus.isEnabled = true
-                    Toast.makeText(this, kondisi.pesan, Toast.LENGTH_LONG).show()
-                    viewModel.resetKondisiHapus()
-                }
-
-                null -> {
-                    Helper.sembunyi(pbLoading)
-                    btnEdit.isEnabled = true
-                    btnHapus.isEnabled = true
-                }
-            }
-        }
-    }
-
     private fun ubahFavorit() {
         val wisata = wisataSekarang ?: return
 
@@ -179,25 +125,6 @@ class DetailWisataActivity : AppCompatActivity() {
             this,
             if (sudahFavorit) "Dihapus dari favorit" else "Ditambahkan ke favorit"
         )
-    }
-
-    private fun bukaHalamanEdit() {
-        val wisata = wisataSekarang ?: return
-        val intent = Intent(this, EditWisataActivity::class.java)
-        intent.putExtra(EditWisataActivity.KUNCI_WISATA, wisata)
-        intent.putExtra(EditWisataActivity.KUNCI_ID, idWisata)
-        launcherEdit.launch(intent)
-    }
-
-    private fun konfirmasiHapus() {
-        AlertDialog.Builder(this)
-            .setTitle(getString(R.string.hapus_wisata))
-            .setMessage(getString(R.string.konfirmasi_hapus))
-            .setPositiveButton(getString(R.string.ya_hapus)) { _, _ ->
-                viewModel.hapusWisata(idWisata)
-            }
-            .setNegativeButton(getString(R.string.batal), null)
-            .show()
     }
 
     private fun tampilkanDetail(wisata: Wisata) {
@@ -213,11 +140,11 @@ class DetailWisataActivity : AppCompatActivity() {
         tvHarga.text = Helper.rupiah(wisata.hargaTiket)
         tvDeskripsi.text = wisata.deskripsi
 
-        Helper.tampil(isiDetail, fabFavorit, barisAksi)
+        Helper.tampil(isiDetail, fabFavorit)
     }
 
     private fun tampilkanPesan(teks: String) {
-        Helper.sembunyi(pbLoading, isiDetail, fabFavorit, barisAksi)
+        Helper.sembunyi(pbLoading, isiDetail, fabFavorit)
 
         tvPesan.text = teks
         Helper.tampil(tvPesan)

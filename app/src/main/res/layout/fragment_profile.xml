@@ -29,11 +29,31 @@
         android:textColor="@color/teks_utama"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/btnLogout"
+        app:layout_constraintBottom_toTopOf="@id/tvRole"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ivProfil"
         tools:text="ujicoba4" />
+
+    <!-- Role akun yang sedang login, dibaca dari sesi -->
+    <TextView
+        android:id="@+id/tvRole"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_kategori"
+        android:paddingStart="12dp"
+        android:paddingTop="5dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="5dp"
+        android:textColor="@color/hijau_hutan"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/btnLogout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvNama"
+        tools:text="Role: Admin" />
 
     <Button
         android:id="@+id/btnLogout"
@@ -47,6 +67,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvNama" />
+        app:layout_constraintTop_toBottomOf="@id/tvRole" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

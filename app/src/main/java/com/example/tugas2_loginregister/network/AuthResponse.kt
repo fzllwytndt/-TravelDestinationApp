@@ -12,5 +12,13 @@ data class AuthResponse(
     val message: String = "",
 
     @SerializedName("username")
-    val username: String = ""
+    val username: String = "",
+
+    /**
+     * Role akun: "admin" atau "user".
+     * Dikirim Backend setelah login berhasil, lalu disimpan ke sesi oleh aplikasi
+     * untuk menentukan dashboard mana yang dibuka.
+     */
+    @SerializedName("role")
+    val role: String = "user"
 )

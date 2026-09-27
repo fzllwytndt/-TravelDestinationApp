@@ -16,6 +16,12 @@ import com.example.tugas2_loginregister.utils.UiState
 import com.example.tugas2_loginregister.viewmodel.AuthViewModel
 import com.example.tugas2_loginregister.viewmodel.AuthViewModelFactory
 
+/**
+ * Halaman Login.
+ *
+ * Setelah Backend menyatakan login berhasil, username dan role yang dikirim
+ * disimpan ke sesi, lalu pengguna diarahkan ke dashboard sesuai role-nya.
+ */
 class LoginActivity : AppCompatActivity() {
 
     private val viewModel: AuthViewModel by viewModels { AuthViewModelFactory(this) }
@@ -79,10 +85,10 @@ class LoginActivity : AppCompatActivity() {
         Helper.pesanSingkat(this, balasan.message)
 
         if (balasan.success) {
-            SessionManager.simpan(this, balasan.username)
+            SessionManager.simpan(this, balasan.username, balasan.role)
 
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
+            // Role Admin membuka Dashboard Admin, Role User membuka Dashboard User.
+            SessionManager.bukaDashboard(this)
         }
     }
 

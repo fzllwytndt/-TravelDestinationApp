@@ -15,9 +15,11 @@ if ($username == "" || $password == "") {
     exit;
 }
 
+// Kolom role ikut diambil karena aplikasi memakainya untuk menentukan
+// dashboard mana yang dibuka setelah login berhasil.
 $stmt = mysqli_prepare(
     $conn,
-    "SELECT id, username, password FROM users WHERE username = ?"
+    "SELECT id, username, password, role FROM users WHERE username = ?"
 );
 
 mysqli_stmt_bind_param($stmt, "s", $username);
@@ -39,11 +41,15 @@ $user = mysqli_fetch_assoc($result);
 
 if (password_verify($password, $user["password"])) {
 
+    // Akun lama yang dibuat sebelum kolom role ada dianggap sebagai user biasa.
+    $role = $user["role"] ?? "user";
+
     echo json_encode([
         "success" => true,
-        "message" => "Login berhasil",
+        "message" => "Login berhasil sebagai " . $role,
         "user_id" => $user["id"],
-        "username" => $user["username"]
+        "username" => $user["username"],
+        "role"     => $role
     ]);
 
 } else {
